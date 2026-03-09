@@ -37,6 +37,7 @@ export interface Post {
   user_name: string;
   user_avatar: string;
   rating: number;
+  total_reviews: number;
   distance_km: number;
   is_popular: boolean;
   reactions: { emoji: string; count: number }[];
@@ -244,6 +245,7 @@ export const MOCK_POSTS: Post[] = MOCK_ESTABLISHMENTS.map((est, i) => ({
   user_name: ["Ana Silva", "Pedro Santos", "Maria Oliveira", "João Costa", "Laura Mendes", "Carlos Ramos"][i],
   user_avatar: `https://i.pravatar.cc/100?img=${i + 10}`,
   rating: est.rating,
+  total_reviews: est.total_reviews,
   distance_km: Math.random() * 5 + 0.3,
   is_popular: i < 3,
   reactions: [

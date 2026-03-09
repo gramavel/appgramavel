@@ -11,6 +11,8 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const navigate = useNavigate();
 
+  const totalReactions = post.reactions.reduce((sum, r) => sum + r.count, 0);
+
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       {/* Header */}
@@ -27,8 +29,10 @@ export function PostCard({ post }: PostCardProps) {
           <div>
             <h3 className="text-sm font-semibold leading-tight">{post.establishment_name}</h3>
             <div className="flex items-center gap-1 mt-0.5">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="text-xs text-muted-foreground">{post.rating}</span>
+              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+              <span className="text-xs text-muted-foreground">
+                {post.rating} ({post.total_reviews})
+              </span>
             </div>
           </div>
         </div>
@@ -74,18 +78,13 @@ export function PostCard({ post }: PostCardProps) {
         </p>
       </div>
 
-      {/* Reactions */}
+      {/* Reactions - simplified */}
       <div className="flex items-center justify-between px-3 pb-3">
-        <div className="flex items-center gap-2">
-          {post.reactions.map((r) => (
-            <button
-              key={r.emoji}
-              className="flex items-center gap-1 px-2 py-1 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
-            >
-              <span className="text-sm">{r.emoji}</span>
-              <span className="text-[10px] text-muted-foreground">{r.count}</span>
-            </button>
+        <div className="flex items-center gap-1">
+          {post.reactions.slice(0, 3).map((r) => (
+            <span key={r.emoji} className="text-sm">{r.emoji}</span>
           ))}
+          <span className="text-xs text-muted-foreground ml-1">+{totalReactions}</span>
         </div>
         <div className="flex items-center -space-x-2">
           {post.recent_users.slice(0, 3).map((u, i) => (
