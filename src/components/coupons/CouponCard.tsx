@@ -7,9 +7,9 @@ import QRCode from "react-qr-code";
 import type { Coupon } from "@/data/mock";
 
 const STATUS_BADGE = {
-  active: { label: "Ativo", variant: "default" as const },
-  used: { label: "Usado", variant: "secondary" as const },
-  expired: { label: "Expirado", variant: "destructive" as const },
+  active: { label: "Ativo", variant: "default" as const, buttonText: "Ativar Cupom" },
+  used: { label: "Usado", variant: "secondary" as const, buttonText: "Cupom Usado" },
+  expired: { label: "Expirado", variant: "destructive" as const, buttonText: "Cupom Expirado" },
 };
 
 export function CouponCard({ coupon }: { coupon: Coupon }) {
