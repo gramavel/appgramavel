@@ -245,7 +245,7 @@ export const MOCK_POSTS: Post[] = MOCK_ESTABLISHMENTS.map((est, i) => ({
   user_name: ["Ana Silva", "Pedro Santos", "Maria Oliveira", "João Costa", "Laura Mendes", "Carlos Ramos"][i],
   user_avatar: `https://i.pravatar.cc/100?img=${i + 10}`,
   rating: est.rating,
-  distance_km: Math.random() * 5 + 0.3,
+  total_reviews: est.total_reviews,
   is_popular: i < 3,
   reactions: [
     { emoji: "❤️", count: Math.floor(Math.random() * 100) + 20 },
