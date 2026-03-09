@@ -37,6 +37,7 @@ export interface Post {
   user_name: string;
   user_avatar: string;
   rating: number;
+  total_reviews: number;
   distance_km: number;
   is_popular: boolean;
   reactions: { emoji: string; count: number }[];

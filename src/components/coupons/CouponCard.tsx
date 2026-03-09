@@ -50,7 +50,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
             disabled={coupon.status !== "active"}
             onClick={() => setShowQR(true)}
           >
-            Ativar Cupom
+            {badge.buttonText}
           </Button>
         </div>
       </div>
