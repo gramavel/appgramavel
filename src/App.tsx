@@ -3,23 +3,43 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { LocationProvider } from "@/contexts/LocationContext";
+import Feed from "./pages/Feed";
+import Explore from "./pages/Explore";
+import Coupons from "./pages/Coupons";
+import Profile from "./pages/Profile";
+import Establishment from "./pages/Establishment";
+import Auth from "./pages/Auth";
+import SavedPlaces from "./pages/profile/SavedPlaces";
+import BadgesPage from "./pages/profile/Badges";
+import RoutesPage from "./pages/profile/Routes";
+import Settings from "./pages/profile/Settings";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <LocationProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Feed />} />
+            <Route path="/map" element={<Explore />} />
+            <Route path="/coupons" element={<Coupons />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/estabelecimento/:slug" element={<Establishment />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/perfil/lugares" element={<SavedPlaces />} />
+            <Route path="/perfil/badges" element={<BadgesPage />} />
+            <Route path="/perfil/roteiros" element={<RoutesPage />} />
+            <Route path="/perfil/configuracoes" element={<Settings />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </LocationProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
