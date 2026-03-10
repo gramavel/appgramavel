@@ -72,10 +72,11 @@ export function PostCard({ post }: PostCardProps) {
         />
       </div>
 
-      {/* Caption */}
-      <div className="p-3">
+      {/* Caption + Actions */}
+      <div className="p-3 space-y-2">
         <p className="text-sm">
-          <span className="font-semibold">{post.establishment_name}</span>{" "}
+          <span className="font-semibold">{post.establishment_name}</span>
+          {" · "}
           <span className="text-muted-foreground">{post.caption}</span>
         </p>
       </div>
