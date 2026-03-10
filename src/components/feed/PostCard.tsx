@@ -81,15 +81,15 @@ export function PostCard({ post }: PostCardProps) {
         </p>
       </div>
 
-      {/* Reactions - simplified */}
+      {/* Reactions */}
       <div className="flex items-center justify-between px-3 pb-3">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {post.reactions.slice(0, 3).map((r) => (
-            <span key={r.emoji} className="text-sm">{r.emoji}</span>
+            <span key={r.emoji} className="text-lg">{r.emoji}</span>
           ))}
-          <span className="text-xs text-muted-foreground ml-1">+{totalReactions}</span>
+          <span className="text-xs text-muted-foreground">+{totalReactions}</span>
         </div>
-        <div className="flex items-center -space-x-2">
+        <div className="flex -space-x-2">
           {post.recent_users.slice(0, 3).map((u, i) => (
             <img
               key={i}
