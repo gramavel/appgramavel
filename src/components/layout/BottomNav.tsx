@@ -38,8 +38,6 @@ export function BottomNav() {
             </NavLink>
           );
         })}
-          );
-        })}
       </div>
     </nav>
   );
