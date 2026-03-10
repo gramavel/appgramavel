@@ -43,20 +43,22 @@ export function PostCard({ post }: PostCardProps) {
 
       <Separator />
 
-      {/* Tags */}
-      <div className="flex items-center gap-2 px-3 py-2 overflow-x-auto scrollbar-hide">
-        <Badge variant="secondary" className="text-[10px] shrink-0">
+      {/* Tags row */}
+      <div className="px-3 py-2 flex items-center justify-between">
+        <Badge variant="secondary" className="text-[10px]">
           {post.establishment_category}
         </Badge>
-        {post.is_popular && (
-          <div className="flex items-center gap-1 text-[10px] text-primary font-medium shrink-0">
-            <TrendingUp className="w-3 h-3" />
-            Popular esta semana
-          </div>
-        )}
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0 ml-auto">
-          <MapPin className="w-3 h-3" />
-          {post.distance_km.toFixed(1)} km
+        <div className="flex items-center gap-2">
+          {post.is_popular && (
+            <Badge variant="secondary" className="text-[10px] gap-1">
+              <TrendingUp className="h-2.5 w-2.5" />
+              Popular esta semana
+            </Badge>
+          )}
+          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <MapPin className="h-3 w-3" />
+            {post.distance_km.toFixed(1)} km
+          </span>
         </div>
       </div>
 
