@@ -10,21 +10,21 @@ export default function BadgesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <GlobalHeader showBack title="Badges" />
+      <GlobalHeader showBack title="Minhas Badges" />
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
         {/* Earned */}
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
-            <h2 className="text-sm font-semibold">Conquistadas</h2>
-          </div>
+          <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+            Conquistadas ({earned.length})
+          </p>
           <div className="grid grid-cols-2 gap-3">
             {earned.map((b) => (
-              <div key={b.id} className="relative p-4 rounded-xl border-2 bg-card" style={{ borderColor: b.color }}>
-                <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-green-500" />
+              <div key={b.id} className="relative p-4 rounded-xl border-2" style={{ borderColor: b.color, backgroundColor: b.color + "15" }}>
+                <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-green-600" />
                 <div className="text-3xl mb-2">{b.icon}</div>
-                <h3 className="text-sm font-semibold">{b.name}</h3>
-                <p className="text-xs text-muted-foreground">{b.description}</p>
+                <p className="font-semibold text-sm text-foreground">{b.name}</p>
+                <p className="text-xs text-muted-foreground mt-1">{b.description}</p>
               </div>
             ))}
           </div>
@@ -32,18 +32,19 @@ export default function BadgesPage() {
 
         {/* In progress */}
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Lock className="w-4 h-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold">Em progresso</h2>
-          </div>
+          <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5" />
+            Em progresso ({inProgress.length})
+          </p>
           <div className="grid grid-cols-2 gap-3">
             {inProgress.map((b) => (
-              <div key={b.id} className="p-4 rounded-xl border border-muted bg-muted/30">
+              <div key={b.id} className="relative p-4 rounded-xl border-2 border-muted bg-muted/30">
+                <Lock className="absolute top-2 right-2 w-4 h-4 text-muted-foreground" />
                 <div className="text-3xl mb-2 opacity-50">{b.icon}</div>
-                <h3 className="text-sm font-semibold text-muted-foreground">{b.name}</h3>
-                <p className="text-xs text-muted-foreground">{b.description}</p>
-                <Progress value={(b.progress! / b.total!) * 100} className="h-2 mt-2" />
-                <p className="text-[10px] text-muted-foreground mt-1">{b.progress}/{b.total}</p>
+                <p className="font-semibold text-sm text-muted-foreground">{b.name}</p>
+                <p className="text-xs text-muted-foreground mt-1">{b.description}</p>
+                <Progress value={(b.progress! / b.total!) * 100} className="h-2 mt-3" />
+                <p className="text-xs text-muted-foreground mt-1">{b.progress}/{b.total}</p>
               </div>
             ))}
           </div>
