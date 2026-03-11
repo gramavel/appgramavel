@@ -1,0 +1,27 @@
+/* Custom Leaflet popup styling */
+.custom-popup .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid hsl(214 32% 91%);
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 8px;
+}
+
+.custom-popup .leaflet-popup-tip {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Pulse animation for user marker */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}

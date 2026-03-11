@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { CATEGORIES, MOCK_ESTABLISHMENTS, MOCK_ROUTES, EXPERIENCES } from "@/data/mock";
 import { cn } from "@/lib/utils";
+import ExploreMap from "@/components/map/ExploreMap";
+import "@/components/map/map-styles.css";
 
 const FILTER_CHIPS = [
   { label: "Perto de você", icon: MapPin },
@@ -79,14 +81,7 @@ export default function Explore() {
         {/* Map or Results */}
         {showMap && !isSearching ? (
           <>
-            {/* Map placeholder */}
-            <div className="h-[45vh] min-h-[350px] rounded-lg border border-border shadow-sm bg-secondary flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <MapIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Mapa Leaflet</p>
-                <p className="text-xs">Será carregado com geolocalização</p>
-              </div>
-            </div>
+            <ExploreMap />
 
             {/* Category Grid */}
             <div>
