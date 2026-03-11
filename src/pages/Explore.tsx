@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { CATEGORIES, MOCK_ESTABLISHMENTS, MOCK_ROUTES, EXPERIENCES } from "@/data/mock";
 import { cn } from "@/lib/utils";
+import ExploreMap from "@/components/map/ExploreMap";
+import "@/components/map/map-styles.css";
 
 const FILTER_CHIPS = [
   { label: "Perto de você", icon: MapPin },
