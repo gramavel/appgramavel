@@ -41,7 +41,7 @@ export function CategoryBar({ selected, onSelect }: CategoryBarProps) {
           >
             Todos
           </button>
-          {CATEGORIES.map(({ label, emoji }) => (
+          {CATEGORIES.map(({ label, icon: Icon }) => (
             <button
               key={label}
               onClick={() => onSelect(selected === label ? null : label)}
@@ -52,7 +52,7 @@ export function CategoryBar({ selected, onSelect }: CategoryBarProps) {
                   : "bg-card border border-primary/30 text-foreground hover:border-primary"
               )}
             >
-              <span>{emoji}</span>
+              <Icon className="w-3.5 h-3.5" />
               {label}
             </button>
           ))}

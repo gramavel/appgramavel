@@ -8,6 +8,7 @@ import Feed from "./pages/Feed";
 import Explore from "./pages/Explore";
 import Coupons from "./pages/Coupons";
 import Profile from "./pages/Profile";
+import Roteiros from "./pages/Roteiros";
 import Establishment from "./pages/Establishment";
 import Auth from "./pages/Auth";
 import SavedPlaces from "./pages/profile/SavedPlaces";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/" element={<Feed />} />
             <Route path="/map" element={<Explore />} />
             <Route path="/coupons" element={<Coupons />} />
+            <Route path="/roteiros" element={<Roteiros />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/estabelecimento/:slug" element={<Establishment />} />
             <Route path="/auth" element={<Auth />} />

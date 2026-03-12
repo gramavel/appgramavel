@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Search, X, MapPin, Clock, Star, TrendingUp, Heart, Dog, Ticket, ChevronRight, Map as MapIcon } from "lucide-react";
+import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, ChevronRight, Map as MapIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CATEGORIES, MOCK_ESTABLISHMENTS, MOCK_ROUTES, EXPERIENCES } from "@/data/mock";
+import { Button } from "@/components/ui/button";
+import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES } from "@/data/mock";
 import { cn } from "@/lib/utils";
 import ExploreMap from "@/components/map/ExploreMap";
 import "@/components/map/map-styles.css";
@@ -18,10 +20,17 @@ const FILTER_CHIPS = [
   { label: "Com cupons", icon: Ticket },
 ];
 
+const POPULAR_PLACES = [
+  { name: "Lago Negro", category: "Natureza", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop", rating: 4.8 },
+  { name: "Rua Coberta", category: "Atrações", image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=300&fit=crop", rating: 4.7 },
+  { name: "Snowland", category: "Atrações", image: "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=400&h=300&fit=crop", rating: 4.6 },
+];
+
 export default function Explore() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(true);
+  const navigate = useNavigate();
 
   const isSearching = search.length > 0 || activeFilter !== null;
 
@@ -83,20 +92,56 @@ export default function Explore() {
           <>
             <ExploreMap />
 
+            {/* Cupons Button */}
+            <Button
+              variant="outline"
+              className="w-full rounded-xl gap-2 h-12 text-sm font-semibold border-primary/30 hover:border-primary"
+              onClick={() => navigate("/coupons")}
+            >
+              <Ticket className="w-5 h-5 text-primary" />
+              Ver cupons disponíveis
+            </Button>
+
             {/* Category Grid */}
             <div>
               <h2 className="text-lg font-semibold mb-3">Categorias</h2>
               <div className="grid grid-cols-3 gap-3">
-                {CATEGORIES.map(({ label, emoji }) => (
+                {CATEGORIES.map(({ label, icon: Icon }) => (
                   <button
                     key={label}
                     onClick={() => { setActiveFilter(label); setShowMap(false); }}
                     className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
                   >
-                    <span className="text-2xl">{emoji}</span>
+                    <Icon className="w-6 h-6 text-primary" />
                     <span className="text-xs font-medium text-foreground text-center leading-tight">{label}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Popular Places */}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">Populares agora</h2>
+              <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+                <div className="flex gap-3 pb-2">
+                  {POPULAR_PLACES.map((place) => (
+                    <div key={place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-sm">
+                      <div className="aspect-[3/2] overflow-hidden">
+                        <img src={place.image} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                      <div className="p-3">
+                        <h4 className="font-semibold text-sm">{place.name}</h4>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs text-muted-foreground">{place.category}</span>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs font-medium">{place.rating}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -116,24 +161,32 @@ export default function Explore() {
               </div>
             </div>
 
-            {/* Routes */}
+            {/* Nearby establishments */}
             <div>
-              <h2 className="text-lg font-semibold mb-3">Roteiros Prontos</h2>
-              <div className="space-y-2">
-                {MOCK_ROUTES.map((route) => (
-                  <div
-                    key={route.id}
-                    className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border shadow-sm"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-lg">
-                      {route.icon}
+              <h2 className="text-lg font-semibold mb-3">Próximos de você</h2>
+              <div className="space-y-3">
+                {MOCK_ESTABLISHMENTS.slice(0, 3).map((est) => (
+                  <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
+                    <div className="flex gap-3 p-3">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{est.category}</p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span>{est.rating}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>{(Math.random() * 3 + 0.2).toFixed(1)} km</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1 text-left">
-                      <h4 className="font-medium text-foreground text-sm">{route.title}</h4>
-                      <p className="text-xs text-muted-foreground">{route.subtitle}</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>
@@ -155,7 +208,7 @@ export default function Explore() {
             </div>
             <div className="space-y-3">
               {filteredEstablishments.map((est) => (
-                <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden">
+                <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
                   <div className="flex gap-3 p-3">
                     <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                       <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />

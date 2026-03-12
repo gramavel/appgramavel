@@ -1,11 +1,11 @@
-import { Home, Map, Ticket, User } from "lucide-react";
+import { Home, Map, Route, User } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { to: "/", icon: Home, label: "Feed" },
   { to: "/map", icon: Map, label: "Explorar" },
-  { to: "/coupons", icon: Ticket, label: "Cupons" },
+  { to: "/roteiros", icon: Route, label: "Roteiros" },
   { to: "/profile", icon: User, label: "Perfil" },
 ];
 
