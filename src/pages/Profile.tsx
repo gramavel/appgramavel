@@ -62,7 +62,7 @@ export default function Profile() {
             </Avatar>
           </div>
           <h2 className="text-xl font-bold text-foreground">João da Silva</h2>
-          <p className="text-sm text-muted-foreground text-center">Apaixonado pela Serra Gaúcha 🏔️</p>
+          <p className="text-sm text-muted-foreground text-center">Apaixonado pela Serra Gaúcha</p>
           <div className="flex items-center gap-2 mt-1">
             <Button variant="outline" size="sm" className="rounded-full gap-1.5" onClick={() => navigate("/perfil/configuracoes")}>
               <Pencil className="w-3.5 h-3.5" />

@@ -1,3 +1,6 @@
+import { UtensilsCrossed, Coffee, Hotel, FerrisWheel, ShoppingBag, Wine, Sun, Heart, Baby, Navigation, Compass, Mountain, Snowflake, Calendar, MapPin } from "lucide-react";
+import type { ComponentType } from "react";
+
 export interface Establishment {
   id: string;
   name: string;
@@ -63,20 +66,32 @@ export interface Badge {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  iconName: string;
   color: string;
   earned: boolean;
   progress?: number;
   total?: number;
 }
 
-export const CATEGORIES = [
-  { label: "Restaurantes", emoji: "🍕" },
-  { label: "Cafés", emoji: "☕" },
-  { label: "Hotéis", emoji: "🏨" },
-  { label: "Atrações", emoji: "🎢" },
-  { label: "Compras", emoji: "🛍️" },
-  { label: "Bares & Vinícolas", emoji: "🍷" },
+export interface RouteItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: ComponentType<{ className?: string }>;
+  description: string;
+  duration: string;
+  difficulty: string;
+  stops: { name: string; category: string; image: string }[];
+  image: string;
+}
+
+export const CATEGORIES: { label: string; icon: ComponentType<{ className?: string }> }[] = [
+  { label: "Restaurantes", icon: UtensilsCrossed },
+  { label: "Cafés", icon: Coffee },
+  { label: "Hotéis", icon: Hotel },
+  { label: "Atrações", icon: FerrisWheel },
+  { label: "Compras", icon: ShoppingBag },
+  { label: "Bares & Vinícolas", icon: Wine },
 ];
 
 export const CITIES = {
@@ -317,12 +332,12 @@ export const MOCK_COUPONS: Coupon[] = [
 ];
 
 export const MOCK_BADGES: Badge[] = [
-  { id: "b1", name: "Explorador", description: "Visitou 5 lugares", icon: "🗺️", color: "hsl(233, 100%, 69%)", earned: true },
-  { id: "b2", name: "Gourmet", description: "Visitou 3 restaurantes", icon: "🍽️", color: "hsl(25, 95%, 53%)", earned: true },
-  { id: "b3", name: "Sommelier", description: "Visitou 2 vinícolas", icon: "🍷", color: "hsl(340, 82%, 52%)", earned: false, progress: 1, total: 2 },
-  { id: "b4", name: "Fotógrafo", description: "Postou 10 fotos", icon: "📸", color: "hsl(198, 93%, 60%)", earned: false, progress: 4, total: 10 },
-  { id: "b5", name: "Aventureiro", description: "Visitou 10 atrações", icon: "🎢", color: "hsl(142, 76%, 36%)", earned: false, progress: 3, total: 10 },
-  { id: "b6", name: "Cuponeiro", description: "Usou 5 cupons", icon: "🎟️", color: "hsl(45, 93%, 47%)", earned: true },
+  { id: "b1", name: "Explorador", description: "Visitou 5 lugares", iconName: "compass", color: "hsl(233, 100%, 69%)", earned: true },
+  { id: "b2", name: "Gourmet", description: "Visitou 3 restaurantes", iconName: "utensils-crossed", color: "hsl(25, 95%, 53%)", earned: true },
+  { id: "b3", name: "Sommelier", description: "Visitou 2 vinícolas", iconName: "wine", color: "hsl(340, 82%, 52%)", earned: false, progress: 1, total: 2 },
+  { id: "b4", name: "Fotógrafo", description: "Postou 10 fotos", iconName: "camera", color: "hsl(198, 93%, 60%)", earned: false, progress: 4, total: 10 },
+  { id: "b5", name: "Aventureiro", description: "Visitou 10 atrações", iconName: "ferris-wheel", color: "hsl(142, 76%, 36%)", earned: false, progress: 3, total: 10 },
+  { id: "b6", name: "Cuponeiro", description: "Usou 5 cupons", iconName: "ticket", color: "hsl(45, 93%, 47%)", earned: true },
 ];
 
 export const MOCK_TIMELINE = [
@@ -332,16 +347,106 @@ export const MOCK_TIMELINE = [
   { id: "t4", type: "visit" as const, action: "Visitou", place: "Mini Mundo", image: "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=100&h=100&fit=crop", date: "2026-03-05" },
 ];
 
-export const MOCK_ROUTES = [
-  { id: "r1", title: "1 dia em Gramado", subtitle: "6 locais · 8 horas", icon: "☀️" },
-  { id: "r2", title: "Fim de semana romântico", subtitle: "8 locais · 2 dias", icon: "💑" },
-  { id: "r3", title: "Com crianças", subtitle: "5 locais · 6 horas", icon: "👨‍👩‍👧‍👦" },
-  { id: "r4", title: "Experiência gastronômica", subtitle: "4 locais · 5 horas", icon: "🍴" },
+export const MOCK_ROUTES: RouteItem[] = [
+  {
+    id: "r1",
+    title: "1 dia em Gramado",
+    subtitle: "6 locais · 8 horas",
+    icon: Sun,
+    description: "O roteiro perfeito para conhecer o melhor de Gramado em apenas um dia. Inclui os pontos turísticos mais icônicos e experiências gastronômicas imperdíveis.",
+    duration: "8 horas",
+    difficulty: "Fácil",
+    image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&h=400&fit=crop",
+    stops: [
+      { name: "Rua Coberta", category: "Atrações", image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&h=200&fit=crop" },
+      { name: "Lago Negro", category: "Natureza", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=200&fit=crop" },
+      { name: "Mini Mundo", category: "Atrações", image: "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=200&h=200&fit=crop" },
+      { name: "Café Colonial Bela Vista", category: "Cafés", image: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=200&h=200&fit=crop" },
+      { name: "Bella Gramado Ristorante", category: "Restaurantes", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=200&fit=crop" },
+      { name: "Vinícola Ravanello", category: "Bares & Vinícolas", image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=200&h=200&fit=crop" },
+    ],
+  },
+  {
+    id: "r2",
+    title: "Fim de semana romântico",
+    subtitle: "8 locais · 2 dias",
+    icon: Heart,
+    description: "Um roteiro especial para casais que querem viver uma experiência inesquecível na Serra Gaúcha com fondue, vinícolas e passeios encantadores.",
+    duration: "2 dias",
+    difficulty: "Fácil",
+    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=400&fit=crop",
+    stops: [
+      { name: "Hotel Casa da Montanha", category: "Hotéis", image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=200&h=200&fit=crop" },
+      { name: "Vinícola Ravanello", category: "Bares & Vinícolas", image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=200&h=200&fit=crop" },
+      { name: "Lago Negro", category: "Natureza", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=200&fit=crop" },
+      { name: "Bella Gramado Ristorante", category: "Restaurantes", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=200&fit=crop" },
+    ],
+  },
+  {
+    id: "r3",
+    title: "Com crianças",
+    subtitle: "5 locais · 6 horas",
+    icon: Baby,
+    description: "Diversão garantida para toda a família! Roteiro com atrações interativas, parques temáticos e doces irresistíveis.",
+    duration: "6 horas",
+    difficulty: "Fácil",
+    image: "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=800&h=400&fit=crop",
+    stops: [
+      { name: "Mini Mundo", category: "Atrações", image: "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=200&h=200&fit=crop" },
+      { name: "Chocolate Lugano", category: "Compras", image: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=200&h=200&fit=crop" },
+      { name: "Lago Negro", category: "Natureza", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=200&fit=crop" },
+    ],
+  },
+  {
+    id: "r4",
+    title: "Experiência gastronômica",
+    subtitle: "4 locais · 5 horas",
+    icon: UtensilsCrossed,
+    description: "Para os amantes da boa gastronomia: uma jornada pelos melhores restaurantes, cafés e vinícolas da região.",
+    duration: "5 horas",
+    difficulty: "Fácil",
+    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=400&fit=crop",
+    stops: [
+      { name: "Café Colonial Bela Vista", category: "Cafés", image: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=200&h=200&fit=crop" },
+      { name: "Bella Gramado Ristorante", category: "Restaurantes", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=200&fit=crop" },
+      { name: "Vinícola Ravanello", category: "Bares & Vinícolas", image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=200&h=200&fit=crop" },
+      { name: "Chocolate Lugano", category: "Compras", image: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=200&h=200&fit=crop" },
+    ],
+  },
+  {
+    id: "r5",
+    title: "Aventura na natureza",
+    subtitle: "5 locais · 1 dia",
+    icon: Mountain,
+    description: "Trilhas, mirantes e contato com a natureza exuberante da Serra Gaúcha. Ideal para quem busca aventura e tranquilidade.",
+    duration: "1 dia",
+    difficulty: "Moderado",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop",
+    stops: [
+      { name: "Lago Negro", category: "Natureza", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=200&fit=crop" },
+      { name: "Rua Coberta", category: "Atrações", image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&h=200&fit=crop" },
+    ],
+  },
+  {
+    id: "r6",
+    title: "Natal Luz",
+    subtitle: "6 locais · 2 dias",
+    icon: Snowflake,
+    description: "Viva a magia do Natal Luz de Gramado! Roteiro especial com os melhores eventos, decorações e espetáculos natalinos.",
+    duration: "2 dias",
+    difficulty: "Fácil",
+    image: "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=800&h=400&fit=crop",
+    stops: [
+      { name: "Rua Coberta", category: "Atrações", image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&h=200&fit=crop" },
+      { name: "Mini Mundo", category: "Atrações", image: "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=200&h=200&fit=crop" },
+      { name: "Hotel Casa da Montanha", category: "Hotéis", image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=200&h=200&fit=crop" },
+    ],
+  },
 ];
 
 export const EXPERIENCES = [
   { id: "e1", title: "Café Colonial", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=400&fit=crop" },
-  { id: "e2", title: "Fondue", image: "https://images.unsplash.com/photo-1530016555861-3137e tried-fondue?w=600&h=400&fit=crop".replace("tried-fondue", "07e0bcd59d83") },
+  { id: "e2", title: "Fondue", image: "https://images.unsplash.com/photo-1530016555861-07e0bcd59d83?w=600&h=400&fit=crop" },
   { id: "e3", title: "Passeios Românticos", image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=400&fit=crop" },
   { id: "e4", title: "Gramado à Noite", image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&h=400&fit=crop" },
   { id: "e5", title: "Lugares Instagramáveis", image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop" },

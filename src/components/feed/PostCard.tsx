@@ -63,7 +63,7 @@ export function PostCard({ post }: PostCardProps) {
       </div>
 
       {/* Image */}
-      <div className="aspect-[4/3] overflow-hidden">
+      <div className="aspect-[4/5] overflow-hidden">
         <img
           src={post.image}
           alt={post.establishment_name}
