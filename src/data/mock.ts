@@ -89,7 +89,7 @@ export const CATEGORIES: { label: string; icon: ComponentType<{ className?: stri
   { label: "Restaurantes", icon: UtensilsCrossed },
   { label: "Cafés", icon: Coffee },
   { label: "Hotéis", icon: Hotel },
-  { label: "Atrações", icon: Ferris Wheel },
+  { label: "Atrações", icon: FerrisWheel },
   { label: "Compras", icon: ShoppingBag },
   { label: "Bares & Vinícolas", icon: Wine },
 ];
