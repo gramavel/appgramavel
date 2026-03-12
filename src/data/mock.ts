@@ -1,4 +1,4 @@
-import { UtensilsCrossed, Coffee, Hotel, Ferris Wheel, ShoppingBag, Wine, Sun, Heart, Baby, Navigation, Compass, Mountain, Snowflake, Calendar, MapPin } from "lucide-react";
+import { UtensilsCrossed, Coffee, Hotel, FerrisWheel, ShoppingBag, Wine, Sun, Heart, Baby, Navigation, Compass, Mountain, Snowflake, Calendar, MapPin } from "lucide-react";
 import type { ComponentType } from "react";
 
 export interface Establishment {
