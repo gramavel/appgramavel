@@ -17,7 +17,7 @@ export default function Coupons() {
       <GlobalHeader title="Cupons" />
       <CategoryBar selected={selectedCategory} onSelect={setSelectedCategory} />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[52px]">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[64px]">
         <div className="space-y-4">
           {filtered.map((coupon) => (
             <CouponCard key={coupon.id} coupon={coupon} />
