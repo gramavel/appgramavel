@@ -1,18 +1,9 @@
 import { useState } from "react";
-import { Bookmark, Star, TrendingUp, MapPin, Heart, ThumbsUp, Flame, Sparkles, Laugh, X } from "lucide-react";
+import { Bookmark, Star, TrendingUp, MapPin, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import type { Post } from "@/data/mock";
-
-const REACTION_ICONS: Record<string, { icon: typeof Heart; color: string }> = {
-  heart: { icon: Heart, color: "text-red-500" },
-  "thumbs-up": { icon: ThumbsUp, color: "text-blue-500" },
-  flame: { icon: Flame, color: "text-orange-500" },
-  sparkles: { icon: Sparkles, color: "text-yellow-500" },
-  laugh: { icon: Laugh, color: "text-amber-500" },
-  star: { icon: Star, color: "text-purple-500" },
-};
 
 interface PostCardProps {
   post: Post;
@@ -32,7 +23,7 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden relative">
+    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-3">
         <div
@@ -47,15 +38,15 @@ export function PostCard({ post }: PostCardProps) {
           <div>
             <h3 className="text-sm font-semibold leading-tight">{post.establishment_name}</h3>
             <div className="flex items-center gap-2 mt-0.5">
+              <Badge variant="secondary" className="text-[11px] px-2 py-0.5">
+                {post.establishment_category}
+              </Badge>
               <span className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
                 <span className="text-xs text-muted-foreground">
                   {post.rating} ({post.total_reviews})
                 </span>
               </span>
-              <Badge variant="secondary" className="text-[11px] px-2 py-0.5">
-                {post.establishment_category}
-              </Badge>
             </div>
           </div>
         </div>
@@ -92,7 +83,7 @@ export function PostCard({ post }: PostCardProps) {
         />
       </div>
 
-      {/* Caption + Actions */}
+      {/* Caption */}
       <div className="p-3 space-y-2">
         <p className="text-sm">
           <span className="font-semibold">{post.establishment_name}</span>
@@ -104,21 +95,18 @@ export function PostCard({ post }: PostCardProps) {
       {/* Reactions */}
       <div className="flex items-center justify-between px-3 pb-3">
         <button
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
           onClick={() => setShowReactions(true)}
         >
-          {displayReactions.map((r) => {
-            const config = REACTION_ICONS[r.emoji];
-            if (!config) return null;
-            const Icon = config.icon;
-            return (
-              <Icon
-                key={r.emoji}
-                className={`w-5 h-5 ${userReaction === r.emoji ? config.color + " fill-current" : "text-muted-foreground"}`}
-              />
-            );
-          })}
-          <span className="text-xs text-muted-foreground">+{totalReactions}</span>
+          {displayReactions.map((r) => (
+            <span
+              key={r.emoji}
+              className={`text-lg ${userReaction === r.emoji ? "scale-125" : ""} transition-transform`}
+            >
+              {r.emoji}
+            </span>
+          ))}
+          <span className="text-xs text-muted-foreground ml-1">+{totalReactions}</span>
         </button>
         <div className="flex -space-x-2">
           {post.recent_users.slice(0, 3).map((u, i) => (
@@ -134,22 +122,25 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Reaction Modal */}
       {showReactions && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowReactions(false)}>
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setShowReactions(false)}
+        >
           <div
             className="w-full max-w-md bg-card rounded-t-2xl border-t border-border p-4 pb-8 animate-in slide-in-from-bottom duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-semibold text-foreground">Reagir</h4>
-              <button onClick={() => setShowReactions(false)} className="p-1 rounded-full hover:bg-secondary">
+              <button
+                onClick={() => setShowReactions(false)}
+                className="p-1 rounded-full hover:bg-secondary"
+              >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
             <div className="flex justify-around">
               {post.reactions.map((r) => {
-                const config = REACTION_ICONS[r.emoji];
-                if (!config) return null;
-                const Icon = config.icon;
                 const isActive = userReaction === r.emoji;
                 return (
                   <button
@@ -159,7 +150,7 @@ export function PostCard({ post }: PostCardProps) {
                       isActive ? "bg-primary/10 scale-110" : "hover:bg-secondary"
                     }`}
                   >
-                    <Icon className={`w-7 h-7 ${isActive ? config.color + " fill-current" : "text-muted-foreground"}`} />
+                    <span className="text-2xl">{r.emoji}</span>
                     <span className="text-[10px] text-muted-foreground">{r.count}</span>
                   </button>
                 );
