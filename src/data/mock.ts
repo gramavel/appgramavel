@@ -264,12 +264,12 @@ export const MOCK_POSTS: Post[] = MOCK_ESTABLISHMENTS.map((est, i) => ({
   distance_km: Math.random() * 5 + 0.3,
   is_popular: i < 3,
   reactions: [
-    { emoji: "heart", count: Math.floor(Math.random() * 100) + 20 },
-    { emoji: "thumbs-up", count: Math.floor(Math.random() * 50) + 10 },
-    { emoji: "flame", count: Math.floor(Math.random() * 30) + 5 },
-    { emoji: "sparkles", count: Math.floor(Math.random() * 20) + 3 },
-    { emoji: "laugh", count: Math.floor(Math.random() * 15) + 2 },
-    { emoji: "star", count: Math.floor(Math.random() * 10) + 1 },
+    { emoji: "❤️", count: Math.floor(Math.random() * 100) + 20 },
+    { emoji: "😍", count: Math.floor(Math.random() * 50) + 10 },
+    { emoji: "🔥", count: Math.floor(Math.random() * 30) + 5 },
+    { emoji: "👏", count: Math.floor(Math.random() * 20) + 3 },
+    { emoji: "😋", count: Math.floor(Math.random() * 15) + 2 },
+    { emoji: "✨", count: Math.floor(Math.random() * 10) + 1 },
   ],
   recent_users: [
     { avatar: `https://i.pravatar.cc/40?img=${i + 20}` },
