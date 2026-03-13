@@ -14,6 +14,16 @@ const BADGE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   ticket: Ticket,
 };
 
+// Each earned badge gets a unique color palette: [bgColor, borderColor, iconColor]
+const BADGE_COLOR_PALETTES: Record<string, { bg: string; border: string; icon: string }> = {
+  compass: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-600" },
+  "utensils-crossed": { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600" },
+  wine: { bg: "bg-rose-50", border: "border-rose-200", icon: "text-rose-600" },
+  camera: { bg: "bg-cyan-50", border: "border-cyan-200", icon: "text-cyan-600" },
+  "ferris-wheel": { bg: "bg-green-50", border: "border-green-200", icon: "text-green-600" },
+  ticket: { bg: "bg-yellow-50", border: "border-yellow-200", icon: "text-yellow-600" },
+};
+
 export default function BadgesPage() {
   const earned = MOCK_BADGES.filter((b) => b.earned);
   const inProgress = MOCK_BADGES.filter((b) => !b.earned);
@@ -31,10 +41,14 @@ export default function BadgesPage() {
           <div className="grid grid-cols-2 gap-3">
             {earned.map((b) => {
               const BadgeIcon = BADGE_ICONS[b.iconName] || Compass;
+              const palette = BADGE_COLOR_PALETTES[b.iconName] || { bg: "bg-primary/10", border: "border-primary/30", icon: "text-primary" };
               return (
-                <div key={b.id} className="relative p-4 rounded-xl border-2" style={{ borderColor: b.color, backgroundColor: b.color + "15" }}>
+                <div
+                  key={b.id}
+                  className={`relative p-4 rounded-xl border-2 ${palette.bg} ${palette.border}`}
+                >
                   <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-green-600" />
-                  <BadgeIcon className="w-8 h-8 mb-2" />
+                  <BadgeIcon className={`w-8 h-8 mb-2 ${palette.icon}`} />
                   <p className="font-semibold text-sm text-foreground">{b.name}</p>
                   <p className="text-xs text-muted-foreground mt-1">{b.description}</p>
                 </div>
