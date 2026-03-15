@@ -140,26 +140,26 @@ export function PostCard({ post }: PostCardProps) {
               </button>
             </div>
             <div className="flex justify-around">
-              {post.reactions.map((r) => {
-                const isActive = userReaction === r.emoji;
-                const reactionName = {
-                  "❤️": "Amei",
-                  "⭐": "Recomendo",
-                  "😋": "Delícia",
-                  "😍": "Encantador",
-                  "📌": "Visitar",
-                }[r.emoji] || "";
+              {[
+                { emoji: "❤️", name: "Amei" },
+                { emoji: "⭐", name: "Recomendo" },
+                { emoji: "😋", name: "Delícia" },
+                { emoji: "😍", name: "Encantador" },
+                { emoji: "📌", name: "Visitar" },
+              ].map((item) => {
+                const isActive = userReaction === item.emoji;
+                const count = post.reactions.find((r) => r.emoji === item.emoji)?.count ?? 0;
                 return (
                   <button
-                    key={r.emoji}
-                    onClick={() => handleReact(r.emoji)}
+                    key={item.emoji}
+                    onClick={() => handleReact(item.emoji)}
                     className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
                       isActive ? "bg-primary/10 scale-110" : "hover:bg-secondary"
                     }`}
                   >
-                    <span className="text-2xl">{r.emoji}</span>
-                    <span className="text-[11px] font-medium text-foreground">{reactionName}</span>
-                    <span className="text-[10px] text-muted-foreground">{r.count}</span>
+                    <span className="text-2xl">{item.emoji}</span>
+                    <span className="text-[11px] font-medium text-foreground">{item.name}</span>
+                    <span className="text-[10px] text-muted-foreground">{count}</span>
                   </button>
                 );
               })}
