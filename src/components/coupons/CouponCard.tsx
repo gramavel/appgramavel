@@ -38,11 +38,11 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
             </div>
           </div>
 
-          <p className="text-[10px] text-muted-foreground">{coupon.description}</p>
+          <p className="text-xs text-muted-foreground">{coupon.description}</p>
 
           {/* Expiry */}
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-            <Calendar className="w-3 h-3" />
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Calendar className="w-3.5 h-3.5" />
             <span>Válido até {new Date(coupon.expires_at).toLocaleDateString("pt-BR")}</span>
           </div>
 
