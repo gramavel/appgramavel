@@ -147,7 +147,7 @@ export default function Profile() {
             <button
               key={to}
               onClick={() => navigate(to)}
-              className="w-full flex items-center justify-between p-3 rounded-xl bg-card border border-border hover:shadow-sm transition-shadow"
+              className="w-full flex items-center justify-between p-4 rounded-xl bg-card border border-border hover:shadow-sm transition-shadow active:scale-[0.98]"
             >
               <span className="text-sm font-medium text-foreground">{label}</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />

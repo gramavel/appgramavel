@@ -28,11 +28,11 @@ export function BottomNav() {
             >
               <Icon
                 className={cn(
-                  "h-6 w-6 transition-colors",
+                  "h-5 w-5 transition-colors",
                   active && "stroke-[2.5]"
                 )}
               />
-              <span className="text-xs font-medium">
+              <span className="text-[11px] font-medium mt-0.5">
                 {label}
               </span>
             </NavLink>
