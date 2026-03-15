@@ -31,7 +31,7 @@ export function GlobalHeader({ showBack, title = "Gramável" }: GlobalHeaderProp
         </div>
 
         {/* Center */}
-        <img src={logoSrc} alt="Gramável" className="h-4" />
+        <img src={logoSrc} alt="Gramável" className="h-5" />
 
         {/* Right */}
         <div className="w-24 flex justify-end">

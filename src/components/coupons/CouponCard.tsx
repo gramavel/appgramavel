@@ -31,24 +31,24 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
         <CardContent className="p-3 space-y-2">
           {/* Header */}
           <div className="flex items-start gap-2">
-            <img src={coupon.establishment_avatar} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+            <img src={coupon.establishment_avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
             <div>
-              <p className="text-xs font-semibold text-foreground">{coupon.title}</p>
-              <p className="text-[10px] text-muted-foreground">{coupon.establishment_name}</p>
+              <p className="text-sm font-semibold text-foreground">{coupon.title}</p>
+              <p className="text-xs text-muted-foreground">{coupon.establishment_name}</p>
             </div>
           </div>
 
-          <p className="text-[10px] text-muted-foreground">{coupon.description}</p>
+          <p className="text-xs text-muted-foreground">{coupon.description}</p>
 
           {/* Expiry */}
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-            <Calendar className="w-3 h-3" />
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Calendar className="w-3.5 h-3.5" />
             <span>Válido até {new Date(coupon.expires_at).toLocaleDateString("pt-BR")}</span>
           </div>
 
           <Button
             size="sm"
-            className="w-full text-xs"
+            className="w-full text-sm h-10"
             disabled={coupon.status !== "active"}
             onClick={() => setShowQR(true)}
           >

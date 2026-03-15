@@ -19,7 +19,7 @@ export function ProximityCheckinCard({ name, distance, onCheckin }: ProximityChe
           <p className="text-sm font-medium truncate">{name}</p>
           <p className="text-xs text-muted-foreground">{distance < 1000 ? `${distance}m` : `${(distance / 1000).toFixed(1)}km`} de distância</p>
         </div>
-        <Button size="sm" onClick={onCheckin}>
+        <Button size="sm" className="h-9 px-4 text-sm rounded-full" onClick={onCheckin}>
           Check-in
         </Button>
       </div>

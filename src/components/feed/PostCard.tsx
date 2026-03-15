@@ -50,7 +50,7 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
         </div>
-        <button className="p-2 hover:bg-secondary rounded-full transition-colors">
+        <button className="p-2.5 hover:bg-secondary rounded-full transition-colors active:scale-95">
           <Bookmark className="w-5 h-5" />
         </button>
       </div>
