@@ -95,18 +95,18 @@ export function PostCard({ post }: PostCardProps) {
       {/* Reactions */}
       <div className="flex items-center justify-between px-3 pb-3">
         <button
-          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+          className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-colors"
           onClick={() => setShowReactions(true)}
         >
           {displayReactions.map((r) => (
             <span
               key={r.emoji}
-              className={`text-lg ${userReaction === r.emoji ? "scale-125" : ""} transition-transform`}
+              className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
             >
               {r.emoji}
             </span>
           ))}
-          <span className="text-xs text-muted-foreground ml-1">+{totalReactions}</span>
+          <span className="text-[11px] text-muted-foreground ml-0.5">+{totalReactions}</span>
         </button>
         <div className="flex -space-x-2">
           {post.recent_users.slice(0, 3).map((u, i) => (
@@ -142,15 +142,23 @@ export function PostCard({ post }: PostCardProps) {
             <div className="flex justify-around">
               {post.reactions.map((r) => {
                 const isActive = userReaction === r.emoji;
+                const reactionName = {
+                  "❤️": "Amei",
+                  "⭐": "Recomendo",
+                  "😋": "Delícia",
+                  "😍": "Encantador",
+                  "📌": "Visitar",
+                }[r.emoji] || "";
                 return (
                   <button
                     key={r.emoji}
                     onClick={() => handleReact(r.emoji)}
-                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
                       isActive ? "bg-primary/10 scale-110" : "hover:bg-secondary"
                     }`}
                   >
                     <span className="text-2xl">{r.emoji}</span>
+                    <span className="text-[11px] font-medium text-foreground">{reactionName}</span>
                     <span className="text-[10px] text-muted-foreground">{r.count}</span>
                   </button>
                 );
