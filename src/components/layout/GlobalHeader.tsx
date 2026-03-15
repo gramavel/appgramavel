@@ -31,7 +31,7 @@ export function GlobalHeader({ showBack, title = "Gramável" }: GlobalHeaderProp
         </div>
 
         {/* Center */}
-        <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">{title}</span>
+        <img src={logoSrc} alt="Gramável" className="h-6" />
 
         {/* Right */}
         <div className="w-24 flex justify-end">

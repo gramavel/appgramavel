@@ -127,7 +127,7 @@ export function PostCard({ post }: PostCardProps) {
           onClick={() => setShowReactions(false)}
         >
           <div
-            className="w-full max-w-md bg-card rounded-t-2xl border-t border-border p-4 pb-8 animate-in slide-in-from-bottom duration-200"
+            className="w-full max-w-md bg-card rounded-t-2xl border-t border-border p-4 pb-24 animate-in slide-in-from-bottom duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
