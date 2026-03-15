@@ -142,15 +142,23 @@ export function PostCard({ post }: PostCardProps) {
             <div className="flex justify-around">
               {post.reactions.map((r) => {
                 const isActive = userReaction === r.emoji;
+                const reactionName = {
+                  "❤️": "Amei",
+                  "⭐": "Recomendo",
+                  "😋": "Delícia",
+                  "😍": "Encantador",
+                  "📌": "Visitar",
+                }[r.emoji] || "";
                 return (
                   <button
                     key={r.emoji}
                     onClick={() => handleReact(r.emoji)}
-                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
                       isActive ? "bg-primary/10 scale-110" : "hover:bg-secondary"
                     }`}
                   >
                     <span className="text-2xl">{r.emoji}</span>
+                    <span className="text-[11px] font-medium text-foreground">{reactionName}</span>
                     <span className="text-[10px] text-muted-foreground">{r.count}</span>
                   </button>
                 );
