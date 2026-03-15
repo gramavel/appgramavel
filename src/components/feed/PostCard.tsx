@@ -95,18 +95,18 @@ export function PostCard({ post }: PostCardProps) {
       {/* Reactions */}
       <div className="flex items-center justify-between px-3 pb-3">
         <button
-          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+          className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-colors"
           onClick={() => setShowReactions(true)}
         >
           {displayReactions.map((r) => (
             <span
               key={r.emoji}
-              className={`text-lg ${userReaction === r.emoji ? "scale-125" : ""} transition-transform`}
+              className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
             >
               {r.emoji}
             </span>
           ))}
-          <span className="text-xs text-muted-foreground ml-1">+{totalReactions}</span>
+          <span className="text-[11px] text-muted-foreground ml-0.5">+{totalReactions}</span>
         </button>
         <div className="flex -space-x-2">
           {post.recent_users.slice(0, 3).map((u, i) => (
