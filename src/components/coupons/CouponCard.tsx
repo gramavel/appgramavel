@@ -31,10 +31,10 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
         <CardContent className="p-3 space-y-2">
           {/* Header */}
           <div className="flex items-start gap-2">
-            <img src={coupon.establishment_avatar} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+            <img src={coupon.establishment_avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
             <div>
-              <p className="text-xs font-semibold text-foreground">{coupon.title}</p>
-              <p className="text-[10px] text-muted-foreground">{coupon.establishment_name}</p>
+              <p className="text-sm font-semibold text-foreground">{coupon.title}</p>
+              <p className="text-xs text-muted-foreground">{coupon.establishment_name}</p>
             </div>
           </div>
 
