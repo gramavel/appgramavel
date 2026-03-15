@@ -2,6 +2,7 @@ import { ChevronLeft, Bell, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/contexts/LocationContext";
 import { Badge } from "@/components/ui/badge";
+import logoSrc from "@/assets/logo_gramavel_header.svg";
 
 interface GlobalHeaderProps {
   showBack?: boolean;
@@ -30,7 +31,7 @@ export function GlobalHeader({ showBack, title = "Gramável" }: GlobalHeaderProp
         </div>
 
         {/* Center */}
-        <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">{title}</span>
+        <img src={logoSrc} alt="Gramável" className="h-6" />
 
         {/* Right */}
         <div className="w-24 flex justify-end">
