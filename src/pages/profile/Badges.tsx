@@ -1,7 +1,6 @@
-import { Compass, UtensilsCrossed, Wine, Camera, FerrisWheel, Ticket, CheckCircle2, Lock } from "lucide-react";
+import { Compass, UtensilsCrossed, Wine, Camera, FerrisWheel, Ticket, CheckCircle2, Lock, CalendarDays } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { Progress } from "@/components/ui/progress";
 import { MOCK_BADGES } from "@/data/mock";
 import type { ComponentType } from "react";
 
@@ -14,15 +13,40 @@ const BADGE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   ticket: Ticket,
 };
 
-// Each earned badge gets a unique color palette: [bgColor, borderColor, iconColor]
-const BADGE_COLOR_PALETTES: Record<string, { bg: string; border: string; icon: string }> = {
-  compass: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-600" },
-  "utensils-crossed": { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600" },
-  wine: { bg: "bg-rose-50", border: "border-rose-200", icon: "text-rose-600" },
-  camera: { bg: "bg-cyan-50", border: "border-cyan-200", icon: "text-cyan-600" },
-  "ferris-wheel": { bg: "bg-green-50", border: "border-green-200", icon: "text-green-600" },
-  ticket: { bg: "bg-yellow-50", border: "border-yellow-200", icon: "text-yellow-600" },
+const BADGE_COLOR_PALETTES: Record<string, { bg: string; border: string; icon: string; ring: string }> = {
+  compass: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-600", ring: "#2563eb" },
+  "utensils-crossed": { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", ring: "#d97706" },
+  wine: { bg: "bg-rose-50", border: "border-rose-200", icon: "text-rose-600", ring: "#e11d48" },
+  camera: { bg: "bg-cyan-50", border: "border-cyan-200", icon: "text-cyan-600", ring: "#0891b2" },
+  "ferris-wheel": { bg: "bg-green-50", border: "border-green-200", icon: "text-green-600", ring: "#16a34a" },
+  ticket: { bg: "bg-yellow-50", border: "border-yellow-200", icon: "text-yellow-600", ring: "#ca8a04" },
 };
+
+const EARNED_DATES: Record<string, string> = {
+  b1: "08/03/2026",
+  b2: "05/03/2026",
+  b6: "01/03/2026",
+};
+
+function ProgressRing({ progress, total, color, size = 56 }: { progress: number; total: number; color: string; size?: number }) {
+  const strokeWidth = 4;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (progress / total) * circumference;
+
+  return (
+    <svg width={size} height={size} className="transform -rotate-90">
+      <circle cx={size / 2} cy={size / 2} r={radius} stroke="currentColor" strokeWidth={strokeWidth} fill="none" className="text-border" />
+      <circle
+        cx={size / 2} cy={size / 2} r={radius}
+        stroke={color} strokeWidth={strokeWidth} fill="none"
+        strokeDasharray={circumference} strokeDashoffset={offset}
+        strokeLinecap="round"
+        className="transition-all duration-700 ease-out"
+      />
+    </svg>
+  );
+}
 
 export default function BadgesPage() {
   const earned = MOCK_BADGES.filter((b) => b.earned);
@@ -34,23 +58,32 @@ export default function BadgesPage() {
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
         {/* Earned */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+          <p className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
             Conquistadas ({earned.length})
           </p>
           <div className="grid grid-cols-2 gap-3">
-            {earned.map((b) => {
+            {earned.map((b, i) => {
               const BadgeIcon = BADGE_ICONS[b.iconName] || Compass;
-              const palette = BADGE_COLOR_PALETTES[b.iconName] || { bg: "bg-primary/10", border: "border-primary/30", icon: "text-primary" };
+              const palette = BADGE_COLOR_PALETTES[b.iconName] || { bg: "bg-primary/10", border: "border-primary/30", icon: "text-primary", ring: "" };
               return (
                 <div
                   key={b.id}
-                  className={`relative p-4 rounded-xl border-2 ${palette.bg} ${palette.border}`}
+                  className={`relative p-4 rounded-xl border-2 ${palette.bg} ${palette.border} overflow-hidden`}
+                  style={{ animationDelay: `${i * 100}ms`, animation: "fadeInScale 0.5s ease-out both" }}
                 >
+                  {/* Shimmer */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer pointer-events-none" />
                   <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-green-600" />
                   <BadgeIcon className={`w-8 h-8 mb-2 ${palette.icon}`} />
                   <p className="font-semibold text-sm text-foreground">{b.name}</p>
                   <p className="text-xs text-muted-foreground mt-1">{b.description}</p>
+                  {EARNED_DATES[b.id] && (
+                    <p className="text-[10px] text-muted-foreground/70 mt-2 flex items-center gap-1">
+                      <CalendarDays className="w-3 h-3" />
+                      {EARNED_DATES[b.id]}
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -59,21 +92,31 @@ export default function BadgesPage() {
 
         {/* In progress */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+          <p className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
             <Lock className="w-3.5 h-3.5" />
             Em progresso ({inProgress.length})
           </p>
           <div className="grid grid-cols-2 gap-3">
-            {inProgress.map((b) => {
+            {inProgress.map((b, i) => {
               const BadgeIcon = BADGE_ICONS[b.iconName] || Compass;
+              const palette = BADGE_COLOR_PALETTES[b.iconName] || { bg: "", border: "", icon: "", ring: "#888" };
               return (
-                <div key={b.id} className="relative p-4 rounded-xl border-2 border-muted bg-muted/30">
-                  <Lock className="absolute top-2 right-2 w-4 h-4 text-muted-foreground" />
-                  <BadgeIcon className="w-8 h-8 mb-2 text-muted-foreground opacity-50" />
+                <div
+                  key={b.id}
+                  className="relative p-4 rounded-xl border-2 border-muted bg-muted/30"
+                  style={{ animationDelay: `${i * 100 + 200}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <BadgeIcon className="w-7 h-7 text-muted-foreground opacity-60" />
+                    <div className="relative">
+                      <ProgressRing progress={b.progress!} total={b.total!} color={palette.ring} />
+                      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-muted-foreground">
+                        {b.progress}/{b.total}
+                      </span>
+                    </div>
+                  </div>
                   <p className="font-semibold text-sm text-muted-foreground">{b.name}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{b.description}</p>
-                  <Progress value={(b.progress! / b.total!) * 100} className="h-2 mt-3" />
-                  <p className="text-xs text-muted-foreground mt-1">{b.progress}/{b.total}</p>
+                  <p className="text-xs text-muted-foreground/80 mt-1">{b.description}</p>
                 </div>
               );
             })}
@@ -81,6 +124,24 @@ export default function BadgesPage() {
         </div>
       </main>
       <BottomNav />
+
+      <style>{`
+        @keyframes fadeInScale {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 3s infinite;
+        }
+      `}</style>
     </div>
   );
 }

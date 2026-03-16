@@ -14,8 +14,12 @@ export function PostCard({ post }: PostCardProps) {
   const [showReactions, setShowReactions] = useState(false);
   const [userReaction, setUserReaction] = useState<string | null>(null);
 
+  const CANONICAL_EMOJIS = ["❤️", "⭐", "😋", "😍", "📌"];
   const totalReactions = post.reactions.reduce((sum, r) => sum + r.count, 0);
-  const displayReactions = post.reactions.slice(0, 3);
+  const displayReactions = CANONICAL_EMOJIS.slice(0, 3).map((emoji) => ({
+    emoji,
+    count: post.reactions.find((r) => r.emoji === emoji)?.count ?? 0,
+  }));
 
   const handleReact = (emoji: string) => {
     setUserReaction(userReaction === emoji ? null : emoji);

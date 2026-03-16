@@ -12,25 +12,33 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import { MOCK_ESTABLISHMENTS } from "@/data/mock";
 import { BottomNav } from "@/components/layout/BottomNav";
+import ImageLightbox from "@/components/ui/ImageLightbox";
 
 export default function Establishment() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const est = MOCK_ESTABLISHMENTS.find((e) => e.slug === slug);
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
-  const isOpen = true; // mock
-
+  const isOpen = true;
   const postImages = [est.image_url, est.logo_url, est.image_url, est.logo_url, est.image_url, est.image_url];
+  const allImages = [est.image_url, ...postImages];
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border/50 shadow-sm">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <button onClick={() => navigate(-1)}>
+          <button onClick={() => navigate(-1)} className="active:scale-95 transition-transform">
             <ChevronLeft className="h-5 w-5 text-foreground" />
           </button>
           <span className="text-lg font-semibold bg-gradient-primary bg-clip-text text-transparent truncate max-w-[50%]">{est.name}</span>
@@ -43,7 +51,7 @@ export default function Establishment() {
 
       <main className="max-w-2xl mx-auto px-4 pb-20 space-y-4 pt-4">
         {/* Banner */}
-        <div className="aspect-[2/1] rounded-xl overflow-hidden">
+        <div className="aspect-[2/1] rounded-xl overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
           <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
         </div>
 
@@ -89,7 +97,11 @@ export default function Establishment() {
             <TabsContent value="posts" className="p-2">
               <div className="grid grid-cols-3 gap-1.5">
                 {postImages.map((src, i) => (
-                  <div key={i} className="aspect-square rounded-md overflow-hidden group cursor-pointer relative">
+                  <div
+                    key={i}
+                    className="aspect-square rounded-md overflow-hidden group cursor-pointer relative"
+                    onClick={() => openLightbox(i + 1)}
+                  >
                     <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
                     <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 transition-all flex items-center justify-center">
                       <Heart className="h-5 w-5 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -107,8 +119,6 @@ export default function Establishment() {
               <Button variant="outline" className="w-full gap-2">
                 <MessageSquarePlus className="h-4 w-4" /> Deixar avaliação
               </Button>
-
-              {/* Mock reviews */}
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex gap-3 p-3 border rounded-lg">
                   <Avatar className="h-8 w-8">
@@ -140,7 +150,6 @@ export default function Establishment() {
           </DialogHeader>
           <Separator />
           <div className="space-y-4">
-            {/* Address */}
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <p className="text-sm text-foreground flex-1">{est.address}</p>
@@ -148,8 +157,6 @@ export default function Establishment() {
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-
-            {/* Hours */}
             <div className="flex items-center gap-3">
               <Clock className="h-5 w-5 text-primary shrink-0" />
               <p className="text-sm text-foreground flex-1">{est.opening_hours}</p>
@@ -157,23 +164,15 @@ export default function Establishment() {
                 {isOpen ? "Aberto" : "Fechado"}
               </Badge>
             </div>
-
-            {/* Contact */}
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" className="gap-2 rounded-lg" onClick={() => window.open(`tel:${est.phone}`)}>
                 <Phone className="h-4 w-4" /> Ligar
               </Button>
-              <Button
-                variant="outline"
-                className="gap-2 rounded-lg text-green-600 border-green-600/30"
-                onClick={() => window.open(`https://wa.me/${est.whatsapp}`)}
-              >
+              <Button variant="outline" className="gap-2 rounded-lg text-green-600 border-green-600/30" onClick={() => window.open(`https://wa.me/${est.whatsapp}`)}>
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
                 WhatsApp
               </Button>
             </div>
-
-            {/* Social */}
             <div className="flex items-center justify-evenly pt-2">
               {est.website && (
                 <a href={est.website} target="_blank" rel="noopener" className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
@@ -199,6 +198,14 @@ export default function Establishment() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ImageLightbox
+        images={allImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        aspectRatio="4/5"
+      />
 
       <BottomNav />
     </div>
