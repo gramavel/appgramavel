@@ -8,9 +8,10 @@ interface ImageLightboxProps {
   onClose: () => void;
   titles?: string[];
   captions?: string[];
+  aspectRatio?: "4/5" | "auto";
 }
 
-export default function ImageLightbox({ images, initialIndex = 0, open, onClose, titles, captions }: ImageLightboxProps) {
+export default function ImageLightbox({ images, initialIndex = 0, open, onClose, titles, captions, aspectRatio = "auto" }: ImageLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
@@ -74,11 +75,21 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
           setTouchStart(null);
         }}
       >
-        <img
-          src={images[currentIndex]}
-          alt={titles?.[currentIndex] || `Imagem ${currentIndex + 1}`}
-          className="max-w-full max-h-[80vh] object-contain rounded-lg"
-        />
+        {aspectRatio === "4/5" ? (
+          <div className="w-full max-w-sm aspect-[4/5] rounded-lg overflow-hidden">
+            <img
+              src={images[currentIndex]}
+              alt={titles?.[currentIndex] || `Imagem ${currentIndex + 1}`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <img
+            src={images[currentIndex]}
+            alt={titles?.[currentIndex] || `Imagem ${currentIndex + 1}`}
+            className="max-w-full max-h-[80vh] object-contain rounded-lg"
+          />
+        )}
       </div>
 
       {/* Caption card */}

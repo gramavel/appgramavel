@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Ticket, Map, Award, Camera, ChevronRight, CheckCircle2, Star, Pencil, LogOut } from "lucide-react";
+import { MapPin, Ticket, Map, Award, Camera, ChevronRight, CheckCircle2, Star, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -63,14 +63,10 @@ export default function Profile() {
           </div>
           <h2 className="text-xl font-bold text-foreground">João da Silva</h2>
           <p className="text-sm text-muted-foreground text-center">Apaixonado pela Serra Gaúcha</p>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex justify-center mt-1">
             <Button variant="outline" size="sm" className="rounded-full gap-1.5" onClick={() => navigate("/perfil/configuracoes")}>
               <Pencil className="w-3.5 h-3.5" />
               Editar perfil
-            </Button>
-            <Button variant="ghost" size="sm" className="rounded-full gap-1.5 text-muted-foreground">
-              <LogOut className="w-3.5 h-3.5" />
-              Sair
             </Button>
           </div>
         </div>
@@ -78,7 +74,7 @@ export default function Profile() {
         {/* Stats */}
         <div className="flex justify-around py-3 border-y border-border/50">
           {STATS.map(({ label, value, icon: Icon, color, to }) => (
-            <button key={label} onClick={() => navigate(to)} className="flex flex-col items-center hover:opacity-70 transition-opacity">
+            <button key={label} onClick={() => navigate(to)} className="flex flex-col items-center hover:opacity-70 transition-opacity active:scale-95">
               <div className="flex items-center gap-1">
                 <Icon className={`w-4 h-4 ${color}`} />
                 <span className="text-lg font-bold text-foreground">{value}</span>
@@ -128,7 +124,7 @@ export default function Profile() {
             {MEMORIES.map((src, i) => (
               <div
                 key={i}
-                className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
                 onClick={() => openLightbox(i)}
               >
                 <img src={src} alt={`Memória ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
@@ -142,7 +138,6 @@ export default function Profile() {
           {[
             { label: "Lugares Salvos", to: "/perfil/lugares" },
             { label: "Roteiros Salvos", to: "/perfil/roteiros" },
-            { label: "Configurações", to: "/perfil/configuracoes" },
           ].map(({ label, to }) => (
             <button
               key={to}
@@ -163,6 +158,7 @@ export default function Profile() {
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
+        aspectRatio="4/5"
       />
     </div>
   );
