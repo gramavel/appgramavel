@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
+interface ImageReaction {
+  emoji: string;
+  label: string;
+  count: number;
+}
+
 interface ImageLightboxProps {
   images: string[];
   initialIndex?: number;
@@ -9,9 +15,10 @@ interface ImageLightboxProps {
   titles?: string[];
   captions?: string[];
   aspectRatio?: "4/5" | "auto";
+  reactions?: ImageReaction[][];
 }
 
-export default function ImageLightbox({ images, initialIndex = 0, open, onClose, titles, captions, aspectRatio = "auto" }: ImageLightboxProps) {
+export default function ImageLightbox({ images, initialIndex = 0, open, onClose, titles, captions, aspectRatio = "auto", reactions }: ImageLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
@@ -35,6 +42,10 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
 
   if (!open || images.length === 0) return null;
 
+  const hasCaption = titles?.[currentIndex] || captions?.[currentIndex];
+  const hasReactions = reactions?.[currentIndex] && reactions[currentIndex].length > 0;
+  const hasMeta = hasCaption || hasReactions;
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center"
@@ -46,17 +57,17 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
       </div>
 
       {/* Close */}
-      <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
+      <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors z-10">
         <X className="w-6 h-6" />
       </button>
 
       {/* Navigation arrows */}
       {images.length > 1 && (
         <>
-          <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/80 hover:bg-white/20 transition-colors">
+          <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/80 hover:bg-white/20 transition-colors z-10">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/80 hover:bg-white/20 transition-colors">
+          <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/80 hover:bg-white/20 transition-colors z-10">
             <ChevronRight className="w-5 h-5" />
           </button>
         </>
@@ -64,7 +75,7 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
 
       {/* Image */}
       <div
-        className="flex-1 flex items-center justify-center w-full px-12"
+        className="flex-1 flex items-center justify-center w-full px-4"
         onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
         onTouchEnd={(e) => {
           if (touchStart === null) return;
@@ -76,7 +87,7 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
         }}
       >
         {aspectRatio === "4/5" ? (
-          <div className="w-full max-w-sm aspect-[4/5] rounded-lg overflow-hidden">
+          <div className="w-full max-w-lg aspect-[4/5] rounded-lg overflow-hidden">
             <img
               src={images[currentIndex]}
               alt={titles?.[currentIndex] || `Imagem ${currentIndex + 1}`}
@@ -92,11 +103,20 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
         )}
       </div>
 
-      {/* Caption card */}
-      {(titles?.[currentIndex] || captions?.[currentIndex]) && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 max-w-sm text-center">
+      {/* Caption + Reactions card */}
+      {hasMeta && (
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 max-w-md w-[90%] text-center space-y-2">
           {titles?.[currentIndex] && <p className="text-white font-semibold text-sm">{titles[currentIndex]}</p>}
-          {captions?.[currentIndex] && <p className="text-white/70 text-xs mt-0.5">{captions[currentIndex]}</p>}
+          {captions?.[currentIndex] && <p className="text-white/70 text-xs">{captions[currentIndex]}</p>}
+          {hasReactions && (
+            <div className="flex justify-center gap-2 flex-wrap pt-1">
+              {reactions![currentIndex].map((r) => (
+                <span key={r.emoji} className="inline-flex items-center gap-1 bg-white/15 rounded-full px-2.5 py-1 text-xs text-white">
+                  {r.emoji} <span className="font-medium">{r.count}</span>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

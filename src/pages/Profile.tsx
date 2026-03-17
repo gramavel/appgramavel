@@ -10,7 +10,7 @@ import ImageLightbox from "@/components/ui/ImageLightbox";
 
 const STATS = [
   { label: "Lugares", value: "12", icon: MapPin, color: "text-primary", to: "/perfil/lugares" },
-  { label: "Cupons", value: "5", icon: Ticket, color: "text-amber-500", to: "/coupons" },
+  { label: "Cupons", value: "5", icon: Ticket, color: "text-amber-500", to: "/perfil/cupons" },
   { label: "Roteiros", value: "2", icon: Map, color: "text-blue-500", to: "/perfil/roteiros" },
   { label: "Badges", value: String(MOCK_BADGES.filter((b) => b.earned).length), icon: Award, color: "text-yellow-500", to: "/perfil/badges" },
 ];

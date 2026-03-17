@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
-  ChevronLeft, Share2, Bookmark, Star, Navigation, Info,
+  Share2, Bookmark, Star, Navigation, Info,
   MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, Heart, User
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -12,11 +12,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import { MOCK_ESTABLISHMENTS } from "@/data/mock";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import ImageLightbox from "@/components/ui/ImageLightbox";
+
+const CANONICAL_REACTIONS = [
+  { emoji: "❤️", label: "Amei" },
+  { emoji: "⭐", label: "Recomendo" },
+  { emoji: "😋", label: "Delícia" },
+  { emoji: "😍", label: "Encantador" },
+  { emoji: "📌", label: "Visitar" },
+];
 
 export default function Establishment() {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -27,6 +35,17 @@ export default function Establishment() {
   const isOpen = true;
   const postImages = [est.image_url, est.logo_url, est.image_url, est.logo_url, est.image_url, est.image_url];
   const allImages = [est.image_url, ...postImages];
+  const allTitles = [est.name, ...postImages.map((_, i) => `Post ${i + 1}`)];
+  const allCaptions = [est.description, ...postImages.map(() => est.category)];
+
+  // Generate mock reaction counts per image
+  const allReactions = allImages.map(() =>
+    CANONICAL_REACTIONS.map((r) => ({
+      emoji: r.emoji,
+      label: r.label,
+      count: Math.floor(Math.random() * 80) + 5,
+    }))
+  );
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
@@ -35,24 +54,20 @@ export default function Establishment() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border/50 shadow-sm">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="active:scale-95 transition-transform">
-            <ChevronLeft className="h-5 w-5 text-foreground" />
-          </button>
-          <span className="text-lg font-semibold bg-gradient-primary bg-clip-text text-transparent truncate max-w-[50%]">{est.name}</span>
-          <div className="flex gap-2">
-            <Share2 className="h-5 w-5 text-muted-foreground" />
-            <Bookmark className="h-5 w-5 text-muted-foreground" />
-          </div>
-        </div>
-      </header>
+      <GlobalHeader showBack title={est.name} />
 
       <main className="max-w-2xl mx-auto px-4 pb-20 space-y-4 pt-4">
         {/* Banner */}
-        <div className="aspect-[2/1] rounded-xl overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
+        <div className="relative aspect-[2/1] rounded-xl overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
           <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
+          <div className="absolute top-3 right-3 flex gap-2">
+            <button className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center active:scale-95">
+              <Share2 className="h-4 w-4 text-foreground" />
+            </button>
+            <button className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center active:scale-95">
+              <Bookmark className="h-4 w-4 text-foreground" />
+            </button>
+          </div>
         </div>
 
         {/* Info */}
@@ -205,6 +220,9 @@ export default function Establishment() {
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         aspectRatio="4/5"
+        titles={allTitles}
+        captions={allCaptions}
+        reactions={allReactions}
       />
 
       <BottomNav />

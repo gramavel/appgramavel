@@ -1,10 +1,33 @@
-import { ChevronRight, Clock, Mountain } from "lucide-react";
+import { useState } from "react";
+import { ChevronRight, Clock, Mountain, Plus, X, MapPin } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_ROUTES } from "@/data/mock";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { MOCK_ROUTES, MOCK_ESTABLISHMENTS } from "@/data/mock";
 
 export default function RoutesPage() {
+  const [createOpen, setCreateOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedStops, setSelectedStops] = useState<string[]>([]);
+
+  const toggleStop = (id: string) => {
+    setSelectedStops((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setSelectedStops([]);
+    setCreateOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Roteiros Salvos" />
@@ -72,6 +95,90 @@ export default function RoutesPage() {
           );
         })}
       </main>
+
+      {/* FAB */}
+      <button
+        onClick={() => setCreateOpen(true)}
+        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform hover:shadow-xl"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+
+      {/* Create Route Sheet */}
+      <Sheet open={createOpen} onOpenChange={setCreateOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-bold text-foreground">Criar Roteiro</SheetTitle>
+          </SheetHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Nome do roteiro</label>
+              <Input
+                placeholder="Ex: Meu dia em Gramado"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Descrição</label>
+              <Textarea
+                placeholder="Descreva seu roteiro..."
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Paradas ({selectedStops.length} selecionadas)
+              </label>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {MOCK_ESTABLISHMENTS.map((est) => {
+                  const selected = selectedStops.includes(est.id);
+                  return (
+                    <button
+                      key={est.id}
+                      onClick={() => toggleStop(est.id)}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg border transition-all active:scale-[0.98] ${
+                        selected
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:bg-secondary/50"
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={est.logo_url} alt={est.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{est.name}</p>
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {est.category}
+                        </p>
+                      </div>
+                      {selected && (
+                        <X className="w-4 h-4 text-primary flex-shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Button
+              className="w-full rounded-full gap-2"
+              disabled={!title.trim() || selectedStops.length === 0}
+              onClick={resetForm}
+            >
+              <Plus className="w-4 h-4" />
+              Criar Roteiro
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <BottomNav />
 
       <style>{`

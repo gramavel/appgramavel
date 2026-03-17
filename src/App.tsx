@@ -15,6 +15,7 @@ import SavedPlaces from "./pages/profile/SavedPlaces";
 import BadgesPage from "./pages/profile/Badges";
 import RoutesPage from "./pages/profile/Routes";
 import Settings from "./pages/profile/Settings";
+import UserCoupons from "./pages/profile/UserCoupons";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/perfil/badges" element={<BadgesPage />} />
             <Route path="/perfil/roteiros" element={<RoutesPage />} />
             <Route path="/perfil/configuracoes" element={<Settings />} />
+            <Route path="/perfil/cupons" element={<UserCoupons />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
