@@ -5,8 +5,6 @@ import type { ComponentType } from "react";
 interface Notification {
   id: string;
   icon: ComponentType<{ className?: string }>;
-  iconBg: string;
-  iconColor: string;
   title: string;
   description: string;
   time: string;
@@ -17,8 +15,6 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: "n1",
     icon: Ticket,
-    iconBg: "bg-amber-100",
-    iconColor: "text-amber-600",
     title: "Novo cupom disponível!",
     description: "20% OFF no Bella Gramado Ristorante. Válido até 30/04.",
     time: "Há 2 horas",
@@ -27,8 +23,6 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: "n2",
     icon: Award,
-    iconBg: "bg-primary/10",
-    iconColor: "text-primary",
     title: "Quase lá! 🏆",
     description: "Falta 1 vinícola para conquistar a badge Sommelier.",
     time: "Há 5 horas",
@@ -37,8 +31,6 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: "n3",
     icon: MapPin,
-    iconBg: "bg-green-100",
-    iconColor: "text-green-600",
     title: "Lugar novo perto de você",
     description: "Chocolate Lugano está a apenas 800m de distância.",
     time: "Ontem",
@@ -47,8 +39,6 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: "n4",
     icon: TrendingUp,
-    iconBg: "bg-rose-100",
-    iconColor: "text-rose-600",
     title: "Em alta esta semana",
     description: "Vinícola Ravanello recebeu 50+ reações nos últimos 7 dias.",
     time: "Há 2 dias",
@@ -57,8 +47,6 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: "n5",
     icon: Bell,
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
     title: "Bem-vindo ao Gramável!",
     description: "Explore os melhores lugares de Gramado e Canela.",
     time: "Há 3 dias",
@@ -76,8 +64,8 @@ export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetPro
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0">
-        <SheetHeader className="px-4 pt-6 pb-3 border-b border-border/50">
+      <SheetContent side="right" className="w-full sm:max-w-md p-0 [&>button]:top-5 [&>button]:right-5 [&>button]:z-10">
+        <SheetHeader className="px-4 pt-6 pb-3 border-b border-border/50 pr-12">
           <SheetTitle className="text-lg font-bold text-foreground flex items-center gap-2">
             Notificações
             {unreadCount > 0 && (
@@ -98,8 +86,8 @@ export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetPro
                   !notification.read ? "bg-primary/5" : ""
                 }`}
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.iconBg}`}>
-                  <Icon className={`w-5 h-5 ${notification.iconColor}`} />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary/10">
+                  <Icon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
