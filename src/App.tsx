@@ -39,6 +39,7 @@ const App = () => (
             <Route path="/perfil/badges" element={<BadgesPage />} />
             <Route path="/perfil/roteiros" element={<RoutesPage />} />
             <Route path="/perfil/configuracoes" element={<Settings />} />
+            <Route path="/perfil/cupons" element={<UserCoupons />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
