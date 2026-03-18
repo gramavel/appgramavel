@@ -105,7 +105,7 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
 
       {/* Caption + Reactions card */}
       {hasMeta && (
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 max-w-md w-[90%] text-center space-y-2">
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 max-w-md w-[90%] text-center space-y-2">
           {titles?.[currentIndex] && <p className="text-white font-semibold text-sm">{titles[currentIndex]}</p>}
           {captions?.[currentIndex] && <p className="text-white/70 text-xs">{captions[currentIndex]}</p>}
           {hasReactions && (
