@@ -36,6 +36,12 @@ const MEMORIES = [
   "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=200&h=200&fit=crop",
   "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=200&h=200&fit=crop",
   "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=200&h=200&fit=crop",
 ];
 
 export default function Profile() {
