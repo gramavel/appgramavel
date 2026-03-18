@@ -75,7 +75,7 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
 
       {/* Image */}
       <div
-        className="flex-1 flex items-center justify-center w-full px-4"
+        className="flex-1 flex items-center justify-center w-full px-4 pb-10 mt-6"
         onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
         onTouchEnd={(e) => {
           if (touchStart === null) return;

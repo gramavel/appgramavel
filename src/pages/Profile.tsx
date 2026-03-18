@@ -138,23 +138,6 @@ export default function Profile() {
             ))}
           </div>
         </div>
-
-        {/* Quick links */}
-        <div className="space-y-2">
-          {[
-            { label: "Lugares Salvos", to: "/perfil/lugares" },
-            { label: "Roteiros Salvos", to: "/perfil/roteiros" },
-          ].map(({ label, to }) => (
-            <button
-              key={to}
-              onClick={() => navigate(to)}
-              className="w-full flex items-center justify-between p-4 rounded-xl bg-card border border-border hover:shadow-sm transition-shadow active:scale-[0.98]"
-            >
-              <span className="text-sm font-medium text-foreground">{label}</span>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-          ))}
-        </div>
       </main>
 
       <BottomNav />
