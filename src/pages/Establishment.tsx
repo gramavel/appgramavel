@@ -60,14 +60,6 @@ export default function Establishment() {
         {/* Banner */}
         <div className="relative aspect-[2/1] rounded-xl overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
           <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
-          <div className="absolute top-3 right-3 flex gap-2">
-            <button className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center active:scale-95">
-              <Share2 className="h-4 w-4 text-foreground" />
-            </button>
-            <button className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center active:scale-95">
-              <Bookmark className="h-4 w-4 text-foreground" />
-            </button>
-          </div>
         </div>
 
         {/* Info */}
