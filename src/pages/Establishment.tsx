@@ -69,8 +69,8 @@ export default function Establishment() {
           <p className="text-sm text-muted-foreground">{est.description}</p>
         </div>
 
-        {/* Rating pill */}
-        <div className="flex justify-center mt-3">
+        {/* Rating pill + Share/Bookmark */}
+        <div className="flex items-center justify-center gap-2 mt-3">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
             <span className="text-sm font-semibold text-foreground">{est.rating}</span>
             <div className="flex gap-0.5">
@@ -80,6 +80,12 @@ export default function Establishment() {
             </div>
             <span className="text-xs text-muted-foreground">({est.total_reviews} avaliações)</span>
           </div>
+          <button className="w-8 h-8 rounded-full bg-secondary/50 border border-border flex items-center justify-center active:scale-95 transition-transform">
+            <Share2 className="h-3.5 w-3.5 text-foreground" />
+          </button>
+          <button className="w-8 h-8 rounded-full bg-secondary/50 border border-border flex items-center justify-center active:scale-95 transition-transform">
+            <Bookmark className="h-3.5 w-3.5 text-foreground" />
+          </button>
         </div>
 
         {/* Actions */}
