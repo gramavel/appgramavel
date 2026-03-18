@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Ticket, Map, Award, Camera, ChevronRight, CheckCircle2, Star, Pencil } from "lucide-react";
+import { MapPin, Ticket, Map, Award, Camera, CheckCircle2, Star, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
