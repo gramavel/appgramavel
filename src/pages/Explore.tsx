@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, ChevronRight, Map as MapIcon } from "lucide-react";
+import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, ChevronLeft, Map as MapIcon, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -26,18 +26,107 @@ const POPULAR_PLACES = [
   { name: "Snowland", category: "Atrações", image: "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=400&h=300&fit=crop", rating: 4.6 },
 ];
 
+const RECOMMENDED_PLACES = [
+  { name: "Vinícola Ravanello", category: "Bares & Vinícolas", image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=300&fit=crop", rating: 4.9 },
+  { name: "Chocolate Lugano", category: "Compras", image: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&h=300&fit=crop", rating: 4.7 },
+  { name: "Casa da Montanha", category: "Hotéis", image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop", rating: 4.8 },
+];
+
+const CATEGORY_BANNERS: Record<string, string> = {
+  "Restaurantes": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=400&fit=crop",
+  "Cafés": "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=800&h=400&fit=crop",
+  "Hotéis": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=400&fit=crop",
+  "Atrações": "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=800&h=400&fit=crop",
+  "Compras": "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=800&h=400&fit=crop",
+  "Bares & Vinícolas": "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&h=400&fit=crop",
+};
+
 export default function Explore() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const isSearching = search.length > 0 || activeFilter !== null;
 
   const filteredEstablishments = MOCK_ESTABLISHMENTS.filter((e) => {
     if (search && !e.name.toLowerCase().includes(search.toLowerCase()) && !e.category.toLowerCase().includes(search.toLowerCase())) return false;
+    if (activeFilter) {
+      const catMatch = CATEGORIES.find(c => c.label === activeFilter);
+      if (catMatch && e.category !== activeFilter) return false;
+    }
     return true;
   });
+
+  const categoryEstablishments = selectedCategory
+    ? MOCK_ESTABLISHMENTS.filter((e) => e.category === selectedCategory).slice(0, 10)
+    : [];
+
+  // Category detail view
+  if (selectedCategory) {
+    const catIcon = CATEGORIES.find(c => c.label === selectedCategory);
+    const CatIcon = catIcon?.icon;
+    return (
+      <div className="min-h-screen bg-background">
+        <GlobalHeader showBack title={selectedCategory} />
+        <main className="max-w-2xl mx-auto pb-20 space-y-4">
+          {/* Banner */}
+          <div className="relative aspect-[2/1] overflow-hidden">
+            <img src={CATEGORY_BANNERS[selectedCategory] || CATEGORY_BANNERS["Restaurantes"]} alt={selectedCategory} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute bottom-4 left-4 flex items-center gap-2">
+              {CatIcon && <CatIcon className="w-6 h-6 text-white" />}
+              <h2 className="text-xl font-bold text-white">{selectedCategory}</h2>
+            </div>
+          </div>
+
+          {/* Results */}
+          <div className="px-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
+              <button
+                onClick={() => { setSelectedCategory(null); setActiveFilter(selectedCategory); setShowMap(false); }}
+                className="flex items-center gap-1.5 text-xs text-primary font-medium"
+              >
+                <MapIcon className="w-4 h-4" />
+                Ver no mapa
+              </button>
+            </div>
+            {categoryEstablishments.map((est) => (
+              <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
+                <div className="flex gap-3 p-3">
+                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
+                    <p className="text-xs text-muted-foreground truncate">{est.category}</p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        <span>{est.rating}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        <span>{(Math.random() * 3 + 0.2).toFixed(1)} km</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+            {categoryEstablishments.length === 0 && (
+              <div className="py-12 text-center">
+                <p className="text-sm text-muted-foreground">Nenhum estabelecimento nesta categoria</p>
+              </div>
+            )}
+          </div>
+        </main>
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,7 +198,7 @@ export default function Explore() {
                 {CATEGORIES.map(({ label, icon: Icon }) => (
                   <button
                     key={label}
-                    onClick={() => { setActiveFilter(label); setShowMap(false); }}
+                    onClick={() => setSelectedCategory(label)}
                     className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
                   >
                     <Icon className="w-6 h-6 text-primary" />
@@ -125,6 +214,32 @@ export default function Explore() {
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-3 pb-2">
                   {POPULAR_PLACES.map((place) => (
+                    <div key={place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-sm">
+                      <div className="aspect-[3/2] overflow-hidden">
+                        <img src={place.image} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                      <div className="p-3">
+                        <h4 className="font-semibold text-sm">{place.name}</h4>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs text-muted-foreground">{place.category}</span>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs font-medium">{place.rating}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recommended Places */}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">Recomendados</h2>
+              <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+                <div className="flex gap-3 pb-2">
+                  {RECOMMENDED_PLACES.map((place) => (
                     <div key={place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-sm">
                       <div className="aspect-[3/2] overflow-hidden">
                         <img src={place.image} alt={place.name} className="w-full h-full object-cover" loading="lazy" />

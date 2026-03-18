@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Ticket, Map, Award, Camera, ChevronRight, CheckCircle2, Star, Pencil } from "lucide-react";
+import { MapPin, Ticket, Map, Award, Camera, CheckCircle2, Star, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -36,6 +36,12 @@ const MEMORIES = [
   "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=200&h=200&fit=crop",
   "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=200&h=200&fit=crop",
   "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=200&h=200&fit=crop",
+  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=200&h=200&fit=crop",
 ];
 
 export default function Profile() {
@@ -131,23 +137,6 @@ export default function Profile() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Quick links */}
-        <div className="space-y-2">
-          {[
-            { label: "Lugares Salvos", to: "/perfil/lugares" },
-            { label: "Roteiros Salvos", to: "/perfil/roteiros" },
-          ].map(({ label, to }) => (
-            <button
-              key={to}
-              onClick={() => navigate(to)}
-              className="w-full flex items-center justify-between p-4 rounded-xl bg-card border border-border hover:shadow-sm transition-shadow active:scale-[0.98]"
-            >
-              <span className="text-sm font-medium text-foreground">{label}</span>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-          ))}
         </div>
       </main>
 

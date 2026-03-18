@@ -60,14 +60,6 @@ export default function Establishment() {
         {/* Banner */}
         <div className="relative aspect-[2/1] rounded-xl overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
           <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
-          <div className="absolute top-3 right-3 flex gap-2">
-            <button className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center active:scale-95">
-              <Share2 className="h-4 w-4 text-foreground" />
-            </button>
-            <button className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center active:scale-95">
-              <Bookmark className="h-4 w-4 text-foreground" />
-            </button>
-          </div>
         </div>
 
         {/* Info */}
@@ -77,8 +69,8 @@ export default function Establishment() {
           <p className="text-sm text-muted-foreground">{est.description}</p>
         </div>
 
-        {/* Rating pill */}
-        <div className="flex justify-center mt-3">
+        {/* Rating pill + Share/Bookmark */}
+        <div className="flex items-center justify-center gap-2 mt-3">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
             <span className="text-sm font-semibold text-foreground">{est.rating}</span>
             <div className="flex gap-0.5">
@@ -88,6 +80,12 @@ export default function Establishment() {
             </div>
             <span className="text-xs text-muted-foreground">({est.total_reviews} avaliações)</span>
           </div>
+          <button className="w-8 h-8 rounded-full bg-secondary/50 border border-border flex items-center justify-center active:scale-95 transition-transform">
+            <Share2 className="h-3.5 w-3.5 text-foreground" />
+          </button>
+          <button className="w-8 h-8 rounded-full bg-secondary/50 border border-border flex items-center justify-center active:scale-95 transition-transform">
+            <Bookmark className="h-3.5 w-3.5 text-foreground" />
+          </button>
         </div>
 
         {/* Actions */}
@@ -172,12 +170,34 @@ export default function Establishment() {
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-primary shrink-0" />
-              <p className="text-sm text-foreground flex-1">{est.opening_hours}</p>
-              <Badge className={isOpen ? "bg-green-500/10 text-green-600 border-0 text-xs" : "bg-destructive/10 text-destructive border-0 text-xs"}>
-                {isOpen ? "Aberto" : "Fechado"}
-              </Badge>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Clock className="h-5 w-5 text-primary shrink-0" />
+                <span className="text-sm font-medium text-foreground">Horários</span>
+                <Badge className={isOpen ? "bg-green-500/10 text-green-600 border-0 text-xs" : "bg-destructive/10 text-destructive border-0 text-xs"}>
+                  {isOpen ? "Aberto" : "Fechado"}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 pl-8 text-sm">
+                {[
+                  { day: "Segunda", hours: est.opening_hours },
+                  { day: "Terça", hours: est.opening_hours },
+                  { day: "Quarta", hours: est.opening_hours },
+                  { day: "Quinta", hours: est.opening_hours },
+                  { day: "Sexta", hours: est.opening_hours },
+                  { day: "Sábado", hours: est.opening_hours },
+                  { day: "Domingo", hours: null },
+                ].map(({ day, hours }) => (
+                  <div key={day} className="contents">
+                    <span className="font-medium text-foreground">{day}:</span>
+                    {hours ? (
+                      <span className="text-muted-foreground">{hours}</span>
+                    ) : (
+                      <Badge className="bg-destructive/10 text-destructive border-0 text-xs w-fit">Fechado</Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" className="gap-2 rounded-lg" onClick={() => window.open(`tel:${est.phone}`)}>
