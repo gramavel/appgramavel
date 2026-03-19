@@ -181,17 +181,7 @@ export default function Explore() {
           <>
             <ExploreMap />
 
-            {/* Cupons Button */}
-            <Button
-              variant="outline"
-              className="w-full rounded-xl gap-2 h-12 text-sm font-semibold border-primary/30 hover:border-primary"
-              onClick={() => navigate("/coupons")}
-            >
-              <Ticket className="w-5 h-5 text-primary" />
-              Ver cupons disponíveis
-            </Button>
-
-            {/* Category Grid */}
+            {/* Category Grid + Cupons */}
             <div>
               <h2 className="text-lg font-semibold mb-3">Categorias</h2>
               <div className="grid grid-cols-3 gap-3">
@@ -205,6 +195,13 @@ export default function Explore() {
                     <span className="text-xs font-medium text-foreground text-center leading-tight">{label}</span>
                   </button>
                 ))}
+                <button
+                  onClick={() => navigate("/coupons")}
+                  className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
+                >
+                  <Ticket className="w-6 h-6 text-primary" />
+                  <span className="text-xs font-medium text-foreground text-center leading-tight">Cupons</span>
+                </button>
               </div>
             </div>
 

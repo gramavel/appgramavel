@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Bookmark, Star, TrendingUp, MapPin, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { SaveSheet } from "@/components/SaveSheet";
 import type { Post } from "@/data/mock";
 
 interface PostCardProps {
@@ -13,6 +14,8 @@ export function PostCard({ post }: PostCardProps) {
   const navigate = useNavigate();
   const [showReactions, setShowReactions] = useState(false);
   const [userReaction, setUserReaction] = useState<string | null>(null);
+  const [showSave, setShowSave] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const CANONICAL_EMOJIS = ["❤️", "⭐", "😋", "😍", "📌"];
   const totalReactions = post.reactions.reduce((sum, r) => sum + r.count, 0);
@@ -54,8 +57,15 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
         </div>
-        <button className="p-2.5 hover:bg-secondary rounded-full transition-colors active:scale-95">
-          <Bookmark className="w-5 h-5" />
+        <button
+          className="p-2.5 hover:bg-secondary rounded-full transition-colors active:scale-95"
+          onClick={() => setShowSave(true)}
+        >
+          {isSaved ? (
+            <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
+          ) : (
+            <Bookmark className="w-5 h-5" />
+          )}
         </button>
       </div>
 
@@ -123,6 +133,13 @@ export function PostCard({ post }: PostCardProps) {
           ))}
         </div>
       </div>
+
+      <SaveSheet
+        open={showSave}
+        onOpenChange={setShowSave}
+        itemName={post.establishment_name}
+        onSaved={() => setIsSaved(true)}
+      />
 
       {/* Reaction Modal */}
       {showReactions && (

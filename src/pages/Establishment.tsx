@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Star, Navigation, Info, Bookmark, BookmarkCheck, Share,
-  MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, Heart, User, Route as RouteIcon
+  MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, Heart, User
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { MOCK_ESTABLISHMENTS, MOCK_ROUTES } from "@/data/mock";
+import { MOCK_ESTABLISHMENTS } from "@/data/mock";
+import { SaveSheet } from "@/components/SaveSheet";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import ImageLightbox from "@/components/ui/ImageLightbox";
@@ -28,7 +29,6 @@ export default function Establishment() {
   const { slug } = useParams();
   const [showDetails, setShowDetails] = useState(false);
   const [showSave, setShowSave] = useState(false);
-  const [showRouteSelect, setShowRouteSelect] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -71,18 +71,7 @@ export default function Establishment() {
     }
   };
 
-  const handleWishlist = () => {
-    setIsSaved(true);
-    setShowSave(false);
-    toast.success("Salvo em Quero visitar!");
-  };
-
-  const handleAddToRoute = (routeId: string) => {
-    setIsSaved(true);
-    setShowRouteSelect(false);
-    setShowSave(false);
-    toast.success("Adicionado ao roteiro!");
-  };
+  // handleWishlist and handleAddToRoute now handled by SaveSheet
 
   const ACTION_BUTTONS = [
     { icon: Navigation, label: "Como chegar", action: handleNavigate },
@@ -275,69 +264,12 @@ export default function Establishment() {
         </SheetContent>
       </Sheet>
 
-      {/* Save Sheet */}
-      <Sheet open={showSave} onOpenChange={setShowSave}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="text-lg font-bold text-foreground">Salvar em...</SheetTitle>
-          </SheetHeader>
-          <div className="space-y-2 pb-4">
-            <button
-              onClick={() => { setShowSave(false); setShowRouteSelect(true); }}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
-            >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <RouteIcon className="w-5 h-5 text-primary" />
-              </div>
-              <div className="text-left flex-1">
-                <p className="text-sm font-semibold text-foreground">Adicionar ao roteiro</p>
-                <p className="text-xs text-muted-foreground">Incluir num roteiro de viagem</p>
-              </div>
-            </button>
-            <button
-              onClick={handleWishlist}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
-            >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Heart className="w-5 h-5 text-primary" />
-              </div>
-              <div className="text-left flex-1">
-                <p className="text-sm font-semibold text-foreground">Quero visitar</p>
-                <p className="text-xs text-muted-foreground">Guardar para visitar nessa viagem</p>
-              </div>
-            </button>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Route Select Sheet */}
-      <Sheet open={showRouteSelect} onOpenChange={setShowRouteSelect}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] overflow-y-auto">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="text-lg font-bold text-foreground">Escolher roteiro</SheetTitle>
-          </SheetHeader>
-          <div className="space-y-2 pb-4">
-            {MOCK_ROUTES.map((route) => {
-              const Icon = route.icon;
-              return (
-                <button
-                  key={route.id}
-                  onClick={() => handleAddToRoute(route.id)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="text-left flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{route.title}</p>
-                    <p className="text-xs text-muted-foreground">{route.stops.length} paradas · {route.duration}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <SaveSheet
+        open={showSave}
+        onOpenChange={setShowSave}
+        itemName={est.name}
+        onSaved={() => setIsSaved(true)}
+      />
 
       <ImageLightbox
         images={allImages}
