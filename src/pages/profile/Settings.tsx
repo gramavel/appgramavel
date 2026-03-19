@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { Camera, Save, LogOut, Bell } from "lucide-react";
+import { Camera, Save, LogOut } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Bell } from "lucide-react";
 
 export default function Settings() {
   const navigate = useNavigate();
   const [name, setName] = useState("João da Silva");
-  const [bio, setBio] = useState("Apaixonado pela Serra Gaúcha 🏔️");
   const [notifications, setNotifications] = useState(true);
 
   const handleLogout = async () => {
@@ -42,17 +42,10 @@ export default function Settings() {
           <p className="text-xs text-muted-foreground mt-2">Toque para alterar a foto</p>
         </div>
 
-        {/* Inputs */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Nome</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} className="h-10 text-sm" />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Bio</Label>
-            <Textarea rows={3} value={bio} onChange={(e) => setBio(e.target.value.slice(0, 100))} />
-            <p className="text-xs text-muted-foreground">{bio.length}/100 caracteres</p>
-          </div>
+        {/* Name input */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Nome</Label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} className="h-10 text-sm" />
         </div>
 
         {/* Notifications */}
@@ -67,15 +60,37 @@ export default function Settings() {
           <Switch checked={notifications} onCheckedChange={setNotifications} />
         </div>
 
-        {/* Buttons */}
+        {/* Save button */}
         <Button className="w-full gap-2">
           <Save className="w-4 h-4" />
           Salvar alterações
         </Button>
-        <Button variant="destructive" className="w-full gap-2" onClick={handleLogout}>
-          <LogOut className="w-4 h-4" />
-          Sair da conta
-        </Button>
+
+        {/* Logout link */}
+        <div className="flex justify-center mt-6">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: "#c0283a" }}>
+                <LogOut className="w-4 h-4" />
+                Sair da conta
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Sair da conta</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tem certeza que deseja sair?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Sair
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </main>
       <BottomNav />
     </div>

@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
-  Share2, Bookmark, Star, Navigation, Info,
-  MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, Heart, User
+  Star, Navigation, Info, Bookmark, BookmarkCheck, Share,
+  MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, Heart, User, Route as RouteIcon
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { MOCK_ESTABLISHMENTS } from "@/data/mock";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { MOCK_ESTABLISHMENTS, MOCK_ROUTES } from "@/data/mock";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import ImageLightbox from "@/components/ui/ImageLightbox";
+import { toast } from "sonner";
 
 const CANONICAL_REACTIONS = [
   { emoji: "❤️", label: "Amei" },
@@ -26,6 +27,9 @@ const CANONICAL_REACTIONS = [
 export default function Establishment() {
   const { slug } = useParams();
   const [showDetails, setShowDetails] = useState(false);
+  const [showSave, setShowSave] = useState(false);
+  const [showRouteSelect, setShowRouteSelect] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -35,10 +39,9 @@ export default function Establishment() {
   const isOpen = true;
   const postImages = [est.image_url, est.logo_url, est.image_url, est.logo_url, est.image_url, est.image_url];
   const allImages = [est.image_url, ...postImages];
-  const allTitles = [est.name, ...postImages.map((_, i) => `Post ${i + 1}`)];
+  const allTitles = [est.name, ...postImages.map((_, i) => `Foto ${i + 1}`)];
   const allCaptions = [est.description, ...postImages.map(() => est.category)];
 
-  // Generate mock reaction counts per image
   const allReactions = allImages.map(() =>
     CANONICAL_REACTIONS.map((r) => ({
       emoji: r.emoji,
@@ -51,6 +54,42 @@ export default function Establishment() {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
+
+  const handleNavigate = () => {
+    window.open(`https://maps.google.com/?q=${est.latitude},${est.longitude}`);
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/estabelecimento/${est.slug}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: est.name, text: est.description, url });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado!");
+    }
+  };
+
+  const handleWishlist = () => {
+    setIsSaved(true);
+    setShowSave(false);
+    toast.success("Salvo em Quero visitar!");
+  };
+
+  const handleAddToRoute = (routeId: string) => {
+    setIsSaved(true);
+    setShowRouteSelect(false);
+    setShowSave(false);
+    toast.success("Adicionado ao roteiro!");
+  };
+
+  const ACTION_BUTTONS = [
+    { icon: Navigation, label: "Como chegar", action: handleNavigate },
+    { icon: Info, label: "Informações", action: () => setShowDetails(true) },
+    { icon: isSaved ? BookmarkCheck : Bookmark, label: "Salvar", action: () => setShowSave(true), active: isSaved },
+    { icon: Share, label: "Compartilhar", action: handleShare },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,8 +108,8 @@ export default function Establishment() {
           <p className="text-sm text-muted-foreground">{est.description}</p>
         </div>
 
-        {/* Rating pill + Share/Bookmark */}
-        <div className="flex items-center justify-center gap-2 mt-3">
+        {/* Rating pill centered */}
+        <div className="flex items-center justify-center mt-3">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
             <span className="text-sm font-semibold text-foreground">{est.rating}</span>
             <div className="flex gap-0.5">
@@ -80,34 +119,36 @@ export default function Establishment() {
             </div>
             <span className="text-xs text-muted-foreground">({est.total_reviews} avaliações)</span>
           </div>
-          <button className="w-8 h-8 rounded-full bg-secondary/50 border border-border flex items-center justify-center active:scale-95 transition-transform">
-            <Share2 className="h-3.5 w-3.5 text-foreground" />
-          </button>
-          <button className="w-8 h-8 rounded-full bg-secondary/50 border border-border flex items-center justify-center active:scale-95 transition-transform">
-            <Bookmark className="h-3.5 w-3.5 text-foreground" />
-          </button>
         </div>
 
-        {/* Actions */}
-        <div className="grid grid-cols-2 gap-3 px-4 mt-4">
-          <Button className="rounded-full gap-2" onClick={() => window.open(`https://maps.google.com/?q=${est.latitude},${est.longitude}`)}>
-            <Navigation className="h-4 w-4" /> Como chegar
-          </Button>
-          <Button className="rounded-full gap-2" onClick={() => setShowDetails(true)}>
-            <Info className="h-4 w-4" /> Detalhes
-          </Button>
+        {/* 4 Action buttons */}
+        <div className="flex items-center justify-center gap-5 mt-4">
+          {ACTION_BUTTONS.map(({ icon: Icon, label, action, active }) => (
+            <button
+              key={label}
+              onClick={action}
+              className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+            >
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center border transition-colors ${
+                active ? "bg-primary/10 border-primary" : "bg-secondary/50 border-border hover:border-primary/30"
+              }`}>
+                <Icon className={`h-5 w-5 ${active ? "text-primary fill-primary" : "text-foreground"}`} />
+              </div>
+              <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Tabs */}
         <div className="mt-4">
-          <Tabs defaultValue="posts">
+          <Tabs defaultValue="fotos">
             <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="posts">Posts</TabsTrigger>
+              <TabsTrigger value="fotos">Fotos</TabsTrigger>
               <TabsTrigger value="cupons">Cupons</TabsTrigger>
               <TabsTrigger value="avaliacoes">Avaliações</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="posts" className="p-2">
+            <TabsContent value="fotos" className="p-2">
               <div className="grid grid-cols-3 gap-1.5">
                 {postImages.map((src, i) => (
                   <div
@@ -155,18 +196,18 @@ export default function Establishment() {
         </div>
       </main>
 
-      {/* Details Dialog */}
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-center">Detalhes do local</DialogTitle>
-          </DialogHeader>
+      {/* Details Sheet */}
+      <Sheet open={showDetails} onOpenChange={setShowDetails}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-semibold text-center">Detalhes do local</SheetTitle>
+          </SheetHeader>
           <Separator />
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4">
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <p className="text-sm text-foreground flex-1">{est.address}</p>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigator.clipboard.writeText(est.address)}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { navigator.clipboard.writeText(est.address); toast.success("Endereço copiado!"); }}>
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
@@ -231,8 +272,72 @@ export default function Establishment() {
               )}
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
+
+      {/* Save Sheet */}
+      <Sheet open={showSave} onOpenChange={setShowSave}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-bold text-foreground">Salvar em...</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-2 pb-4">
+            <button
+              onClick={() => { setShowSave(false); setShowRouteSelect(true); }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <RouteIcon className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left flex-1">
+                <p className="text-sm font-semibold text-foreground">Adicionar ao roteiro</p>
+                <p className="text-xs text-muted-foreground">Incluir num roteiro de viagem</p>
+              </div>
+            </button>
+            <button
+              onClick={handleWishlist}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Heart className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left flex-1">
+                <p className="text-sm font-semibold text-foreground">Quero visitar</p>
+                <p className="text-xs text-muted-foreground">Guardar para visitar nessa viagem</p>
+              </div>
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Route Select Sheet */}
+      <Sheet open={showRouteSelect} onOpenChange={setShowRouteSelect}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-bold text-foreground">Escolher roteiro</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-2 pb-4">
+            {MOCK_ROUTES.map((route) => {
+              const Icon = route.icon;
+              return (
+                <button
+                  key={route.id}
+                  onClick={() => handleAddToRoute(route.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{route.title}</p>
+                    <p className="text-xs text-muted-foreground">{route.stops.length} paradas · {route.duration}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <ImageLightbox
         images={allImages}
