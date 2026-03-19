@@ -134,6 +134,13 @@ export function PostCard({ post }: PostCardProps) {
         </div>
       </div>
 
+      <SaveSheet
+        open={showSave}
+        onOpenChange={setShowSave}
+        itemName={post.establishment_name}
+        onSaved={() => setIsSaved(true)}
+      />
+
       {/* Reaction Modal */}
       {showReactions && (
         <div
