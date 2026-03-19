@@ -72,18 +72,7 @@ export default function Establishment() {
     }
   };
 
-  const handleWishlist = () => {
-    setIsSaved(true);
-    setShowSave(false);
-    toast.success("Salvo em Quero visitar!");
-  };
-
-  const handleAddToRoute = (routeId: string) => {
-    setIsSaved(true);
-    setShowRouteSelect(false);
-    setShowSave(false);
-    toast.success("Adicionado ao roteiro!");
-  };
+  // handleWishlist and handleAddToRoute now handled by SaveSheet
 
   const ACTION_BUTTONS = [
     { icon: Navigation, label: "Como chegar", action: handleNavigate },
