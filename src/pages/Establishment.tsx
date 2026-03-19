@@ -87,8 +87,8 @@ export default function Establishment() {
   const ACTION_BUTTONS = [
     { icon: Navigation, label: "Como chegar", action: handleNavigate },
     { icon: Info, label: "Informações", action: () => setShowDetails(true) },
-    { icon: isSaved ? BookmarkCheck : Bookmark, label: "Salvar", action: () => setShowSave(true), active: isSaved },
     { icon: Share, label: "Compartilhar", action: handleShare },
+    { icon: isSaved ? BookmarkCheck : Bookmark, label: "Salvar", action: () => setShowSave(true), active: isSaved },
   ];
 
   return (
