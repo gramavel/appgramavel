@@ -57,8 +57,15 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
         </div>
-        <button className="p-2.5 hover:bg-secondary rounded-full transition-colors active:scale-95">
-          <Bookmark className="w-5 h-5" />
+        <button
+          className="p-2.5 hover:bg-secondary rounded-full transition-colors active:scale-95"
+          onClick={() => setShowSave(true)}
+        >
+          {isSaved ? (
+            <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
+          ) : (
+            <Bookmark className="w-5 h-5" />
+          )}
         </button>
       </div>
 
