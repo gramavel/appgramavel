@@ -14,6 +14,8 @@ export function PostCard({ post }: PostCardProps) {
   const navigate = useNavigate();
   const [showReactions, setShowReactions] = useState(false);
   const [userReaction, setUserReaction] = useState<string | null>(null);
+  const [showSave, setShowSave] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const CANONICAL_EMOJIS = ["❤️", "⭐", "😋", "😍", "📌"];
   const totalReactions = post.reactions.reduce((sum, r) => sum + r.count, 0);
