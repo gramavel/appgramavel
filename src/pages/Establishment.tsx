@@ -129,8 +129,8 @@ export default function Establishment() {
               onClick={action}
               className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center border transition-colors ${
-                active ? "bg-primary/10 border-primary" : "bg-secondary/50 border-border hover:border-primary/30"
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center border transition-colors ${
+                active ? "bg-primary/10 border-primary" : "bg-card border-border hover:border-primary/30"
               }`}>
                 <Icon className={`h-5 w-5 ${active ? "text-primary fill-primary" : "text-foreground"}`} />
               </div>

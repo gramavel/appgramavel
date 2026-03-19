@@ -246,13 +246,6 @@ export default function Roteiros() {
         </div>
       </main>
 
-      {/* FAB */}
-      <button
-        onClick={() => setCreateOpen(true)}
-        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform hover:shadow-xl"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
 
       {/* Create Route Sheet */}
       <Sheet open={createOpen} onOpenChange={setCreateOpen}>
