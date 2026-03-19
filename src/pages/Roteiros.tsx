@@ -153,11 +153,7 @@ export default function Roteiros() {
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge className="bg-primary/80 text-primary-foreground border-0 text-[10px] backdrop-blur-sm">
-                    Curado pelo Gramável
-                  </Badge>
-                </div>
+                <div className="flex items-center gap-2 mb-1" />
                 <h3 className="text-white font-bold text-lg">{filteredSuggested[0].title}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm text-xs gap-1">
@@ -189,7 +185,6 @@ export default function Roteiros() {
                   <div className="flex-1 text-left">
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-foreground text-sm">{route.title}</h4>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-primary/30 text-primary">Curado</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">{route.subtitle}</p>
                   </div>
@@ -251,13 +246,6 @@ export default function Roteiros() {
         </div>
       </main>
 
-      {/* FAB */}
-      <button
-        onClick={() => setCreateOpen(true)}
-        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform hover:shadow-xl"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
 
       {/* Create Route Sheet */}
       <Sheet open={createOpen} onOpenChange={setCreateOpen}>
