@@ -29,7 +29,7 @@ export default function Establishment() {
   const { slug } = useParams();
   const [showDetails, setShowDetails] = useState(false);
   const [showSave, setShowSave] = useState(false);
-  const [showRouteSelect, setShowRouteSelect] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
