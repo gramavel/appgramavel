@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Bookmark, Star, TrendingUp, MapPin, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { SaveSheet } from "@/components/SaveSheet";
 import type { Post } from "@/data/mock";
 
 interface PostCardProps {
