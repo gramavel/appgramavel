@@ -185,7 +185,6 @@ export default function Roteiros() {
                   <div className="flex-1 text-left">
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-foreground text-sm">{route.title}</h4>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-primary/30 text-primary">Curado</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">{route.subtitle}</p>
                   </div>
