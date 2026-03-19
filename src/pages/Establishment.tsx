@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Star, Navigation, Info, Bookmark, BookmarkCheck, Share,
-  MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, Heart, User, Route as RouteIcon
+  MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, User
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
