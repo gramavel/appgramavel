@@ -24,6 +24,8 @@ export interface Establishment {
   rating: number;
   total_reviews: number;
   opening_hours: string;
+  is_open: boolean;
+  sunday_hours: string | null;
 }
 
 export interface Post {
@@ -123,6 +125,8 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     rating: 4.8,
     total_reviews: 342,
     opening_hours: "11:30 - 23:00",
+    is_open: true,
+    sunday_hours: null,
   },
   {
     id: "2",
@@ -147,6 +151,8 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     rating: 4.6,
     total_reviews: 218,
     opening_hours: "08:00 - 18:00",
+    is_open: false,
+    sunday_hours: null,
   },
   {
     id: "3",
@@ -171,6 +177,8 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     rating: 4.9,
     total_reviews: 567,
     opening_hours: "10:00 - 19:00",
+    is_open: true,
+    sunday_hours: "10:00 - 16:00",
   },
   {
     id: "4",
@@ -195,6 +203,8 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     rating: 4.5,
     total_reviews: 892,
     opening_hours: "09:00 - 17:00",
+    is_open: true,
+    sunday_hours: "09:00 - 14:00",
   },
   {
     id: "5",
@@ -219,6 +229,8 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     rating: 4.7,
     total_reviews: 445,
     opening_hours: "09:00 - 19:00",
+    is_open: false,
+    sunday_hours: null,
   },
   {
     id: "6",
@@ -243,6 +255,8 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     rating: 4.8,
     total_reviews: 156,
     opening_hours: "24 horas",
+    is_open: true,
+    sunday_hours: "24 horas",
   },
 ];
 

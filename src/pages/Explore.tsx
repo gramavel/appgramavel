@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, ChevronLeft, Map as MapIcon, Heart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Map as MapIcon, Heart } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES } from "@/data/mock";
+import { CATEGORIES, MOCK_ESTABLISHMENTS, MOCK_COUPONS, EXPERIENCES } from "@/data/mock";
+import { CouponCard } from "@/components/coupons/CouponCard";
 import { cn } from "@/lib/utils";
 import ExploreMap from "@/components/map/ExploreMap";
 import "@/components/map/map-styles.css";
@@ -39,6 +39,46 @@ const CATEGORY_BANNERS: Record<string, string> = {
   "Atrações": "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=800&h=400&fit=crop",
   "Compras": "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=800&h=400&fit=crop",
   "Bares & Vinícolas": "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&h=400&fit=crop",
+  "Cupons": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=400&fit=crop",
+};
+
+const CATEGORY_FILTER_CHIPS: Record<string, { label: string; icon: typeof MapPin }[]> = {
+  "Restaurantes": [
+    { label: "Perto de você", icon: MapPin },
+    { label: "Abertos agora", icon: Clock },
+    { label: "Mais bem avaliados", icon: Star },
+    { label: "Pet friendly", icon: Dog },
+  ],
+  "Cafés": [
+    { label: "Perto de você", icon: MapPin },
+    { label: "Abertos agora", icon: Clock },
+    { label: "Mais bem avaliados", icon: Star },
+  ],
+  "Hotéis": [
+    { label: "Perto de você", icon: MapPin },
+    { label: "Mais bem avaliados", icon: Star },
+  ],
+  "Atrações": [
+    { label: "Perto de você", icon: MapPin },
+    { label: "Mais bem avaliados", icon: Star },
+    { label: "Em alta hoje", icon: TrendingUp },
+  ],
+  "Compras": [
+    { label: "Perto de você", icon: MapPin },
+    { label: "Abertos agora", icon: Clock },
+    { label: "Mais bem avaliados", icon: Star },
+  ],
+  "Bares & Vinícolas": [
+    { label: "Perto de você", icon: MapPin },
+    { label: "Abertos agora", icon: Clock },
+    { label: "Mais bem avaliados", icon: Star },
+  ],
+  "Cupons": [
+    { label: "Restaurantes", icon: MapPin },
+    { label: "Cafés", icon: Clock },
+    { label: "Atrações", icon: Star },
+    { label: "Bares & Vinícolas", icon: TrendingUp },
+  ],
 };
 
 export default function Explore() {
@@ -46,6 +86,7 @@ export default function Explore() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const isSearching = search.length > 0 || activeFilter !== null;
@@ -59,14 +100,21 @@ export default function Explore() {
     return true;
   });
 
-  const categoryEstablishments = selectedCategory
+  const categoryEstablishments = selectedCategory && selectedCategory !== "Cupons"
     ? MOCK_ESTABLISHMENTS.filter((e) => e.category === selectedCategory).slice(0, 10)
+    : [];
+
+  const categoryCoupons = selectedCategory === "Cupons"
+    ? (categoryFilter ? MOCK_COUPONS.filter(c => c.category === categoryFilter) : MOCK_COUPONS)
     : [];
 
   // Category detail view
   if (selectedCategory) {
+    const isCoupons = selectedCategory === "Cupons";
     const catIcon = CATEGORIES.find(c => c.label === selectedCategory);
-    const CatIcon = catIcon?.icon;
+    const CatIcon = isCoupons ? Ticket : catIcon?.icon;
+    const filters = CATEGORY_FILTER_CHIPS[selectedCategory] || CATEGORY_FILTER_CHIPS["Restaurantes"];
+
     return (
       <div className="min-h-screen bg-background">
         <GlobalHeader showBack title={selectedCategory} />
@@ -81,45 +129,82 @@ export default function Explore() {
             </div>
           </div>
 
+          {/* Filter Chips */}
+          <div className="overflow-x-auto scrollbar-hide px-4">
+            <div className="flex gap-2 pb-2">
+              {filters.map(({ label, icon: Icon }) => (
+                <button
+                  key={label}
+                  onClick={() => setCategoryFilter(categoryFilter === label ? null : label)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 shrink-0",
+                    categoryFilter === label
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-card border border-primary/30 text-foreground hover:border-primary"
+                  )}
+                >
+                  <Icon className="w-3 h-3" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Results */}
           <div className="px-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
-              <button
-                onClick={() => { setSelectedCategory(null); setActiveFilter(selectedCategory); setShowMap(false); }}
-                className="flex items-center gap-1.5 text-xs text-primary font-medium"
-              >
-                <MapIcon className="w-4 h-4" />
-                Ver no mapa
-              </button>
-            </div>
-            {categoryEstablishments.map((est) => (
-              <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
-                <div className="flex gap-3 p-3">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                    <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
+            {isCoupons ? (
+              <>
+                <p className="text-sm text-muted-foreground">{categoryCoupons.length} cupom(ns) disponível(is)</p>
+                {categoryCoupons.map((coupon) => (
+                  <CouponCard key={coupon.id} coupon={coupon} />
+                ))}
+                {categoryCoupons.length === 0 && (
+                  <div className="py-12 text-center">
+                    <p className="text-sm text-muted-foreground">Nenhum cupom nesta categoria</p>
                   </div>
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
-                    <p className="text-xs text-muted-foreground truncate">{est.category}</p>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        <span>{est.rating}</span>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
+                  <button
+                    onClick={() => { setSelectedCategory(null); setActiveFilter(selectedCategory); setShowMap(false); }}
+                    className="flex items-center gap-1.5 text-xs text-primary font-medium"
+                  >
+                    <MapIcon className="w-4 h-4" />
+                    Ver no mapa
+                  </button>
+                </div>
+                {categoryEstablishments.map((est) => (
+                  <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
+                    <div className="flex gap-3 p-3">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
                       </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        <span>{(Math.random() * 3 + 0.2).toFixed(1)} km</span>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{est.category}</p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span>{est.rating}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>{(Math.random() * 3 + 0.2).toFixed(1)} km</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                  </Card>
+                ))}
+                {categoryEstablishments.length === 0 && (
+                  <div className="py-12 text-center">
+                    <p className="text-sm text-muted-foreground">Nenhum estabelecimento nesta categoria</p>
                   </div>
-                </div>
-              </Card>
-            ))}
-            {categoryEstablishments.length === 0 && (
-              <div className="py-12 text-center">
-                <p className="text-sm text-muted-foreground">Nenhum estabelecimento nesta categoria</p>
-              </div>
+                )}
+              </>
             )}
           </div>
         </main>
@@ -181,7 +266,7 @@ export default function Explore() {
           <>
             <ExploreMap />
 
-            {/* Category Grid + Cupons */}
+            {/* Category Grid */}
             <div>
               <h2 className="text-lg font-semibold mb-3">Categorias</h2>
               <div className="grid grid-cols-3 gap-3">
@@ -195,9 +280,12 @@ export default function Explore() {
                     <span className="text-xs font-medium text-foreground text-center leading-tight">{label}</span>
                   </button>
                 ))}
+              </div>
+              {/* Cupons - centered below grid */}
+              <div className="flex justify-center mt-3">
                 <button
-                  onClick={() => navigate("/coupons")}
-                  className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
+                  onClick={() => setSelectedCategory("Cupons")}
+                  className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 w-[calc(33.333%-0.5rem)]"
                 >
                   <Ticket className="w-6 h-6 text-primary" />
                   <span className="text-xs font-medium text-foreground text-center leading-tight">Cupons</span>

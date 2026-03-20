@@ -36,7 +36,7 @@ export default function Establishment() {
   const est = MOCK_ESTABLISHMENTS.find((e) => e.slug === slug);
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
-  const isOpen = true;
+  const isOpen = est.is_open;
   const postImages = [est.image_url, est.logo_url, est.image_url, est.logo_url, est.image_url, est.image_url];
   const allImages = [est.image_url, ...postImages];
   const allTitles = [est.name, ...postImages.map((_, i) => `Foto ${i + 1}`)];
@@ -216,15 +216,13 @@ export default function Establishment() {
                   { day: "Quinta", hours: est.opening_hours },
                   { day: "Sexta", hours: est.opening_hours },
                   { day: "Sábado", hours: est.opening_hours },
-                  { day: "Domingo", hours: null },
+                  { day: "Domingo", hours: est.sunday_hours },
                 ].map(({ day, hours }) => (
                   <div key={day} className="contents">
                     <span className="font-medium text-foreground">{day}:</span>
-                    {hours ? (
-                      <span className="text-muted-foreground">{hours}</span>
-                    ) : (
-                      <Badge className="bg-destructive/10 text-destructive border-0 text-xs w-fit">Fechado</Badge>
-                    )}
+                    <span className={hours ? "text-muted-foreground" : "text-destructive"}>
+                      {hours || "Fechado"}
+                    </span>
                   </div>
                 ))}
               </div>

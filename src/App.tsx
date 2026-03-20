@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LocationProvider } from "@/contexts/LocationContext";
+import { useScrollRestore } from "@/hooks/useScrollRestore";
 import Feed from "./pages/Feed";
 import Explore from "./pages/Explore";
 import Coupons from "./pages/Coupons";
@@ -20,6 +21,11 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function ScrollRestore() {
+  useScrollRestore();
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -27,6 +33,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollRestore />
           <Routes>
             <Route path="/" element={<Feed />} />
             <Route path="/map" element={<Explore />} />
