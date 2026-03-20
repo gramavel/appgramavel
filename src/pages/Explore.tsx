@@ -117,7 +117,7 @@ export default function Explore() {
 
     return (
       <div className="min-h-screen bg-background">
-        <GlobalHeader showBack title={selectedCategory} />
+        <GlobalHeader showBack title={selectedCategory} onBack={() => { setSelectedCategory(null); setCategoryFilter(null); }} />
         <main className="max-w-2xl mx-auto pb-20 space-y-4">
           {/* Banner */}
           <div className="relative aspect-[2/1] overflow-hidden">
@@ -165,17 +165,8 @@ export default function Explore() {
                 )}
               </>
             ) : (
-              <>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
-                  <button
-                    onClick={() => { setSelectedCategory(null); setActiveFilter(selectedCategory); setShowMap(false); }}
-                    className="flex items-center gap-1.5 text-xs text-primary font-medium"
-                  >
-                    <MapIcon className="w-4 h-4" />
-                    Ver no mapa
-                  </button>
-                </div>
+            <>
+                <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
                 {categoryEstablishments.map((est) => (
                   <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
                     <div className="flex gap-3 p-3">

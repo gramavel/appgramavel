@@ -9,9 +9,10 @@ import { NotificationsSheet } from "./NotificationsSheet";
 interface GlobalHeaderProps {
   showBack?: boolean;
   title?: string;
+  onBack?: () => void;
 }
 
-export function GlobalHeader({ showBack, title = "Gramável" }: GlobalHeaderProps) {
+export function GlobalHeader({ showBack, title = "Gramável", onBack }: GlobalHeaderProps) {
   const navigate = useNavigate();
   const { city } = useLocation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -23,7 +24,7 @@ export function GlobalHeader({ showBack, title = "Gramável" }: GlobalHeaderProp
           {/* Left */}
           <div className="w-24 flex items-center">
             {showBack ? (
-              <button onClick={() => navigate(-1)} className="p-1 -ml-1 rounded-full hover:bg-secondary transition-colors active:scale-95">
+              <button onClick={() => onBack ? onBack() : navigate(-1)} className="p-1 -ml-1 rounded-full hover:bg-secondary transition-colors active:scale-95">
                 <ChevronLeft className="w-6 h-6" />
               </button>
             ) : (
