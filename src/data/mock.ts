@@ -24,6 +24,8 @@ export interface Establishment {
   rating: number;
   total_reviews: number;
   opening_hours: string;
+  is_open: boolean;
+  sunday_hours: string | null;
 }
 
 export interface Post {
