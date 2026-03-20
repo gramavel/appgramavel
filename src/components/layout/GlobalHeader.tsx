@@ -12,7 +12,7 @@ interface GlobalHeaderProps {
   onBack?: () => void;
 }
 
-export function GlobalHeader({ showBack, title = "Gramável" }: GlobalHeaderProps) {
+export function GlobalHeader({ showBack, title = "Gramável", onBack }: GlobalHeaderProps) {
   const navigate = useNavigate();
   const { city } = useLocation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
