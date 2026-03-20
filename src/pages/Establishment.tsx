@@ -36,7 +36,7 @@ export default function Establishment() {
   const est = MOCK_ESTABLISHMENTS.find((e) => e.slug === slug);
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
-  const isOpen = true;
+  const isOpen = est.is_open;
   const postImages = [est.image_url, est.logo_url, est.image_url, est.logo_url, est.image_url, est.image_url];
   const allImages = [est.image_url, ...postImages];
   const allTitles = [est.name, ...postImages.map((_, i) => `Foto ${i + 1}`)];
