@@ -9,6 +9,7 @@ import { NotificationsSheet } from "./NotificationsSheet";
 interface GlobalHeaderProps {
   showBack?: boolean;
   title?: string;
+  onBack?: () => void;
 }
 
 export function GlobalHeader({ showBack, title = "Gramável" }: GlobalHeaderProps) {
