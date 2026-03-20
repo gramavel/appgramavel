@@ -229,6 +229,8 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     rating: 4.7,
     total_reviews: 445,
     opening_hours: "09:00 - 19:00",
+    is_open: false,
+    sunday_hours: null,
   },
   {
     id: "6",
