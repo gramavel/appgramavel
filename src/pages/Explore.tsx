@@ -165,17 +165,8 @@ export default function Explore() {
                 )}
               </>
             ) : (
-              <>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
-                  <button
-                    onClick={() => { setSelectedCategory(null); setActiveFilter(selectedCategory); setShowMap(false); }}
-                    className="flex items-center gap-1.5 text-xs text-primary font-medium"
-                  >
-                    <MapIcon className="w-4 h-4" />
-                    Ver no mapa
-                  </button>
-                </div>
+            <>
+                <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
                 {categoryEstablishments.map((est) => (
                   <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
                     <div className="flex gap-3 p-3">
