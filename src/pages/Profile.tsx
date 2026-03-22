@@ -138,7 +138,9 @@ export default function Profile() {
                   className="shrink-0 flex items-center gap-2 px-3 py-2 bg-card rounded-xl border border-border/50 active:scale-95 transition-transform cursor-pointer"
                   onClick={() => navigate("/perfil/badges")}
                 >
-                  <span className="text-lg">{badge.icon}</span>
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: badge.color + "22" }}>
+                    <Award className="w-3.5 h-3.5" style={{ color: badge.color }} />
+                  </div>
                   <span className="text-xs font-medium text-foreground whitespace-nowrap">{badge.name}</span>
                 </div>
               ))}
