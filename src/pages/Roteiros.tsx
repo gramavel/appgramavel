@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronRight, Clock, MapPin, Star, Plus, X, Mountain, Search, Navigation, MoreVertical, Trash2, Edit3, CheckCircle2, SkipForward, PartyPopper } from "lucide-react";
+import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Badge } from "@/components/ui/badge";
