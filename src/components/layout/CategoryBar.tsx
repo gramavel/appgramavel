@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CATEGORIES } from "@/data/mock";
 import { cn } from "@/lib/utils";
+import { FilterChip } from "@/components/ui/FilterChips";
 
 interface CategoryBarProps {
   selected: string | null;
@@ -28,33 +29,21 @@ export function CategoryBar({ selected, onSelect }: CategoryBarProps) {
         visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
       )}
     >
-      <div className="max-w-2xl mx-auto overflow-x-auto scrollbar-hide -mx-0">
+      <div className="max-w-2xl mx-auto overflow-x-auto scrollbar-hide">
         <div className="flex gap-2 px-4 py-2.5">
-          <button
+          <FilterChip
+            label="Todos"
+            active={selected === null}
             onClick={() => onSelect(null)}
-            className={cn(
-              "px-3.5 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200 shrink-0",
-              selected === null
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "bg-card border border-primary/30 text-foreground hover:border-primary"
-            )}
-          >
-            Todos
-          </button>
-          {CATEGORIES.map(({ label, icon: Icon }) => (
-            <button
+          />
+          {CATEGORIES.map(({ label, icon }) => (
+            <FilterChip
               key={label}
+              label={label}
+              icon={icon}
+              active={selected === label}
               onClick={() => onSelect(selected === label ? null : label)}
-              className={cn(
-                "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200 shrink-0",
-                selected === label
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-card border border-primary/30 text-foreground hover:border-primary"
-              )}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </button>
+            />
           ))}
         </div>
       </div>

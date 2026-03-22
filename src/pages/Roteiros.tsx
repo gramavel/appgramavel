@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronRight, Clock, MapPin, Star, Plus, X, Mountain, Search, Navigation, MoreVertical, Trash2, Edit3, CheckCircle2, SkipForward, PartyPopper } from "lucide-react";
+import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Badge } from "@/components/ui/badge";
@@ -466,24 +467,16 @@ export default function Roteiros() {
 
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
         {/* Filters */}
-        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-          <div className="flex gap-2 pb-2">
-            {FILTERS.map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(activeFilter === filter ? null : filter)}
-                className={cn(
-                  "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 shrink-0",
-                  (activeFilter === filter || (!activeFilter && filter === "Todos"))
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card border border-primary/30 text-foreground hover:border-primary"
-                )}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-        </div>
+        <FilterChipsBar>
+          {FILTERS.map((filter) => (
+            <FilterChip
+              key={filter}
+              label={filter}
+              active={activeFilter === filter || (!activeFilter && filter === "Todos")}
+              onClick={() => setActiveFilter(activeFilter === filter ? null : filter)}
+            />
+          ))}
+        </FilterChipsBar>
 
         {/* SECTION 1: Roteiros Sugeridos */}
         <div className="space-y-3">

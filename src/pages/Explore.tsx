@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Map as MapIcon, Heart } from "lucide-react";
+import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -130,25 +131,17 @@ export default function Explore() {
           </div>
 
           {/* Filter Chips */}
-          <div className="overflow-x-auto scrollbar-hide px-4">
-            <div className="flex gap-2 pb-2">
-              {filters.map(({ label, icon: Icon }) => (
-                <button
-                  key={label}
-                  onClick={() => setCategoryFilter(categoryFilter === label ? null : label)}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 shrink-0",
-                    categoryFilter === label
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-card border border-primary/30 text-foreground hover:border-primary"
-                  )}
-                >
-                  <Icon className="w-3 h-3" />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <FilterChipsBar className="px-4 mx-0">
+            {filters.map(({ label, icon }) => (
+              <FilterChip
+                key={label}
+                label={label}
+                icon={icon}
+                active={categoryFilter === label}
+                onClick={() => setCategoryFilter(categoryFilter === label ? null : label)}
+              />
+            ))}
+          </FilterChipsBar>
 
           {/* Results */}
           <div className="px-4 space-y-3">
@@ -229,28 +222,20 @@ export default function Explore() {
         </div>
 
         {/* Filter Chips */}
-        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-          <div className="flex gap-2 pb-2">
-            {FILTER_CHIPS.map(({ label, icon: Icon }) => (
-              <button
-                key={label}
-                onClick={() => {
-                  setActiveFilter(activeFilter === label ? null : label);
-                  if (activeFilter !== label) setShowMap(false); else setShowMap(true);
-                }}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 shrink-0",
-                  activeFilter === label
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card border border-primary/30 text-foreground hover:border-primary"
-                )}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <FilterChipsBar>
+          {FILTER_CHIPS.map(({ label, icon }) => (
+            <FilterChip
+              key={label}
+              label={label}
+              icon={icon}
+              active={activeFilter === label}
+              onClick={() => {
+                setActiveFilter(activeFilter === label ? null : label);
+                if (activeFilter !== label) setShowMap(false); else setShowMap(true);
+              }}
+            />
+          ))}
+        </FilterChipsBar>
 
         {/* Map or Results */}
         {showMap && !isSearching ? (
