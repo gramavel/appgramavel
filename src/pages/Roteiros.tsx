@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, Clock, MapPin, Star, Plus, X, Mountain, Search, Navigation, MoreVertical, Trash2, Edit3, ChevronLeft } from "lucide-react";
+import { ChevronRight, Clock, MapPin, Star, Plus, X, Mountain, Search, Navigation, MoreVertical, Trash2, Edit3, CheckCircle2, SkipForward, PartyPopper } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Badge } from "@/components/ui/badge";
@@ -7,9 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { MOCK_ROUTES, MOCK_ESTABLISHMENTS, type RouteItem } from "@/data/mock";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+interface ActiveNavigation {
+  route: RouteItem;
+  currentStop: number;
+  visited: boolean[];
+}
 
 export default function Roteiros() {
   const [selectedRoute, setSelectedRoute] = useState<RouteItem | null>(null);
@@ -22,6 +29,9 @@ export default function Roteiros() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [activeNavigation, setActiveNavigation] = useState<ActiveNavigation | null>(null);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [showConclusion, setShowConclusion] = useState(false);
 
   // Mock user routes
   const [userRoutes, setUserRoutes] = useState<RouteItem[]>([]);
