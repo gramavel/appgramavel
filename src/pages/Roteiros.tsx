@@ -426,7 +426,7 @@ export default function Roteiros() {
 
             {/* Action buttons */}
             <div className="space-y-2 pb-4">
-              <Button className="w-full rounded-full gap-2">
+              <Button className="w-full rounded-full gap-2" onClick={() => startNavigation(selectedRoute)}>
                 <Navigation className="w-4 h-4" />
                 Iniciar roteiro
               </Button>
