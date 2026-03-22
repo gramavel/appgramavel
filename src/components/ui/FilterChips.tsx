@@ -3,7 +3,7 @@ import type { ComponentType } from "react";
 
 interface FilterChipProps {
   label: string;
-  icon?: LucideIcon;
+  icon?: ComponentType<{ className?: string }>;
   active: boolean;
   onClick: () => void;
 }
