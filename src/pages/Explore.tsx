@@ -222,28 +222,20 @@ export default function Explore() {
         </div>
 
         {/* Filter Chips */}
-        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-          <div className="flex gap-2 pb-2">
-            {FILTER_CHIPS.map(({ label, icon: Icon }) => (
-              <button
-                key={label}
-                onClick={() => {
-                  setActiveFilter(activeFilter === label ? null : label);
-                  if (activeFilter !== label) setShowMap(false); else setShowMap(true);
-                }}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 shrink-0",
-                  activeFilter === label
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card border border-primary/30 text-foreground hover:border-primary"
-                )}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <FilterChipsBar>
+          {FILTER_CHIPS.map(({ label, icon }) => (
+            <FilterChip
+              key={label}
+              label={label}
+              icon={icon}
+              active={activeFilter === label}
+              onClick={() => {
+                setActiveFilter(activeFilter === label ? null : label);
+                if (activeFilter !== label) setShowMap(false); else setShowMap(true);
+              }}
+            />
+          ))}
+        </FilterChipsBar>
 
         {/* Map or Results */}
         {showMap && !isSearching ? (
