@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Map as MapIcon, Heart } from "lucide-react";
+import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
