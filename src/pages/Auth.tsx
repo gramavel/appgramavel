@@ -39,7 +39,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm shadow-card">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-gradient-primary">Gramável</CardTitle>
           <CardDescription>Explore Gramado e Canela</CardDescription>
@@ -52,19 +52,19 @@ export default function Auth() {
             </TabsList>
 
             <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-3">
-                <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-                <div><Label>Senha</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
-                <Button className="w-full" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+                <div className="space-y-2"><Label>Senha</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+                <Button className="w-full rounded-md" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
               </form>
             </TabsContent>
 
             <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-3">
-                <div><Label>Nome</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
-                <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-                <div><Label>Senha</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
-                <Button className="w-full" disabled={loading}>{loading ? "Criando conta..." : "Criar conta"}</Button>
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div className="space-y-2"><Label>Nome</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
+                <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+                <div className="space-y-2"><Label>Senha</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
+                <Button className="w-full rounded-md" disabled={loading}>{loading ? "Criando conta..." : "Criar conta"}</Button>
               </form>
             </TabsContent>
           </Tabs>

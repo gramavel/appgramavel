@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Ticket, Tag, CheckCircle2 } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -12,7 +11,7 @@ const usedCoupons = MOCK_COUPONS.filter((c) => c.status === "used" || c.status =
 function CouponItem({ coupon, used }: { coupon: typeof MOCK_COUPONS[0]; used?: boolean }) {
   return (
     <div
-      className={`flex gap-3 p-3 rounded-xl border transition-all ${used ? "border-border/30 opacity-70" : "border-border bg-card hover:shadow-sm active:scale-[0.98]"}`}
+      className={`flex gap-4 p-4 rounded-lg border transition-all ${used ? "border-border/30 opacity-70" : "border-border bg-card shadow-card hover:shadow-card-hover active:scale-[0.98]"}`}
       style={{ animation: "fadeInUp 0.4s ease-out both" }}
     >
       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
@@ -24,14 +23,14 @@ function CouponItem({ coupon, used }: { coupon: typeof MOCK_COUPONS[0]; used?: b
           {used ? (
             <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
           ) : (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 flex-shrink-0">
+            <Badge variant="secondary" className="text-xs px-1.5 py-0 flex-shrink-0">
               <Tag className="w-3 h-3 mr-0.5" />
               {coupon.code}
             </Badge>
           )}
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">{coupon.establishment_name}</p>
-        <p className="text-[11px] text-muted-foreground/70 mt-1">
+        <p className="text-xs text-muted-foreground/70 mt-1">
           {used ? "Utilizado" : `Válido até ${new Date(coupon.expires_at).toLocaleDateString("pt-BR")}`}
         </p>
       </div>
@@ -56,10 +55,10 @@ export default function UserCoupons() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="salvos" className="space-y-3">
+          <TabsContent value="salvos" className="space-y-4">
             {savedCoupons.length === 0 ? (
               <div className="py-12 text-center">
-                <Ticket className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                <Ticket className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground">Nenhum cupom salvo ainda</p>
               </div>
             ) : (
@@ -67,10 +66,10 @@ export default function UserCoupons() {
             )}
           </TabsContent>
 
-          <TabsContent value="usados" className="space-y-3">
+          <TabsContent value="usados" className="space-y-4">
             {usedCoupons.length === 0 ? (
               <div className="py-12 text-center">
-                <CheckCircle2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                <CheckCircle2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground">Nenhum cupom utilizado ainda</p>
               </div>
             ) : (

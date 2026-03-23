@@ -65,7 +65,7 @@ export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetPro
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md p-0 [&>button]:top-5 [&>button]:right-5 [&>button]:z-10">
-        <SheetHeader className="px-4 pt-6 pb-3 border-b border-border/50 pr-12">
+        <SheetHeader className="px-4 pt-6 pb-4 border-b border-border/50 pr-12">
           <SheetTitle className="text-lg font-bold text-foreground flex items-center gap-2">
             Notificações
             {unreadCount > 0 && (
@@ -82,7 +82,7 @@ export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetPro
             return (
               <div
                 key={notification.id}
-                className={`flex items-start gap-3 px-4 py-4 border-b border-border/30 transition-colors ${
+                className={`flex items-start gap-4 px-4 py-4 border-b border-border/30 transition-colors ${
                   !notification.read ? "bg-primary/5" : ""
                 }`}
               >
@@ -99,7 +99,7 @@ export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetPro
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{notification.description}</p>
-                  <p className="text-[11px] text-muted-foreground/70 mt-1.5">{notification.time}</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1.5">{notification.time}</p>
                 </div>
               </div>
             );

@@ -125,8 +125,8 @@ export default function Explore() {
             <img src={CATEGORY_BANNERS[selectedCategory] || CATEGORY_BANNERS["Restaurantes"]} alt={selectedCategory} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <div className="absolute bottom-4 left-4 flex items-center gap-2">
-              {CatIcon && <CatIcon className="w-6 h-6 text-white" />}
-              <h2 className="text-xl font-bold text-white">{selectedCategory}</h2>
+              {CatIcon && <CatIcon className="w-5 h-5 text-primary-foreground" />}
+              <h2 className="text-xl font-bold text-primary-foreground">{selectedCategory}</h2>
             </div>
           </div>
 
@@ -144,7 +144,7 @@ export default function Explore() {
           </FilterChipsBar>
 
           {/* Results */}
-          <div className="px-4 space-y-3">
+          <div className="px-4 space-y-4">
             {isCoupons ? (
               <>
                 <p className="text-sm text-muted-foreground">{categoryCoupons.length} cupom(ns) disponível(is)</p>
@@ -158,18 +158,18 @@ export default function Explore() {
                 )}
               </>
             ) : (
-            <>
+              <>
                 <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
                 {categoryEstablishments.map((est) => (
-                  <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
-                    <div className="flex gap-3 p-3">
+                  <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
+                    <div className="flex gap-4 p-4">
                       <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                         <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0 space-y-1">
                         <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
                         <p className="text-xs text-muted-foreground truncate">{est.category}</p>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                             <span>{est.rating}</span>
@@ -201,12 +201,12 @@ export default function Explore() {
     <div className="min-h-screen bg-background">
       <GlobalHeader title="Explorar" />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-4">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            className="h-11 pl-9 pr-9 bg-card border-border shadow-sm"
+            className="h-10 pl-9 pr-9 bg-card border-border shadow-card"
             placeholder="Buscar locais, categorias..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); if (e.target.value) setShowMap(false); }}
@@ -244,26 +244,26 @@ export default function Explore() {
 
             {/* Category Grid */}
             <div>
-              <h2 className="text-lg font-semibold mb-3">Categorias</h2>
-              <div className="grid grid-cols-3 gap-3">
+              <h2 className="text-lg font-semibold mb-4">Categorias</h2>
+              <div className="grid grid-cols-3 gap-4">
                 {CATEGORIES.map(({ label, icon: Icon }) => (
                   <button
                     key={label}
                     onClick={() => setSelectedCategory(label)}
-                    className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
+                    className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-lg border border-border shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-200"
                   >
-                    <Icon className="w-6 h-6 text-primary" />
+                    <Icon className="w-5 h-5 text-primary" />
                     <span className="text-xs font-medium text-foreground text-center leading-tight">{label}</span>
                   </button>
                 ))}
               </div>
               {/* Cupons - centered below grid */}
-              <div className="flex justify-center mt-3">
+              <div className="flex justify-center mt-4">
                 <button
                   onClick={() => setSelectedCategory("Cupons")}
-                  className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 w-[calc(33.333%-0.5rem)]"
+                  className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-lg border border-border shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-200 w-[calc(33.333%-0.667rem)]"
                 >
-                  <Ticket className="w-6 h-6 text-primary" />
+                  <Ticket className="w-5 h-5 text-primary" />
                   <span className="text-xs font-medium text-foreground text-center leading-tight">Cupons</span>
                 </button>
               </div>
@@ -271,15 +271,15 @@ export default function Explore() {
 
             {/* Popular Places */}
             <div>
-              <h2 className="text-lg font-semibold mb-3">Populares agora</h2>
+              <h2 className="text-lg font-semibold mb-4">Populares agora</h2>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-                <div className="flex gap-3 pb-2">
+                <div className="flex gap-4 pb-2">
                   {POPULAR_PLACES.map((place) => (
-                    <div key={place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-sm">
+                    <div key={place.name} className="shrink-0 w-[60%] rounded-lg overflow-hidden border border-border bg-card shadow-card">
                       <div className="aspect-[3/2] overflow-hidden">
                         <img src={place.image} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
                       </div>
-                      <div className="p-3">
+                      <div className="p-4">
                         <h4 className="font-semibold text-sm">{place.name}</h4>
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-xs text-muted-foreground">{place.category}</span>
@@ -297,15 +297,15 @@ export default function Explore() {
 
             {/* Recommended Places */}
             <div>
-              <h2 className="text-lg font-semibold mb-3">Recomendados</h2>
+              <h2 className="text-lg font-semibold mb-4">Recomendados</h2>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-                <div className="flex gap-3 pb-2">
+                <div className="flex gap-4 pb-2">
                   {RECOMMENDED_PLACES.map((place) => (
-                    <div key={place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-sm">
+                    <div key={place.name} className="shrink-0 w-[60%] rounded-lg overflow-hidden border border-border bg-card shadow-card">
                       <div className="aspect-[3/2] overflow-hidden">
                         <img src={place.image} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
                       </div>
-                      <div className="p-3">
+                      <div className="p-4">
                         <h4 className="font-semibold text-sm">{place.name}</h4>
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-xs text-muted-foreground">{place.category}</span>
@@ -323,14 +323,14 @@ export default function Explore() {
 
             {/* Experiences Carousel */}
             <div>
-              <h2 className="text-lg font-semibold mb-3">Experiências</h2>
+              <h2 className="text-lg font-semibold mb-4">Experiências</h2>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-                <div className="flex gap-3 pb-2">
+                <div className="flex gap-4 pb-2">
                   {EXPERIENCES.map((exp) => (
-                    <div key={exp.id} className="relative shrink-0 w-[70%] h-36 rounded-xl overflow-hidden">
+                    <div key={exp.id} className="relative shrink-0 w-[70%] h-36 rounded-lg overflow-hidden">
                       <img src={exp.image} alt={exp.title} className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                      <span className="absolute bottom-3 left-3 right-3 text-white font-semibold text-sm">{exp.title}</span>
+                      <span className="absolute bottom-4 left-4 right-4 text-primary-foreground font-semibold text-sm">{exp.title}</span>
                     </div>
                   ))}
                 </div>
@@ -339,18 +339,18 @@ export default function Explore() {
 
             {/* Nearby establishments */}
             <div>
-              <h2 className="text-lg font-semibold mb-3">Próximos de você</h2>
-              <div className="space-y-3">
+              <h2 className="text-lg font-semibold mb-4">Próximos de você</h2>
+              <div className="space-y-4">
                 {MOCK_ESTABLISHMENTS.slice(0, 3).map((est) => (
-                  <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
-                    <div className="flex gap-3 p-3">
+                  <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
+                    <div className="flex gap-4 p-4">
                       <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                         <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0 space-y-1">
                         <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
                         <p className="text-xs text-muted-foreground truncate">{est.category}</p>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                             <span>{est.rating}</span>
@@ -382,17 +382,17 @@ export default function Explore() {
                 Ver mapa
               </button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {filteredEstablishments.map((est) => (
-                <Card key={est.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
-                  <div className="flex gap-3 p-3">
+                <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
+                  <div className="flex gap-4 p-4">
                     <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                       <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-1">
                       <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
                       <p className="text-xs text-muted-foreground truncate">{est.category}</p>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                           <span>{est.rating}</span>
