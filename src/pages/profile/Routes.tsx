@@ -50,18 +50,18 @@ function RouteCard({ route }: { route: UserRoute }) {
 
   return (
     <div
-      className="rounded-xl bg-card border border-border overflow-hidden hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+      className="rounded-lg bg-card border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer"
       onClick={() => navigate("/roteiros")}
     >
       {/* Cover */}
       <div className="aspect-[2.5/1] overflow-hidden relative">
         <img src={route.image} alt={route.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-4 right-4">
           <Badge
-            className={`text-[11px] px-2 py-0.5 border-0 ${
+            className={`text-xs px-2 py-0.5 border-0 ${
               isCompleted
-                ? "bg-green-500/90 text-white"
+                ? "bg-green-500/90 text-primary-foreground"
                 : "bg-primary/90 text-primary-foreground"
             }`}
           >
@@ -72,13 +72,13 @@ function RouteCard({ route }: { route: UserRoute }) {
             )}
           </Badge>
         </div>
-        <div className="absolute bottom-3 left-3 right-3">
-          <h3 className="text-white font-bold text-base">{route.title}</h3>
+        <div className="absolute bottom-4 left-4 right-4">
+          <h3 className="text-primary-foreground font-bold text-sm">{route.title}</h3>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-white/80 text-xs flex items-center gap-1">
+            <span className="text-primary-foreground/80 text-xs flex items-center gap-1">
               <MapPin className="w-3 h-3" /> {route.completedStops}/{totalStops} paradas
             </span>
-            <span className="text-white/80 text-xs flex items-center gap-1">
+            <span className="text-primary-foreground/80 text-xs flex items-center gap-1">
               <Clock className="w-3 h-3" /> {route.duration}
             </span>
           </div>
@@ -86,12 +86,12 @@ function RouteCard({ route }: { route: UserRoute }) {
       </div>
 
       {/* Progress + stops */}
-      <div className="px-3 py-3 space-y-2.5">
+      <div className="px-4 py-4 space-y-4">
         {/* Progress bar */}
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-muted-foreground">Progresso</span>
-            <span className="text-[11px] font-semibold text-foreground">{progress}%</span>
+            <span className="text-xs text-muted-foreground">Progresso</span>
+            <span className="text-xs font-semibold text-foreground">{progress}%</span>
           </div>
           <Progress value={progress} className="h-1.5" />
         </div>
@@ -107,21 +107,21 @@ function RouteCard({ route }: { route: UserRoute }) {
               </div>
               {j < route.completedStops && (
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-green-500 flex items-center justify-center ring-2 ring-card">
-                  <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                  <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
                 </div>
               )}
             </div>
           ))}
           {route.stops.length > 6 && (
             <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary flex items-center justify-center border-2 border-border">
-              <span className="text-[10px] font-semibold text-muted-foreground">+{route.stops.length - 6}</span>
+              <span className="text-xs font-semibold text-muted-foreground">+{route.stops.length - 6}</span>
             </div>
           )}
         </div>
 
         {/* Date info */}
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
             {isCompleted
               ? `Concluído em ${new Date((route as typeof COMPLETED_ROUTES[number]).completedAt).toLocaleDateString("pt-BR")}`
               : `Iniciado em ${new Date(route.startedAt).toLocaleDateString("pt-BR")}`
@@ -143,18 +143,18 @@ export default function RoutesPage() {
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-4">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="in_progress" className="gap-1.5 text-[13px]">
-              <Play className="w-3.5 h-3.5" /> Em andamento ({IN_PROGRESS_ROUTES.length})
+            <TabsTrigger value="in_progress" className="gap-1.5 text-sm">
+              <Play className="w-4 h-4" /> Em andamento ({IN_PROGRESS_ROUTES.length})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="gap-1.5 text-[13px]">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Concluídos ({COMPLETED_ROUTES.length})
+            <TabsTrigger value="completed" className="gap-1.5 text-sm">
+              <CheckCircle2 className="w-4 h-4" /> Concluídos ({COMPLETED_ROUTES.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="in_progress" className="mt-4 space-y-4">
             {IN_PROGRESS_ROUTES.length === 0 ? (
               <div className="py-12 text-center">
-                <Play className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                <Play className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground">Nenhum roteiro em andamento</p>
                 <p className="text-xs text-muted-foreground/70 mt-1">Inicie um roteiro na aba Roteiros</p>
               </div>
@@ -173,7 +173,7 @@ export default function RoutesPage() {
           <TabsContent value="completed" className="mt-4 space-y-4">
             {COMPLETED_ROUTES.length === 0 ? (
               <div className="py-12 text-center">
-                <CheckCircle2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                <CheckCircle2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground">Nenhum roteiro concluído</p>
                 <p className="text-xs text-muted-foreground/70 mt-1">Complete um roteiro para vê-lo aqui</p>
               </div>

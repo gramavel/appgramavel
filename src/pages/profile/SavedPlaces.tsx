@@ -16,7 +16,7 @@ export default function SavedPlaces() {
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Lugares Salvos" />
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-3">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -24,7 +24,7 @@ export default function SavedPlaces() {
             placeholder="Buscar lugares salvos..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-9 h-10 rounded-xl bg-card border-border/50"
+            className="pl-9 pr-9 h-10 bg-card border-border/50"
           />
           {search && (
             <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -36,7 +36,7 @@ export default function SavedPlaces() {
         {/* Results */}
         {filtered.length === 0 ? (
           <div className="py-12 text-center">
-            <Bookmark className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+            <Bookmark className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
             <p className="text-sm text-muted-foreground">Nenhum lugar encontrado</p>
             <p className="text-xs text-muted-foreground/70 mt-1">Salve seus lugares favoritos para vê-los aqui</p>
           </div>
@@ -44,7 +44,7 @@ export default function SavedPlaces() {
           filtered.map((est, i) => (
             <div
               key={est.id}
-              className="flex gap-3 p-3 bg-card rounded-xl border border-border/50 hover:shadow-md transition-all active:scale-[0.98]"
+              className="flex gap-4 p-4 bg-card rounded-lg border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
               style={{ animationDelay: `${i * 80}ms`, animation: "fadeInUp 0.4s ease-out both" }}
             >
               <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
@@ -58,9 +58,9 @@ export default function SavedPlaces() {
                   </div>
                   <Bookmark className="w-5 h-5 text-primary fill-primary flex-shrink-0" />
                 </div>
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                     {est.rating}
                   </span>
                   <span className="flex items-center gap-1">

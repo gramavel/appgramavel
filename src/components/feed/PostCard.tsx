@@ -30,11 +30,11 @@ export function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+    <div className="bg-card rounded-lg border border-border shadow-card overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-3">
+      <div className="flex items-center justify-between p-4">
         <div
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex items-center gap-4 cursor-pointer"
           onClick={() => navigate(`/estabelecimento/${post.establishment_slug}`)}
         >
           <img
@@ -45,11 +45,11 @@ export function PostCard({ post }: PostCardProps) {
           <div>
             <h3 className="text-sm font-semibold leading-tight">{post.establishment_name}</h3>
             <div className="flex items-center gap-2 mt-0.5">
-              <Badge variant="secondary" className="text-[11px] px-2 py-0.5">
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 {post.establishment_category}
               </Badge>
               <span className="flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                 <span className="text-xs text-muted-foreground">
                   {post.rating} ({post.total_reviews})
                 </span>
@@ -58,7 +58,7 @@ export function PostCard({ post }: PostCardProps) {
           </div>
         </div>
         <button
-          className="p-2.5 hover:bg-secondary rounded-full transition-colors active:scale-95"
+          className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
           onClick={() => setShowSave(true)}
         >
           {isSaved ? (
@@ -72,17 +72,17 @@ export function PostCard({ post }: PostCardProps) {
       <Separator />
 
       {/* Tags row */}
-      <div className="px-3 py-2 flex items-center justify-between">
+      <div className="px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {post.is_popular && (
-            <Badge variant="default" className="text-[11px] px-2.5 py-0.5 gap-1">
+            <Badge variant="default" className="text-xs px-2.5 py-0.5 gap-1">
               <TrendingUp className="h-3 w-3" />
               Popular esta semana
             </Badge>
           )}
         </div>
         <span className="flex items-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5" />
+          <MapPin className="h-3 w-3" />
           {post.distance_km.toFixed(1)} km
         </span>
       </div>
@@ -98,7 +98,7 @@ export function PostCard({ post }: PostCardProps) {
       </div>
 
       {/* Caption */}
-      <div className="p-3 space-y-2">
+      <div className="p-4 space-y-2">
         <p className="text-sm">
           <span className="font-semibold">{post.establishment_name}</span>
           {" · "}
@@ -107,7 +107,7 @@ export function PostCard({ post }: PostCardProps) {
       </div>
 
       {/* Reactions */}
-      <div className="flex items-center justify-between px-3 pb-3">
+      <div className="flex items-center justify-between px-4 pb-4">
         <button
           className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-colors"
           onClick={() => setShowReactions(true)}
@@ -120,7 +120,7 @@ export function PostCard({ post }: PostCardProps) {
               {r.emoji}
             </span>
           ))}
-          <span className="text-[11px] text-muted-foreground ml-0.5">+{totalReactions}</span>
+          <span className="text-xs text-muted-foreground ml-0.5">+{totalReactions}</span>
         </button>
         <div className="flex -space-x-2">
           {post.recent_users.slice(0, 3).map((u, i) => (
@@ -174,13 +174,13 @@ export function PostCard({ post }: PostCardProps) {
                   <button
                     key={item.emoji}
                     onClick={() => handleReact(item.emoji)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
+                    className={`flex flex-col items-center gap-1 p-4 rounded-lg transition-all ${
                       isActive ? "bg-primary/10 scale-110" : "hover:bg-secondary"
                     }`}
                   >
                     <span className="text-2xl">{item.emoji}</span>
-                    <span className="text-[11px] font-medium text-foreground">{item.name}</span>
-                    <span className="text-[10px] text-muted-foreground">{count}</span>
+                    <span className="text-xs font-medium text-foreground">{item.name}</span>
+                    <span className="text-xs text-muted-foreground">{count}</span>
                   </button>
                 );
               })}

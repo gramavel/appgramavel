@@ -32,7 +32,7 @@ export function BottomNav() {
                   active && "stroke-[2.5]"
                 )}
               />
-              <span className="text-[11px] font-medium mt-0.5">
+              <span className="text-xs font-medium mt-0.5">
                 {label}
               </span>
             </NavLink>

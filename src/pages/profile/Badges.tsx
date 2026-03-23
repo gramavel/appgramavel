@@ -58,28 +58,27 @@ export default function BadgesPage() {
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
         {/* Earned */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+          <p className="text-xs font-semibold text-muted-foreground mb-4 flex items-center gap-1.5">
+            <CheckCircle2 className="w-4 h-4 text-green-500" />
             Conquistadas ({earned.length})
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {earned.map((b, i) => {
               const BadgeIcon = BADGE_ICONS[b.iconName] || Compass;
               const palette = BADGE_COLOR_PALETTES[b.iconName] || { bg: "bg-primary/10", border: "border-primary/30", icon: "text-primary", ring: "" };
               return (
                 <div
                   key={b.id}
-                  className={`relative p-4 rounded-xl border-2 ${palette.bg} ${palette.border} overflow-hidden`}
+                  className={`relative p-4 rounded-lg border-2 ${palette.bg} ${palette.border} overflow-hidden`}
                   style={{ animationDelay: `${i * 100}ms`, animation: "fadeInScale 0.5s ease-out both" }}
                 >
-                  {/* Shimmer */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer pointer-events-none" />
                   <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-green-600" />
                   <BadgeIcon className={`w-8 h-8 mb-2 ${palette.icon}`} />
                   <p className="font-semibold text-sm text-foreground">{b.name}</p>
                   <p className="text-xs text-muted-foreground mt-1">{b.description}</p>
                   {EARNED_DATES[b.id] && (
-                    <p className="text-[10px] text-muted-foreground/70 mt-2 flex items-center gap-1">
+                    <p className="text-xs text-muted-foreground/70 mt-2 flex items-center gap-1">
                       <CalendarDays className="w-3 h-3" />
                       {EARNED_DATES[b.id]}
                     </p>
@@ -92,25 +91,25 @@ export default function BadgesPage() {
 
         {/* In progress */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5" />
+          <p className="text-xs font-semibold text-muted-foreground mb-4 flex items-center gap-1.5">
+            <Lock className="w-4 h-4" />
             Em progresso ({inProgress.length})
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {inProgress.map((b, i) => {
               const BadgeIcon = BADGE_ICONS[b.iconName] || Compass;
               const palette = BADGE_COLOR_PALETTES[b.iconName] || { bg: "", border: "", icon: "", ring: "#888" };
               return (
                 <div
                   key={b.id}
-                  className="relative p-4 rounded-xl border-2 border-muted bg-muted/30"
+                  className="relative p-4 rounded-lg border-2 border-muted bg-muted/30"
                   style={{ animationDelay: `${i * 100 + 200}ms`, animation: "fadeInUp 0.4s ease-out both" }}
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-4">
                     <BadgeIcon className="w-7 h-7 text-muted-foreground opacity-60" />
                     <div className="relative">
                       <ProgressRing progress={b.progress!} total={b.total!} color={palette.ring} />
-                      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-muted-foreground">
+                      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-muted-foreground">
                         {b.progress}/{b.total}
                       </span>
                     </div>

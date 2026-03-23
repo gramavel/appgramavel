@@ -37,7 +37,7 @@ export function SaveSheet({ open, onOpenChange, itemName, onSaved }: SaveSheetPr
           <div className="space-y-2 pb-4">
             <button
               onClick={() => { onOpenChange(false); setShowRouteSelect(true); }}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
+              className="w-full flex items-center gap-4 p-4 rounded-lg border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <RouteIcon className="w-5 h-5 text-primary" />
@@ -49,7 +49,7 @@ export function SaveSheet({ open, onOpenChange, itemName, onSaved }: SaveSheetPr
             </button>
             <button
               onClick={handleWishlist}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
+              className="w-full flex items-center gap-4 p-4 rounded-lg border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Heart className="w-5 h-5 text-primary" />
@@ -75,7 +75,7 @@ export function SaveSheet({ open, onOpenChange, itemName, onSaved }: SaveSheetPr
                 <button
                   key={route.id}
                   onClick={() => handleAddToRoute(route.id)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-secondary/50 transition-colors active:scale-[0.98]"
+                  className="w-full flex items-center gap-4 p-4 rounded-lg border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
                 >
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <Icon className="w-5 h-5 text-primary" />

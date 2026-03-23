@@ -19,7 +19,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
 
   return (
     <>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-shadow">
         {/* Image */}
         <div className="relative aspect-video">
           <img src={coupon.image} alt={coupon.title} className="w-full h-full object-cover" loading="lazy" />
@@ -28,7 +28,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
           </div>
         </div>
 
-        <CardContent className="p-3 space-y-2">
+        <CardContent className="p-4 space-y-2">
           {/* Header */}
           <div className="flex items-start gap-2">
             <img src={coupon.establishment_avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
@@ -42,13 +42,13 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
 
           {/* Expiry */}
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="w-3 h-3" />
             <span>Válido até {new Date(coupon.expires_at).toLocaleDateString("pt-BR")}</span>
           </div>
 
           <Button
             size="sm"
-            className="w-full text-sm h-10"
+            className="w-full text-sm h-10 rounded-md"
             disabled={coupon.status !== "active"}
             onClick={() => setShowQR(true)}
           >

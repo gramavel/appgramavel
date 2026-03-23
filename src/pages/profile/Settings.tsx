@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Camera, Save, LogOut } from "lucide-react";
+import { Camera, Save, LogOut, Bell } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Bell } from "lucide-react";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -49,11 +48,11 @@ export default function Settings() {
         </div>
 
         {/* Notifications */}
-        <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border shadow-card">
+          <div className="flex items-center gap-4">
             <Bell className="w-5 h-5 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium text-foreground">Notificações</p>
+              <p className="text-sm font-semibold text-foreground">Notificações</p>
               <p className="text-xs text-muted-foreground">Receber alertas de cupons e novidades</p>
             </div>
           </div>
@@ -61,7 +60,7 @@ export default function Settings() {
         </div>
 
         {/* Save button */}
-        <Button className="w-full gap-2">
+        <Button className="w-full gap-2 rounded-md">
           <Save className="w-4 h-4" />
           Salvar alterações
         </Button>
@@ -70,7 +69,7 @@ export default function Settings() {
         <div className="flex justify-center mt-6">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="flex items-center gap-1.5 text-[13px] font-medium" style={{ color: "#c0283a" }}>
+              <button className="flex items-center gap-1.5 text-sm font-medium text-destructive">
                 <LogOut className="w-4 h-4" />
                 Sair da conta
               </button>
@@ -83,8 +82,8 @@ export default function Settings() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                <AlertDialogCancel className="rounded-md">Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md">
                   Sair
                 </AlertDialogAction>
               </AlertDialogFooter>
