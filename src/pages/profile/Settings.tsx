@@ -60,7 +60,7 @@ export default function Settings() {
         </div>
 
         {/* Save button */}
-        <Button className="w-full gap-2 rounded-md">
+        <Button className="w-full gap-2 rounded-full">
           <Save className="w-4 h-4" />
           Salvar alterações
         </Button>
