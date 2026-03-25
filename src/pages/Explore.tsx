@@ -275,7 +275,7 @@ export default function Explore() {
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
                   {POPULAR_PLACES.map((place) => (
-                    <div key={place.name} className="shrink-0 w-[60%] rounded-lg overflow-hidden border border-border bg-card shadow-card">
+                    <div key={place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-card">
                       <div className="aspect-[3/2] overflow-hidden">
                         <img src={place.image} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
                       </div>
