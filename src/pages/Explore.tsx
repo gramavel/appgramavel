@@ -261,7 +261,7 @@ export default function Explore() {
               <div className="flex justify-center mt-4">
                 <button
                   onClick={() => setSelectedCategory("Cupons")}
-                  className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-lg border border-border shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-200 w-[calc(33.333%-0.667rem)]"
+                  className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-200 w-[calc(33.333%-0.667rem)]"
                 >
                   <Ticket className="w-5 h-5 text-primary" />
                   <span className="text-xs font-medium text-foreground text-center leading-tight">Cupons</span>
