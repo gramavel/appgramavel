@@ -64,7 +64,7 @@ export default function Auth() {
                 <div className="space-y-2"><Label>Nome</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
                 <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
                 <div className="space-y-2"><Label>Senha</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
-                <Button className="w-full rounded-md" disabled={loading}>{loading ? "Criando conta..." : "Criar conta"}</Button>
+                <Button className="w-full rounded-full" disabled={loading}>{loading ? "Criando conta..." : "Criar conta"}</Button>
               </form>
             </TabsContent>
           </Tabs>
