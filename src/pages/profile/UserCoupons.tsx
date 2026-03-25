@@ -11,8 +11,8 @@ const usedCoupons = MOCK_COUPONS.filter((c) => c.status === "used" || c.status =
 function CouponItem({ coupon, used }: { coupon: typeof MOCK_COUPONS[0]; used?: boolean }) {
   return (
     <div
-      className={`flex gap-4 p-4 rounded-lg border transition-all ${used ? "border-border/30 opacity-70" : "border-border bg-card shadow-card hover:shadow-card-hover active:scale-[0.98]"}`}
-      style={{ animation: "fadeInUp 0.4s ease-out both" }}
+      className={`flex gap-4 p-4 rounded-xl border transition-all ${used ? "border-border/30 opacity-70" : "border-border bg-card shadow-card hover:shadow-card-hover active:scale-[0.98]"}`}
+      style={{ animation: undefined }}
     >
       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
         <img src={coupon.image} alt={coupon.title} className="w-full h-full object-cover" />
