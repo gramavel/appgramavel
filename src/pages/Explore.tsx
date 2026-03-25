@@ -339,7 +339,7 @@ export default function Explore() {
 
             {/* Nearby establishments */}
             <div>
-              <h2 className="text-lg font-semibold mb-4">Próximos de você</h2>
+              <h2 className="text-base font-semibold tracking-tight mb-4">Próximos de você</h2>
               <div className="space-y-4">
                 {MOCK_ESTABLISHMENTS.slice(0, 3).map((est) => (
                   <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
