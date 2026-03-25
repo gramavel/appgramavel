@@ -244,7 +244,7 @@ export default function Explore() {
 
             {/* Category Grid */}
             <div>
-              <h2 className="text-lg font-semibold mb-4">Categorias</h2>
+              <h2 className="text-base font-semibold tracking-tight mb-4">Categorias</h2>
               <div className="grid grid-cols-3 gap-4">
                 {CATEGORIES.map(({ label, icon: Icon }) => (
                   <button
