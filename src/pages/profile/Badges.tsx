@@ -102,8 +102,8 @@ export default function BadgesPage() {
               return (
                 <div
                   key={b.id}
-                  className="relative p-4 rounded-lg border-2 border-muted bg-muted/30"
-                  style={{ animationDelay: `${i * 100 + 200}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                  className="relative p-4 rounded-xl border-2 border-muted bg-muted/30 animate-fade-in-up"
+                  style={{ animationDelay: `${i * 100 + 200}ms` }}
                 >
                   <div className="flex items-center justify-between mb-4">
                     <BadgeIcon className="w-7 h-7 text-muted-foreground opacity-60" />
