@@ -297,7 +297,7 @@ export default function Explore() {
 
             {/* Recommended Places */}
             <div>
-              <h2 className="text-lg font-semibold mb-4">Recomendados</h2>
+              <h2 className="text-base font-semibold tracking-tight mb-4">Recomendados</h2>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
                   {RECOMMENDED_PLACES.map((place) => (
