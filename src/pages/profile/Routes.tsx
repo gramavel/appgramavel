@@ -186,7 +186,8 @@ export default function RoutesPage() {
               COMPLETED_ROUTES.map((route, i) => (
                 <div
                   key={route.id}
-                  style={{ animationDelay: `${i * 100}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <RouteCard route={route} />
                 </div>
