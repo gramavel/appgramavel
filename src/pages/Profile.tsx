@@ -106,7 +106,7 @@ export default function Profile() {
         </div>
 
         {/* Stats Row */}
-        <div className="flex justify-around py-4 mx-4 mt-4 bg-card rounded-lg border border-border/50 shadow-card">
+        <div className="flex justify-around py-4 mx-4 mt-4 bg-card rounded-xl border border-border/50 shadow-card">
           {STATS.map(({ label, value, icon: Icon, to }) => (
             <button
               key={label}
