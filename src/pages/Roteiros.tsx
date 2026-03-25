@@ -151,7 +151,7 @@ export default function Roteiros() {
       <div className="min-h-screen bg-background">
         <GlobalHeader showBack onBack={finishRoute} />
         <main className="max-w-2xl mx-auto px-4 pb-20 flex flex-col items-center justify-center min-h-[70vh]">
-          <div className="text-center space-y-4" style={{ animation: "scaleIn 0.5s ease-out both" }}>
+          <div className="text-center space-y-4 animate-scale-in">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
               <PartyPopper className="w-10 h-10 text-primary" />
             </div>
