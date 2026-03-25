@@ -140,7 +140,7 @@ export default function Establishment() {
                 {postImages.map((src, i) => (
                   <div
                     key={i}
-                    className="aspect-square rounded-md overflow-hidden group cursor-pointer relative"
+                    className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative"
                     onClick={() => openLightbox(i + 1)}
                   >
                     <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
