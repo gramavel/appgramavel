@@ -72,8 +72,11 @@ export default function UserCoupons() {
           <TabsContent value="usados" className="space-y-4">
             {usedCoupons.length === 0 ? (
               <div className="py-12 text-center">
-                <CheckCircle2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Nenhum cupom utilizado ainda</p>
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Nenhum cupom utilizado ainda</p>
+                <p className="text-xs text-muted-foreground mt-1">Seus cupons usados aparecerão aqui</p>
               </div>
             ) : (
               usedCoupons.map((c) => <CouponItem key={c.id} coupon={c} used />)
