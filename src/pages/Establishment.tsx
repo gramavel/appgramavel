@@ -157,7 +157,7 @@ export default function Establishment() {
             </TabsContent>
 
             <TabsContent value="avaliacoes" className="p-4 space-y-4">
-              <Button variant="outline" className="w-full gap-2 rounded-md">
+              <Button variant="outline" className="w-full gap-2 rounded-full">
                 <MessageSquarePlus className="h-4 w-4" /> Deixar avaliação
               </Button>
               {[1, 2, 3].map((i) => (
