@@ -91,7 +91,7 @@ export default function BadgesPage() {
 
         {/* In progress */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-4 flex items-center gap-1.5">
+          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-4 flex items-center gap-1.5">
             <Lock className="w-4 h-4" />
             Em progresso ({inProgress.length})
           </p>
