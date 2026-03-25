@@ -176,9 +176,11 @@ export default function RoutesPage() {
           <TabsContent value="completed" className="mt-4 space-y-4">
             {COMPLETED_ROUTES.length === 0 ? (
               <div className="py-12 text-center">
-                <CheckCircle2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Nenhum roteiro concluído</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">Complete um roteiro para vê-lo aqui</p>
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Nenhum roteiro concluído</p>
+                <p className="text-xs text-muted-foreground mt-1">Complete um roteiro para vê-lo aqui</p>
               </div>
             ) : (
               COMPLETED_ROUTES.map((route, i) => (
