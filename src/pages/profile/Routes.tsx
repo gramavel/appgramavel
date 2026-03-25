@@ -50,7 +50,7 @@ function RouteCard({ route }: { route: UserRoute }) {
 
   return (
     <div
-      className="rounded-lg bg-card border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer"
+      className="rounded-xl bg-card border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer"
       onClick={() => navigate("/roteiros")}
     >
       {/* Cover */}
