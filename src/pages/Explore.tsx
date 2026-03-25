@@ -189,7 +189,11 @@ export default function Explore() {
                 ))}
                 {categoryEstablishments.length === 0 && (
                   <div className="py-12 text-center">
-                    <p className="text-sm text-muted-foreground">Nenhum estabelecimento nesta categoria</p>
+                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                      <Search className="w-7 h-7 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">Nenhum estabelecimento</p>
+                    <p className="text-xs text-muted-foreground mt-1">Tente outra categoria</p>
                   </div>
                 )}
               </>
