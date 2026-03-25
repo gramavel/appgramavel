@@ -165,8 +165,8 @@ export default function Profile() {
                 return (
                   <div
                     key={item.id}
-                    className="relative flex items-center gap-4 p-4 bg-card/60 rounded-lg border border-border/30 hover:bg-card transition-colors"
-                    style={{ animationDelay: `${idx * 60}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                    className="relative flex items-center gap-4 p-4 bg-card/60 rounded-xl border border-border/30 hover:bg-card transition-colors animate-fade-in-up"
+                    style={{ animationDelay: `${idx * 60}ms` }}
                   >
                     <div className={`absolute -left-6 w-[18px] h-[18px] rounded-full flex items-center justify-center ring-2 ring-background ${TIMELINE_COLORS[item.type]}`}>
                       <TimeIcon className="w-3 h-3" />
