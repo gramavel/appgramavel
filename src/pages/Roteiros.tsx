@@ -517,8 +517,12 @@ export default function Roteiros() {
           </div>
 
           {filteredSuggested.length === 0 && (
-            <div className="py-8 text-center text-muted-foreground">
-              <p className="text-sm">Nenhum roteiro sugerido nesta categoria</p>
+            <div className="py-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                <MapPin className="w-7 h-7 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Nenhum roteiro sugerido</p>
+              <p className="text-xs text-muted-foreground mt-1">Tente outro filtro</p>
             </div>
           )}
         </div>
