@@ -250,7 +250,7 @@ export default function Explore() {
                   <button
                     key={label}
                     onClick={() => setSelectedCategory(label)}
-                    className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-lg border border-border shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-200"
+                    className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-200"
                   >
                     <Icon className="w-5 h-5 text-primary" />
                     <span className="text-xs font-medium text-foreground text-center leading-tight">{label}</span>
