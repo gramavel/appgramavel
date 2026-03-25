@@ -69,8 +69,8 @@ export default function BadgesPage() {
               return (
                 <div
                   key={b.id}
-                  className={`relative p-4 rounded-lg border-2 ${palette.bg} ${palette.border} overflow-hidden`}
-                  style={{ animationDelay: `${i * 100}ms`, animation: "fadeInScale 0.5s ease-out both" }}
+                  className={`relative p-4 rounded-xl border-2 ${palette.bg} ${palette.border} overflow-hidden animate-fade-in-scale`}
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer pointer-events-none" />
                   <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-green-600" />
