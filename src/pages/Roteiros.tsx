@@ -215,7 +215,7 @@ export default function Roteiros() {
 
         <main className="max-w-2xl mx-auto pb-20">
           {/* Hero image */}
-          <div className="relative aspect-[4/5] overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out both" }}>
+          <div className="relative aspect-[4/5] overflow-hidden animate-fade-in-up">
             <img src={stop.image} alt={stop.name} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
