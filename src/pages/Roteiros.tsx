@@ -392,8 +392,8 @@ export default function Roteiros() {
                   {selectedRoute.stops.map((stop, i) => (
                     <div
                       key={i}
-                      className="relative flex items-center gap-3 p-3 bg-card rounded-xl border border-border/50"
-                      style={{ animationDelay: `${i * 80}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                      className="relative flex items-center gap-3 p-4 bg-card rounded-xl border border-border/50 animate-fade-in-up"
+                      style={{ animationDelay: `${i * 80}ms` }}
                     >
                       {/* Number circle */}
                       <div className="absolute -left-8 w-[30px] h-[30px] rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold z-10">
