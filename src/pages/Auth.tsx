@@ -55,7 +55,7 @@ export default function Auth() {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
                 <div className="space-y-2"><Label>Senha</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
-                <Button className="w-full rounded-md" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
+                <Button className="w-full rounded-full" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
               </form>
             </TabsContent>
 
