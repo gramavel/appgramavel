@@ -58,8 +58,11 @@ export default function UserCoupons() {
           <TabsContent value="salvos" className="space-y-4">
             {savedCoupons.length === 0 ? (
               <div className="py-12 text-center">
-                <Ticket className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Nenhum cupom salvo ainda</p>
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <Ticket className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Nenhum cupom salvo ainda</p>
+                <p className="text-xs text-muted-foreground mt-1">Salve cupons para usá-los depois</p>
               </div>
             ) : (
               savedCoupons.map((c) => <CouponItem key={c.id} coupon={c} />)
