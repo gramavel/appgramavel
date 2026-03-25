@@ -58,7 +58,7 @@ export default function BadgesPage() {
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
         {/* Earned */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-4 flex items-center gap-1.5">
+          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-4 flex items-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
             Conquistadas ({earned.length})
           </p>
@@ -69,8 +69,8 @@ export default function BadgesPage() {
               return (
                 <div
                   key={b.id}
-                  className={`relative p-4 rounded-lg border-2 ${palette.bg} ${palette.border} overflow-hidden`}
-                  style={{ animationDelay: `${i * 100}ms`, animation: "fadeInScale 0.5s ease-out both" }}
+                  className={`relative p-4 rounded-xl border-2 ${palette.bg} ${palette.border} overflow-hidden animate-fade-in-scale`}
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer pointer-events-none" />
                   <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-green-600" />
@@ -91,7 +91,7 @@ export default function BadgesPage() {
 
         {/* In progress */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-4 flex items-center gap-1.5">
+          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-4 flex items-center gap-1.5">
             <Lock className="w-4 h-4" />
             Em progresso ({inProgress.length})
           </p>
@@ -102,8 +102,8 @@ export default function BadgesPage() {
               return (
                 <div
                   key={b.id}
-                  className="relative p-4 rounded-lg border-2 border-muted bg-muted/30"
-                  style={{ animationDelay: `${i * 100 + 200}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                  className="relative p-4 rounded-xl border-2 border-muted bg-muted/30 animate-fade-in-up"
+                  style={{ animationDelay: `${i * 100 + 200}ms` }}
                 >
                   <div className="flex items-center justify-between mb-4">
                     <BadgeIcon className="w-7 h-7 text-muted-foreground opacity-60" />
@@ -124,23 +124,6 @@ export default function BadgesPage() {
       </main>
       <BottomNav />
 
-      <style>{`
-        @keyframes fadeInScale {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        .animate-shimmer {
-          animation: shimmer 3s infinite;
-        }
-      `}</style>
     </div>
   );
 }

@@ -106,7 +106,7 @@ export default function Profile() {
         </div>
 
         {/* Stats Row */}
-        <div className="flex justify-around py-4 mx-4 mt-4 bg-card rounded-lg border border-border/50 shadow-card">
+        <div className="flex justify-around py-4 mx-4 mt-4 bg-card rounded-xl border border-border/50 shadow-card">
           {STATS.map(({ label, value, icon: Icon, to }) => (
             <button
               key={label}
@@ -133,7 +133,7 @@ export default function Profile() {
               {earnedBadges.map((badge) => (
                 <div
                   key={badge.id}
-                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-card rounded-lg border border-border/50 shadow-card active:scale-95 transition-transform cursor-pointer"
+                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border/50 shadow-card active:scale-95 transition-transform cursor-pointer"
                   onClick={() => navigate("/perfil/badges")}
                 >
                   <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: badge.color + "22" }}>
@@ -165,8 +165,8 @@ export default function Profile() {
                 return (
                   <div
                     key={item.id}
-                    className="relative flex items-center gap-4 p-4 bg-card/60 rounded-lg border border-border/30 hover:bg-card transition-colors"
-                    style={{ animationDelay: `${idx * 60}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                    className="relative flex items-center gap-4 p-4 bg-card/60 rounded-xl border border-border/30 hover:bg-card transition-colors animate-fade-in-up"
+                    style={{ animationDelay: `${idx * 60}ms` }}
                   >
                     <div className={`absolute -left-6 w-[18px] h-[18px] rounded-full flex items-center justify-center ring-2 ring-background ${TIMELINE_COLORS[item.type]}`}>
                       <TimeIcon className="w-3 h-3" />
@@ -205,7 +205,7 @@ export default function Profile() {
               return (
                 <div
                   key={i}
-                  className={`${isTall ? "row-span-2" : ""} rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity active:scale-[0.97]`}
+                  className={`${isTall ? "row-span-2" : ""} rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity active:scale-[0.97]`}
                   onClick={() => openLightbox(i)}
                 >
                   <img
@@ -232,12 +232,6 @@ export default function Profile() {
         aspectRatio="4/5"
       />
 
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

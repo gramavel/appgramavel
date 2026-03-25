@@ -50,7 +50,7 @@ function RouteCard({ route }: { route: UserRoute }) {
 
   return (
     <div
-      className="rounded-lg bg-card border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer"
+      className="rounded-xl bg-card border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer"
       onClick={() => navigate("/roteiros")}
     >
       {/* Cover */}
@@ -154,15 +154,18 @@ export default function RoutesPage() {
           <TabsContent value="in_progress" className="mt-4 space-y-4">
             {IN_PROGRESS_ROUTES.length === 0 ? (
               <div className="py-12 text-center">
-                <Play className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Nenhum roteiro em andamento</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">Inicie um roteiro na aba Roteiros</p>
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <Play className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Nenhum roteiro em andamento</p>
+                <p className="text-xs text-muted-foreground mt-1">Inicie um roteiro na aba Roteiros</p>
               </div>
             ) : (
               IN_PROGRESS_ROUTES.map((route, i) => (
                 <div
                   key={route.id}
-                  style={{ animationDelay: `${i * 100}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <RouteCard route={route} />
                 </div>
@@ -173,15 +176,18 @@ export default function RoutesPage() {
           <TabsContent value="completed" className="mt-4 space-y-4">
             {COMPLETED_ROUTES.length === 0 ? (
               <div className="py-12 text-center">
-                <CheckCircle2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Nenhum roteiro concluído</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">Complete um roteiro para vê-lo aqui</p>
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Nenhum roteiro concluído</p>
+                <p className="text-xs text-muted-foreground mt-1">Complete um roteiro para vê-lo aqui</p>
               </div>
             ) : (
               COMPLETED_ROUTES.map((route, i) => (
                 <div
                   key={route.id}
-                  style={{ animationDelay: `${i * 100}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <RouteCard route={route} />
                 </div>
@@ -193,12 +199,6 @@ export default function RoutesPage() {
 
       <BottomNav />
 
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

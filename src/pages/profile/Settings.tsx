@@ -48,7 +48,7 @@ export default function Settings() {
         </div>
 
         {/* Notifications */}
-        <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border shadow-card">
+        <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border shadow-card">
           <div className="flex items-center gap-4">
             <Bell className="w-5 h-5 text-muted-foreground" />
             <div>
@@ -60,7 +60,7 @@ export default function Settings() {
         </div>
 
         {/* Save button */}
-        <Button className="w-full gap-2 rounded-md">
+        <Button className="w-full gap-2 rounded-full">
           <Save className="w-4 h-4" />
           Salvar alterações
         </Button>
@@ -74,7 +74,7 @@ export default function Settings() {
                 Sair da conta
               </button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="rounded-2xl">
               <AlertDialogHeader>
                 <AlertDialogTitle>Sair da conta</AlertDialogTitle>
                 <AlertDialogDescription>
@@ -82,8 +82,8 @@ export default function Settings() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-md">Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md">
+                <AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full">
                   Sair
                 </AlertDialogAction>
               </AlertDialogFooter>

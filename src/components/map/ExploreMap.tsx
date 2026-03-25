@@ -189,7 +189,7 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   }, []);
 
   return (
-    <div className="relative h-[45vh] min-h-[350px] rounded-lg border border-border shadow-sm overflow-hidden">
+    <div className="relative h-[45vh] min-h-[350px] rounded-xl border border-border shadow-card overflow-hidden">
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
       {/* Search this area button */}

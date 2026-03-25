@@ -11,8 +11,8 @@ const usedCoupons = MOCK_COUPONS.filter((c) => c.status === "used" || c.status =
 function CouponItem({ coupon, used }: { coupon: typeof MOCK_COUPONS[0]; used?: boolean }) {
   return (
     <div
-      className={`flex gap-4 p-4 rounded-lg border transition-all ${used ? "border-border/30 opacity-70" : "border-border bg-card shadow-card hover:shadow-card-hover active:scale-[0.98]"}`}
-      style={{ animation: "fadeInUp 0.4s ease-out both" }}
+      className={`flex gap-4 p-4 rounded-xl border transition-all ${used ? "border-border/30 opacity-70" : "border-border bg-card shadow-card hover:shadow-card-hover active:scale-[0.98]"}`}
+      style={{ animation: undefined }}
     >
       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
         <img src={coupon.image} alt={coupon.title} className="w-full h-full object-cover" />
@@ -58,8 +58,11 @@ export default function UserCoupons() {
           <TabsContent value="salvos" className="space-y-4">
             {savedCoupons.length === 0 ? (
               <div className="py-12 text-center">
-                <Ticket className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Nenhum cupom salvo ainda</p>
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <Ticket className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Nenhum cupom salvo ainda</p>
+                <p className="text-xs text-muted-foreground mt-1">Salve cupons para usá-los depois</p>
               </div>
             ) : (
               savedCoupons.map((c) => <CouponItem key={c.id} coupon={c} />)
@@ -69,8 +72,11 @@ export default function UserCoupons() {
           <TabsContent value="usados" className="space-y-4">
             {usedCoupons.length === 0 ? (
               <div className="py-12 text-center">
-                <CheckCircle2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Nenhum cupom utilizado ainda</p>
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Nenhum cupom utilizado ainda</p>
+                <p className="text-xs text-muted-foreground mt-1">Seus cupons usados aparecerão aqui</p>
               </div>
             ) : (
               usedCoupons.map((c) => <CouponItem key={c.id} coupon={c} used />)
@@ -80,12 +86,6 @@ export default function UserCoupons() {
       </main>
       <BottomNav />
 
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

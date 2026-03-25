@@ -36,16 +36,18 @@ export default function SavedPlaces() {
         {/* Results */}
         {filtered.length === 0 ? (
           <div className="py-12 text-center">
-            <Bookmark className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-            <p className="text-sm text-muted-foreground">Nenhum lugar encontrado</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Salve seus lugares favoritos para vê-los aqui</p>
+            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+              <Bookmark className="w-7 h-7 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-semibold text-foreground">Nenhum lugar encontrado</p>
+            <p className="text-xs text-muted-foreground mt-1">Salve seus lugares favoritos para vê-los aqui</p>
           </div>
         ) : (
           filtered.map((est, i) => (
             <div
               key={est.id}
-              className="flex gap-4 p-4 bg-card rounded-lg border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
-              style={{ animationDelay: `${i * 80}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+              className="flex gap-4 p-4 bg-card rounded-xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] animate-fade-in-up"
+              style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                 <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
@@ -75,12 +77,6 @@ export default function SavedPlaces() {
       </main>
       <BottomNav />
 
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

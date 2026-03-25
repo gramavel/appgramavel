@@ -48,7 +48,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
 
           <Button
             size="sm"
-            className="w-full text-sm h-10 rounded-md"
+            className="w-full text-sm h-10 rounded-full"
             disabled={coupon.status !== "active"}
             onClick={() => setShowQR(true)}
           >
@@ -59,7 +59,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
 
       {/* QR Dialog */}
       <Dialog open={showQR} onOpenChange={setShowQR}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-center">{coupon.title}</DialogTitle>
           </DialogHeader>

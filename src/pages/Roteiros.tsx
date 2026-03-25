@@ -151,7 +151,7 @@ export default function Roteiros() {
       <div className="min-h-screen bg-background">
         <GlobalHeader showBack onBack={finishRoute} />
         <main className="max-w-2xl mx-auto px-4 pb-20 flex flex-col items-center justify-center min-h-[70vh]">
-          <div className="text-center space-y-4" style={{ animation: "scaleIn 0.5s ease-out both" }}>
+          <div className="text-center space-y-4 animate-scale-in">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
               <PartyPopper className="w-10 h-10 text-primary" />
             </div>
@@ -198,12 +198,6 @@ export default function Roteiros() {
           </div>
         </main>
         <BottomNav />
-        <style>{`
-          @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.85); }
-            to { opacity: 1; transform: scale(1); }
-          }
-        `}</style>
       </div>
     );
   }
@@ -221,7 +215,7 @@ export default function Roteiros() {
 
         <main className="max-w-2xl mx-auto pb-20">
           {/* Hero image */}
-          <div className="relative aspect-[4/5] overflow-hidden" style={{ animation: "fadeInUp 0.4s ease-out both" }}>
+          <div className="relative aspect-[4/5] overflow-hidden animate-fade-in-up">
             <img src={stop.image} alt={stop.name} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
@@ -348,12 +342,6 @@ export default function Roteiros() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <style>{`
-          @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}</style>
       </div>
     );
   }
@@ -404,8 +392,8 @@ export default function Roteiros() {
                   {selectedRoute.stops.map((stop, i) => (
                     <div
                       key={i}
-                      className="relative flex items-center gap-3 p-3 bg-card rounded-xl border border-border/50"
-                      style={{ animationDelay: `${i * 80}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+                      className="relative flex items-center gap-3 p-4 bg-card rounded-xl border border-border/50 animate-fade-in-up"
+                      style={{ animationDelay: `${i * 80}ms` }}
                     >
                       {/* Number circle */}
                       <div className="absolute -left-8 w-[30px] h-[30px] rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold z-10">
@@ -450,12 +438,6 @@ export default function Roteiros() {
         </main>
 
         <BottomNav />
-        <style>{`
-          @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}</style>
       </div>
     );
   }
@@ -519,7 +501,7 @@ export default function Roteiros() {
                 <button
                   key={route.id}
                   onClick={() => setSelectedRoute(route)}
-                  className="w-full flex items-center gap-3 p-3 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+                  className="w-full flex items-center gap-3 p-4 bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
                 >
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <Icon className="w-5 h-5 text-primary" />
@@ -535,8 +517,12 @@ export default function Roteiros() {
           </div>
 
           {filteredSuggested.length === 0 && (
-            <div className="py-8 text-center text-muted-foreground">
-              <p className="text-sm">Nenhum roteiro sugerido nesta categoria</p>
+            <div className="py-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                <MapPin className="w-7 h-7 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Nenhum roteiro sugerido</p>
+              <p className="text-xs text-muted-foreground mt-1">Tente outro filtro</p>
             </div>
           )}
         </div>
@@ -556,7 +542,7 @@ export default function Roteiros() {
                   <div key={route.id} className="relative">
                     <button
                       onClick={() => setSelectedRoute(route)}
-                      className="w-full flex items-center gap-3 p-3 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+                      className="w-full flex items-center gap-3 p-4 bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
                     >
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-primary" />
@@ -808,12 +794,6 @@ export default function Roteiros() {
 
       <BottomNav />
 
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }
