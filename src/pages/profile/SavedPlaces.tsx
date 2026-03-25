@@ -46,8 +46,8 @@ export default function SavedPlaces() {
           filtered.map((est, i) => (
             <div
               key={est.id}
-              className="flex gap-4 p-4 bg-card rounded-lg border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
-              style={{ animationDelay: `${i * 80}ms`, animation: "fadeInUp 0.4s ease-out both" }}
+              className="flex gap-4 p-4 bg-card rounded-xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] animate-fade-in-up"
+              style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                 <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
