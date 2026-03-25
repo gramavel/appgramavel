@@ -323,7 +323,7 @@ export default function Explore() {
 
             {/* Experiences Carousel */}
             <div>
-              <h2 className="text-lg font-semibold mb-4">Experiências</h2>
+              <h2 className="text-base font-semibold tracking-tight mb-4">Experiências</h2>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
                   {EXPERIENCES.map((exp) => (
