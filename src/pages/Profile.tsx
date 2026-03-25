@@ -133,7 +133,7 @@ export default function Profile() {
               {earnedBadges.map((badge) => (
                 <div
                   key={badge.id}
-                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-card rounded-lg border border-border/50 shadow-card active:scale-95 transition-transform cursor-pointer"
+                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border/50 shadow-card active:scale-95 transition-transform cursor-pointer"
                   onClick={() => navigate("/perfil/badges")}
                 >
                   <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: badge.color + "22" }}>
