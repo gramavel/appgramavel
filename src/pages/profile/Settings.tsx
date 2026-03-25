@@ -74,7 +74,7 @@ export default function Settings() {
                 Sair da conta
               </button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="rounded-2xl">
               <AlertDialogHeader>
                 <AlertDialogTitle>Sair da conta</AlertDialogTitle>
                 <AlertDialogDescription>
