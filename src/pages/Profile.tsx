@@ -232,12 +232,6 @@ export default function Profile() {
         aspectRatio="4/5"
       />
 
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

@@ -82,8 +82,8 @@ export default function Settings() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-md">Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md">
+                <AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full">
                   Sair
                 </AlertDialogAction>
               </AlertDialogFooter>

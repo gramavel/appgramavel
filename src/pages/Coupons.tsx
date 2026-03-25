@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Ticket } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CategoryBar } from "@/components/layout/CategoryBar";

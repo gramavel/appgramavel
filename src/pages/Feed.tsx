@@ -25,8 +25,12 @@ export default function Feed() {
             <PostCard key={post.id} post={post} />
           ))}
           {filteredPosts.length === 0 && (
-            <div className="py-12 text-center text-muted-foreground">
-              <p className="text-sm">Nenhum post encontrado nesta categoria</p>
+            <div className="py-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              </div>
+              <p className="text-sm font-semibold text-foreground">Nenhum post encontrado</p>
+              <p className="text-xs text-muted-foreground mt-1">Tente outra categoria</p>
             </div>
           )}
         </div>
