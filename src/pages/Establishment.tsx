@@ -161,7 +161,7 @@ export default function Establishment() {
                 <MessageSquarePlus className="h-4 w-4" /> Deixar avaliação
               </Button>
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-4 p-4 border rounded-lg">
+                <div key={i} className="flex gap-4 p-4 border rounded-xl">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
                   </Avatar>
