@@ -327,7 +327,7 @@ export default function Explore() {
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
                   {EXPERIENCES.map((exp) => (
-                    <div key={exp.id} className="relative shrink-0 w-[70%] h-36 rounded-lg overflow-hidden">
+                    <div key={exp.id} className="relative shrink-0 w-[70%] h-36 rounded-xl overflow-hidden">
                       <img src={exp.image} alt={exp.title} className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                       <span className="absolute bottom-4 left-4 right-4 text-primary-foreground font-semibold text-sm">{exp.title}</span>
