@@ -205,7 +205,7 @@ export default function Profile() {
               return (
                 <div
                   key={i}
-                  className={`${isTall ? "row-span-2" : ""} rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity active:scale-[0.97]`}
+                  className={`${isTall ? "row-span-2" : ""} rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity active:scale-[0.97]`}
                   onClick={() => openLightbox(i)}
                 >
                   <img
