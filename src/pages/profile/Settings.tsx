@@ -48,7 +48,7 @@ export default function Settings() {
         </div>
 
         {/* Notifications */}
-        <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border shadow-card">
+        <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border shadow-card">
           <div className="flex items-center gap-4">
             <Bell className="w-5 h-5 text-muted-foreground" />
             <div>
