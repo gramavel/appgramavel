@@ -48,7 +48,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
 
           <Button
             size="sm"
-            className="w-full text-sm h-10 rounded-md"
+            className="w-full text-sm h-10 rounded-full"
             disabled={coupon.status !== "active"}
             onClick={() => setShowQR(true)}
           >
