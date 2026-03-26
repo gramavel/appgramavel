@@ -81,7 +81,7 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
-  const { latitude, longitude } = useLocation();
+  const { latitude, longitude, requestLocation } = useLocation();
   const navigate = useNavigate();
   const [showSearchArea, setShowSearchArea] = useState(false);
 
