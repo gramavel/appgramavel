@@ -81,7 +81,7 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
-  const { latitude, longitude } = useLocation();
+  const { latitude, longitude, requestLocation } = useLocation();
   const navigate = useNavigate();
   const [showSearchArea, setShowSearchArea] = useState(false);
 
@@ -177,11 +177,12 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   }, [latitude, longitude]);
 
   const handleLocateMe = useCallback(() => {
+    requestLocation();
     if (!mapInstance.current) return;
     const lat = latitude ?? -29.3733;
     const lng = longitude ?? -50.8767;
     mapInstance.current.flyTo([lat, lng], 17, { duration: 0.8 });
-  }, [latitude, longitude]);
+  }, [latitude, longitude, requestLocation]);
 
   const handleSearchArea = useCallback(() => {
     setShowSearchArea(false);
@@ -206,7 +207,8 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       {/* My location button */}
       <button
         onClick={handleLocateMe}
-        className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
+        aria-label="Minha localização"
+        className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
       >
         <Locate className="w-5 h-5 text-muted-foreground" />
       </button>

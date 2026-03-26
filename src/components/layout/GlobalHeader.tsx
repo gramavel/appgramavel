@@ -24,7 +24,11 @@ export function GlobalHeader({ showBack, title = "Gramável", onBack }: GlobalHe
           {/* Left */}
           <div className="w-24 flex items-center">
             {showBack ? (
-              <button onClick={() => onBack ? onBack() : navigate(-1)} className="p-1 -ml-1 rounded-full hover:bg-secondary transition-colors active:scale-95">
+              <button
+                onClick={() => onBack ? onBack() : navigate(-1)}
+                className="p-3 -ml-2 rounded-full hover:bg-secondary transition-colors active:scale-95 min-w-[48px] min-h-[48px] flex items-center justify-center"
+                aria-label="Voltar"
+              >
                 <ChevronLeft className="w-6 h-6" />
               </button>
             ) : (
@@ -36,16 +40,17 @@ export function GlobalHeader({ showBack, title = "Gramável", onBack }: GlobalHe
           </div>
 
           {/* Center */}
-          <img src={logoSrc} alt="Gramável" className="h-[18px]" />
+          <img src={logoSrc} alt="Gramável" className="h-[18px]" width={120} height={18} />
 
           {/* Right */}
           <div className="w-24 flex justify-end">
             <button
               onClick={() => setNotificationsOpen(true)}
-              className="relative p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
+              className="relative p-3 rounded-full hover:bg-secondary transition-colors active:scale-95 min-w-[48px] min-h-[48px] flex items-center justify-center"
+              aria-label="Notificações"
             >
               <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
             </button>
           </div>
         </div>

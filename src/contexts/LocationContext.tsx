@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { CITIES } from "@/data/mock";
 
 interface LocationContextType {
@@ -6,6 +6,8 @@ interface LocationContextType {
   latitude: number | null;
   longitude: number | null;
   error: string | null;
+  requestLocation: () => void;
+  locationRequested: boolean;
 }
 
 const LocationContext = createContext<LocationContextType>({
@@ -13,6 +15,8 @@ const LocationContext = createContext<LocationContextType>({
   latitude: null,
   longitude: null,
   error: null,
+  requestLocation: () => {},
+  locationRequested: false,
 });
 
 function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -28,17 +32,20 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<LocationContextType>({
+  const [state, setState] = useState({
     city: "Gramado",
-    latitude: CITIES.gramado.latitude,
-    longitude: CITIES.gramado.longitude,
-    error: null,
+    latitude: CITIES.gramado.latitude as number | null,
+    longitude: CITIES.gramado.longitude as number | null,
+    error: null as string | null,
   });
+  const [locationRequested, setLocationRequested] = useState(false);
+  const [watchId, setWatchId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!navigator.geolocation) return;
+  const requestLocation = useCallback(() => {
+    if (locationRequested || !navigator.geolocation) return;
+    setLocationRequested(true);
 
-    const watchId = navigator.geolocation.watchPosition(
+    const id = navigator.geolocation.watchPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
         const distGramado = haversine(latitude, longitude, CITIES.gramado.latitude, CITIES.gramado.longitude);
@@ -55,11 +62,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       },
       { enableHighAccuracy: true }
     );
+    setWatchId(id);
+  }, [locationRequested]);
 
-    return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
-
-  return <LocationContext.Provider value={state}>{children}</LocationContext.Provider>;
+  return (
+    <LocationContext.Provider value={{ ...state, requestLocation, locationRequested }}>
+      {children}
+    </LocationContext.Provider>
+  );
 }
 
 export const useLocation = () => useContext(LocationContext);
