@@ -207,7 +207,8 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       {/* My location button */}
       <button
         onClick={handleLocateMe}
-        className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
+        aria-label="Minha localização"
+        className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
       >
         <Locate className="w-5 h-5 text-muted-foreground" />
       </button>
