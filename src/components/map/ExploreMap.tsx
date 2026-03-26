@@ -177,11 +177,12 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   }, [latitude, longitude]);
 
   const handleLocateMe = useCallback(() => {
+    requestLocation();
     if (!mapInstance.current) return;
     const lat = latitude ?? -29.3733;
     const lng = longitude ?? -50.8767;
     mapInstance.current.flyTo([lat, lng], 17, { duration: 0.8 });
-  }, [latitude, longitude]);
+  }, [latitude, longitude, requestLocation]);
 
   const handleSearchArea = useCallback(() => {
     setShowSearchArea(false);
