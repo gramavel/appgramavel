@@ -21,8 +21,8 @@ export default function Feed() {
 
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-[64px]">
         <div className="space-y-4">
-          {filteredPosts.map((post) => (
-            <PostCard key={post.id} post={post} />
+          {filteredPosts.map((post, index) => (
+            <PostCard key={post.id} post={post} isFirst={index === 0} />
           ))}
           {filteredPosts.length === 0 && (
             <div className="py-12 text-center">

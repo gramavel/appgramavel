@@ -8,9 +8,10 @@ import type { Post } from "@/data/mock";
 
 interface PostCardProps {
   post: Post;
+  isFirst?: boolean;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, isFirst = false }: PostCardProps) {
   const navigate = useNavigate();
   const [showReactions, setShowReactions] = useState(false);
   const [userReaction, setUserReaction] = useState<string | null>(null);
@@ -41,6 +42,8 @@ export function PostCard({ post }: PostCardProps) {
             src={post.establishment_avatar}
             alt={post.establishment_name}
             className="w-12 h-12 rounded-full object-cover border-2 border-border"
+            width={48}
+            height={48}
           />
           <div>
             <h3 className="text-sm font-semibold leading-tight">{post.establishment_name}</h3>
@@ -58,8 +61,9 @@ export function PostCard({ post }: PostCardProps) {
           </div>
         </div>
         <button
-          className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
+          className="p-3 hover:bg-secondary rounded-full transition-colors active:scale-95"
           onClick={() => setShowSave(true)}
+          aria-label="Salvar lugar"
         >
           {isSaved ? (
             <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
@@ -87,13 +91,16 @@ export function PostCard({ post }: PostCardProps) {
         </span>
       </div>
 
-      {/* Image */}
-      <div className="aspect-[4/5] overflow-hidden">
+      {/* Image — LCP optimization for first card */}
+      <div className="w-full aspect-[4/5] overflow-hidden">
         <img
           src={post.image}
           alt={post.establishment_name}
           className="w-full h-full object-cover"
-          loading="lazy"
+          width={800}
+          height={1000}
+          loading={isFirst ? "eager" : "lazy"}
+          {...(isFirst ? { fetchPriority: "high" as const } : {})}
         />
       </div>
 
@@ -111,6 +118,7 @@ export function PostCard({ post }: PostCardProps) {
         <button
           className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-colors"
           onClick={() => setShowReactions(true)}
+          aria-label="Reagir ao post"
         >
           {displayReactions.map((r) => (
             <span
@@ -120,7 +128,7 @@ export function PostCard({ post }: PostCardProps) {
               {r.emoji}
             </span>
           ))}
-          <span className="text-xs text-muted-foreground ml-0.5">+{totalReactions}</span>
+          <span className="text-xs text-foreground/70 ml-0.5">+{totalReactions}</span>
         </button>
         <div className="flex -space-x-2">
           {post.recent_users.slice(0, 3).map((u, i) => (
@@ -129,6 +137,9 @@ export function PostCard({ post }: PostCardProps) {
               src={u.avatar}
               alt=""
               className="w-6 h-6 rounded-full border-2 border-card object-cover"
+              width={24}
+              height={24}
+              loading="lazy"
             />
           ))}
         </div>
@@ -146,6 +157,8 @@ export function PostCard({ post }: PostCardProps) {
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
           onClick={() => setShowReactions(false)}
+          role="dialog"
+          aria-label="Escolher reação"
         >
           <div
             className="w-full max-w-md bg-card rounded-t-2xl border-t border-border p-4 pb-24 animate-in slide-in-from-bottom duration-200"
@@ -155,7 +168,8 @@ export function PostCard({ post }: PostCardProps) {
               <h4 className="text-sm font-semibold text-foreground">Reagir</h4>
               <button
                 onClick={() => setShowReactions(false)}
-                className="p-1 rounded-full hover:bg-secondary"
+                className="p-2 rounded-full hover:bg-secondary"
+                aria-label="Fechar"
               >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -174,9 +188,10 @@ export function PostCard({ post }: PostCardProps) {
                   <button
                     key={item.emoji}
                     onClick={() => handleReact(item.emoji)}
-                    className={`flex flex-col items-center gap-1 p-4 rounded-lg transition-all ${
+                    className={`flex flex-col items-center gap-1 p-4 rounded-lg transition-all min-w-[48px] min-h-[48px] ${
                       isActive ? "bg-primary/10 scale-110" : "hover:bg-secondary"
                     }`}
+                    aria-label={`Reagir com ${item.name}`}
                   >
                     <span className="text-2xl">{item.emoji}</span>
                     <span className="text-xs font-medium text-foreground">{item.name}</span>
