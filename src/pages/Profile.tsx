@@ -96,7 +96,7 @@ export default function Profile() {
               <span className="text-xs text-muted-foreground">Viajando há 5 dias</span>
             </div>
 
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-4 mb-4">
               <Button variant="outline" size="sm" className="rounded-full gap-1.5 h-8 text-xs" onClick={() => navigate("/perfil/configuracoes")}>
                 <Pencil className="w-3 h-3" />
                 Editar perfil
