@@ -201,8 +201,8 @@ export default function Profile() {
       <BottomNav />
 
       <ImageLightbox
-        images={MEMORIES.map(m => m.src)}
-        captions={MEMORIES.map(m => m.caption)}
+        images={MEMORIES.slice(0, 12).map(m => m.src)}
+        captions={MEMORIES.slice(0, 12).map(m => m.caption)}
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
