@@ -177,23 +177,23 @@ export default function Profile() {
           </div>
 
           <div className="grid grid-cols-3 gap-1.5">
-            {MEMORIES.map((mem, i) => {
-              const isTall = i % 5 === 0;
-              return (
-                <div
-                  key={i}
-                  className={`${isTall ? "row-span-2" : ""} rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity active:scale-[0.97]`}
-                  onClick={() => openLightbox(i)}
-                >
-                  <img
-                    src={mem.src}
-                    alt={mem.caption}
-                    className={`w-full ${isTall ? "h-full" : "aspect-square"} object-cover`}
-                    loading="lazy"
-                  />
+            {MEMORIES.slice(0, 12).map((mem, i) => (
+              <div
+                key={i}
+                className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative"
+                onClick={() => openLightbox(i)}
+              >
+                <img
+                  src={mem.src}
+                  alt={mem.caption}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 transition-all flex items-center justify-center">
+                  <Heart className="h-4 w-4 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </main>
