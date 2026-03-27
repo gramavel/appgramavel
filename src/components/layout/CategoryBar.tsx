@@ -25,7 +25,7 @@ export function CategoryBar({ selected, onSelect }: CategoryBarProps) {
   return (
     <div
       className={cn(
-        "fixed top-[52px] left-0 right-0 z-30 bg-card/95 backdrop-blur-md border-b border-border/50 transition-all duration-300",
+        "fixed top-[48px] left-0 right-0 z-30 bg-card/95 backdrop-blur-md border-b border-border/50 transition-all duration-300",
         visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
       )}
     >
