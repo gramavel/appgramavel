@@ -96,7 +96,7 @@ export default function Profile() {
               <span className="text-xs text-muted-foreground">Viajando há 5 dias</span>
             </div>
 
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-4 mb-4">
               <Button variant="outline" size="sm" className="rounded-full gap-1.5 h-8 text-xs" onClick={() => navigate("/perfil/configuracoes")}>
                 <Pencil className="w-3 h-3" />
                 Editar perfil
@@ -122,29 +122,6 @@ export default function Profile() {
           ))}
         </div>
 
-        {/* Badges earned preview */}
-        {earnedBadges.length > 0 && (
-          <div className="px-4 mt-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold tracking-widest text-muted-foreground uppercase">Conquistas recentes</span>
-              <button onClick={() => navigate("/perfil/badges")} className="text-xs text-primary font-medium">Ver todas</button>
-            </div>
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
-              {earnedBadges.map((badge) => (
-                <div
-                  key={badge.id}
-                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border/50 shadow-card active:scale-95 transition-transform cursor-pointer"
-                  onClick={() => navigate("/perfil/badges")}
-                >
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: badge.color + "22" }}>
-                    <Award className="w-3 h-3" style={{ color: badge.color }} />
-                  </div>
-                  <span className="text-xs font-medium text-foreground whitespace-nowrap">{badge.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Timeline */}
         <div className="px-4 mt-6">
@@ -200,23 +177,23 @@ export default function Profile() {
           </div>
 
           <div className="grid grid-cols-3 gap-1.5">
-            {MEMORIES.map((mem, i) => {
-              const isTall = i % 5 === 0;
-              return (
-                <div
-                  key={i}
-                  className={`${isTall ? "row-span-2" : ""} rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity active:scale-[0.97]`}
-                  onClick={() => openLightbox(i)}
-                >
-                  <img
-                    src={mem.src}
-                    alt={mem.caption}
-                    className={`w-full ${isTall ? "h-full" : "aspect-square"} object-cover`}
-                    loading="lazy"
-                  />
+            {MEMORIES.slice(0, 12).map((mem, i) => (
+              <div
+                key={i}
+                className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative"
+                onClick={() => openLightbox(i)}
+              >
+                <img
+                  src={mem.src}
+                  alt={mem.caption}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 transition-all flex items-center justify-center">
+                  <Heart className="h-4 w-4 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </main>
@@ -224,8 +201,8 @@ export default function Profile() {
       <BottomNav />
 
       <ImageLightbox
-        images={MEMORIES.map(m => m.src)}
-        captions={MEMORIES.map(m => m.caption)}
+        images={MEMORIES.slice(0, 12).map(m => m.src)}
+        captions={MEMORIES.slice(0, 12).map(m => m.caption)}
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
