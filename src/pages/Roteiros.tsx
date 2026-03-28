@@ -444,7 +444,7 @@ export default function Roteiros() {
 
   // ─── Main List View ───
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-14">
       <GlobalHeader title="Roteiros" />
 
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-6">
