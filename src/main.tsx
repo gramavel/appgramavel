@@ -1,10 +1,9 @@
-/* v2 - force reload */
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
 async function setupServiceWorker() {
-  if (!("serviceWorker" in navigator)) return;
+  if (!("serviceWorker" in navigator)) return false;
 
   if (import.meta.env.PROD) {
     try {
@@ -13,22 +12,35 @@ async function setupServiceWorker() {
     } catch (error) {
       console.error("Falha ao registrar Service Worker:", error);
     }
-    return;
+    return false;
   }
 
+  const hadController = Boolean(navigator.serviceWorker.controller);
   const registrations = await navigator.serviceWorker.getRegistrations();
   await Promise.all(registrations.map((registration) => registration.unregister()));
 
   if ("caches" in window) {
     const keys = await caches.keys();
-    await Promise.all(
-      keys.filter((key) => key.startsWith("gramavel-")).map((key) => caches.delete(key)),
-    );
+    await Promise.all(keys.map((key) => caches.delete(key)));
   }
+
+  return hadController || registrations.length > 0;
 }
 
 setupServiceWorker()
-  .catch((error) => console.error("Falha ao limpar Service Worker em dev:", error))
-  .finally(() => {
+  .then((shouldReload) => {
+    const reloadFlag = "__gramavel_sw_dev_reload_done__";
+
+    if (shouldReload && !sessionStorage.getItem(reloadFlag)) {
+      sessionStorage.setItem(reloadFlag, "1");
+      window.location.reload();
+      return;
+    }
+
+    sessionStorage.removeItem(reloadFlag);
+    createRoot(document.getElementById("root")!).render(<App />);
+  })
+  .catch((error) => {
+    console.error("Falha ao inicializar Service Worker em dev:", error);
     createRoot(document.getElementById("root")!).render(<App />);
   });
