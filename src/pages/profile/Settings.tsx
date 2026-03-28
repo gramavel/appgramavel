@@ -26,7 +26,7 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Configurações" />
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-6">
         {/* Avatar */}
         <div className="flex flex-col items-center">
           <div className="relative">
