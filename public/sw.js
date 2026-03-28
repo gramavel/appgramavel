@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gramavel-v1';
+const CACHE_NAME = 'gramavel-v2';
 
 const STATIC_ASSETS = [
   '/',
@@ -33,11 +33,15 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignora requisições de API, OAuth e terceiros
+  // Ignora requisições de API, OAuth, terceiros e assets de dev/HMR
   if (
     request.method !== 'GET' ||
     url.origin !== self.location.origin ||
-    url.pathname.startsWith('/~oauth')
+    url.pathname.startsWith('/~oauth') ||
+    url.pathname.startsWith('/node_modules/') ||
+    url.pathname.startsWith('/@vite') ||
+    url.pathname.startsWith('/src/') ||
+    url.searchParams.has('v')
   ) {
     return;
   }
@@ -59,11 +63,13 @@ self.addEventListener('fetch', (event) => {
   // Assets estáticos (JS, CSS, imagens): Cache First
   event.respondWith(
     caches.match(request).then(
-      (cached) => cached || fetch(request).then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        return response;
-      })
+      (cached) =>
+        cached ||
+        fetch(request).then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return response;
+        })
     )
   );
 });
