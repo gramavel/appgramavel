@@ -447,7 +447,7 @@ export default function Roteiros() {
     <div className="min-h-screen bg-background">
       <GlobalHeader title="Roteiros" />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-6">
         {/* Filters */}
         <FilterChipsBar>
           {FILTERS.map((filter) => (
