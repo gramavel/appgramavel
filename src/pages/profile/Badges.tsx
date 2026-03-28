@@ -55,7 +55,7 @@ export default function BadgesPage() {
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Minhas Badges" />
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-6">
         {/* Earned */}
         <div>
           <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-4 flex items-center gap-1.5">

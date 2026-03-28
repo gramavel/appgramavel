@@ -119,7 +119,7 @@ export default function Explore() {
     return (
       <div className="min-h-screen bg-background">
         <GlobalHeader showBack title={selectedCategory} onBack={() => { setSelectedCategory(null); setCategoryFilter(null); }} />
-        <main className="max-w-2xl mx-auto pb-20 space-y-4">
+        <main className="max-w-2xl mx-auto pb-20 pt-14 space-y-4">
           {/* Banner */}
           <div className="relative aspect-[2/1] overflow-hidden">
             <img src={CATEGORY_BANNERS[selectedCategory] || CATEGORY_BANNERS["Restaurantes"]} alt={selectedCategory} className="w-full h-full object-cover" />
@@ -209,7 +209,7 @@ export default function Explore() {
     <div className="min-h-screen bg-background">
       <GlobalHeader title="Explorar" />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-6">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

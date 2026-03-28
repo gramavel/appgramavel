@@ -140,7 +140,7 @@ export default function RoutesPage() {
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Meus Roteiros" />
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-4">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-4">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="w-full grid grid-cols-2">
             <TabsTrigger value="in_progress" className="gap-1.5 text-sm">

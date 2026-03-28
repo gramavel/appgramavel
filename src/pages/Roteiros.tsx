@@ -150,7 +150,7 @@ export default function Roteiros() {
     return (
       <div className="min-h-screen bg-background">
         <GlobalHeader showBack onBack={finishRoute} />
-        <main className="max-w-2xl mx-auto px-4 pb-20 flex flex-col items-center justify-center min-h-[70vh]">
+        <main className="max-w-2xl mx-auto px-4 pb-20 pt-14 flex flex-col items-center justify-center min-h-[70vh]">
           <div className="text-center space-y-4 animate-scale-in">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
               <PartyPopper className="w-10 h-10 text-primary" />
@@ -213,7 +213,7 @@ export default function Roteiros() {
       <div className="min-h-screen bg-background">
         <GlobalHeader showBack onBack={() => setShowExitDialog(true)} />
 
-        <main className="max-w-2xl mx-auto pb-20">
+        <main className="max-w-2xl mx-auto pb-20 pt-14">
           {/* Hero image */}
           <div className="relative aspect-[4/5] overflow-hidden animate-fade-in-up">
             <img src={stop.image} alt={stop.name} className="w-full h-full object-cover" />
@@ -447,7 +447,7 @@ export default function Roteiros() {
     <div className="min-h-screen bg-background">
       <GlobalHeader title="Roteiros" />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-4 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-6">
         {/* Filters */}
         <FilterChipsBar>
           {FILTERS.map((filter) => (

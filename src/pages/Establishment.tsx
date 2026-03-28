@@ -82,7 +82,7 @@ export default function Establishment() {
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title={est.name} />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 space-y-4 pt-4">
+      <main className="max-w-2xl mx-auto px-4 pb-20 space-y-4 pt-16">
         {/* Banner */}
         <div className="relative aspect-[2/1] rounded-lg overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
           <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
