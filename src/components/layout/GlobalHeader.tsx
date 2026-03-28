@@ -19,7 +19,7 @@ export function GlobalHeader({ showBack, title = "Gramável", onBack }: GlobalHe
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border/50">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-b border-border/50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Left */}
           <div className="w-24 flex items-center">
