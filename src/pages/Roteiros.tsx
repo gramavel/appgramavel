@@ -213,7 +213,7 @@ export default function Roteiros() {
       <div className="min-h-screen bg-background">
         <GlobalHeader showBack onBack={() => setShowExitDialog(true)} />
 
-        <main className="max-w-2xl mx-auto pb-20">
+        <main className="max-w-2xl mx-auto pb-20 pt-14">
           {/* Hero image */}
           <div className="relative aspect-[4/5] overflow-hidden animate-fade-in-up">
             <img src={stop.image} alt={stop.name} className="w-full h-full object-cover" />
