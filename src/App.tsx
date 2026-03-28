@@ -8,11 +8,11 @@ import { LocationProvider } from "@/contexts/LocationContext";
 import { useScrollRestore } from "@/hooks/useScrollRestore";
 import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
 
 // Lazy-loaded routes
 const Explore = lazy(() => import("./pages/Explore"));
 const Coupons = lazy(() => import("./pages/Coupons"));
-const Profile = lazy(() => import("./pages/Profile"));
 const Roteiros = lazy(() => import("./pages/Roteiros"));
 const Establishment = lazy(() => import("./pages/Establishment"));
 const Auth = lazy(() => import("./pages/Auth"));
