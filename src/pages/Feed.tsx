@@ -19,7 +19,7 @@ export default function Feed() {
       <GlobalHeader />
       <CategoryBar selected={selectedCategory} onSelect={setSelectedCategory} />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[112px]">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[104px]">
         <div className="space-y-4">
           {filteredPosts.map((post, index) => (
             <PostCard key={post.id} post={post} isFirst={index === 0} />
