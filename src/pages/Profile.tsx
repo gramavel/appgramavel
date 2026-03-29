@@ -67,7 +67,7 @@ export default function Profile() {
     <div className="min-h-screen bg-background">
       <GlobalHeader title="Meu Gramável" />
 
-      <main className="max-w-2xl mx-auto pb-20 space-y-0 mt-14">
+      <main className="max-w-2xl mx-auto pb-20 space-y-0 mt-[72px]">
         {/* Cover + Avatar Section */}
         <div className="relative">
           <div className="h-28 bg-gradient-primary relative overflow-hidden">
