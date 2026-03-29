@@ -209,7 +209,7 @@ export default function Explore() {
     <div className="min-h-screen bg-background pt-14">
       <GlobalHeader title="Explorar" />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[60px] space-y-6">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
