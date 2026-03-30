@@ -67,7 +67,7 @@ export default function Profile() {
     <div className="min-h-screen bg-background">
       <GlobalHeader title="Meu Gramável" />
 
-      <main className="max-w-2xl mx-auto pb-20 space-y-0 mt-[72px]">
+      <main className="max-w-2xl mx-auto pb-20 space-y-6 mt-[72px]">
         {/* Cover + Avatar Section */}
         <div className="relative">
           <div className="h-28 bg-gradient-primary relative overflow-hidden">
@@ -106,7 +106,7 @@ export default function Profile() {
         </div>
 
         {/* Stats Row */}
-        <div className="flex justify-around py-4 mx-4 mt-4 bg-card rounded-xl border border-border/50 shadow-card">
+        <div className="flex justify-around py-4 mx-4 bg-card rounded-xl border border-border/50 shadow-card">
           {STATS.map(({ label, value, icon: Icon, to }) => (
             <button
               key={label}
@@ -124,7 +124,7 @@ export default function Profile() {
 
 
         {/* Timeline Preview */}
-        <div className="px-4 mt-6">
+        <div className="px-4">
           <div className="relative pl-6">
             <div className="absolute left-[9px] top-2 bottom-2 w-[2px] bg-border" />
 
@@ -169,7 +169,7 @@ export default function Profile() {
         </div>
 
         {/* Memories */}
-        <div className="px-4 mt-6">
+        <div className="px-4">
           <div className="grid grid-cols-3 gap-1.5">
             {MEMORIES.slice(0, 12).map((mem, i) => (
               <div
