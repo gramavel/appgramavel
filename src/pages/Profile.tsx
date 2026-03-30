@@ -79,7 +79,7 @@ export default function Profile() {
             }} />
           </div>
 
-          <div className="flex flex-col items-center -mt-14 relative z-10 px-4">
+          <div className="flex flex-col items-center -mt-11 relative z-10 px-4">
             <div className="p-[3px] rounded-full bg-gradient-to-tr from-primary to-primary/60 shadow-lg">
               <Avatar className="w-[88px] h-[88px] border-[3px] border-background">
                 <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop" />
