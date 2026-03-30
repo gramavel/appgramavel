@@ -12,8 +12,11 @@ import Profile from "./pages/Profile";
 
 // Lazy-loaded routes
 const Explore = lazy(() => import("./pages/Explore"));
+const ExploreCategory = lazy(() => import("./pages/ExploreCategory"));
 const Coupons = lazy(() => import("./pages/Coupons"));
 const Roteiros = lazy(() => import("./pages/Roteiros"));
+const RoteiroDetail = lazy(() => import("./pages/RoteiroDetail"));
+const RoteiroNavigation = lazy(() => import("./pages/RoteiroNavigation"));
 const Establishment = lazy(() => import("./pages/Establishment"));
 const Auth = lazy(() => import("./pages/Auth"));
 const SavedPlaces = lazy(() => import("./pages/profile/SavedPlaces"));
@@ -49,8 +52,11 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Feed />} />
               <Route path="/map" element={<Explore />} />
+              <Route path="/map/categoria/:category" element={<ExploreCategory />} />
               <Route path="/coupons" element={<Coupons />} />
               <Route path="/roteiros" element={<Roteiros />} />
+              <Route path="/roteiros/:id" element={<RoteiroDetail />} />
+              <Route path="/roteiros/:id/navegar" element={<RoteiroNavigation />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/estabelecimento/:slug" element={<Establishment />} />
               <Route path="/auth" element={<Auth />} />
