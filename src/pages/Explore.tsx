@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Map as MapIcon, Heart } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CATEGORIES, MOCK_ESTABLISHMENTS, MOCK_COUPONS, EXPERIENCES } from "@/data/mock";
-import { CouponCard } from "@/components/coupons/CouponCard";
+import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES } from "@/data/mock";
 import { cn } from "@/lib/utils";
 import ExploreMap from "@/components/map/ExploreMap";
 import "@/components/map/map-styles.css";
@@ -33,61 +32,10 @@ const RECOMMENDED_PLACES = [
   { name: "Casa da Montanha", category: "Hotéis", image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop", rating: 4.8 },
 ];
 
-const CATEGORY_BANNERS: Record<string, string> = {
-  "Restaurantes": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=400&fit=crop",
-  "Cafés": "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=800&h=400&fit=crop",
-  "Hotéis": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=400&fit=crop",
-  "Atrações": "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=800&h=400&fit=crop",
-  "Compras": "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=800&h=400&fit=crop",
-  "Bares & Vinícolas": "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&h=400&fit=crop",
-  "Cupons": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=400&fit=crop",
-};
-
-const CATEGORY_FILTER_CHIPS: Record<string, { label: string; icon: typeof MapPin }[]> = {
-  "Restaurantes": [
-    { label: "Perto de você", icon: MapPin },
-    { label: "Abertos agora", icon: Clock },
-    { label: "Mais bem avaliados", icon: Star },
-    { label: "Pet friendly", icon: Dog },
-  ],
-  "Cafés": [
-    { label: "Perto de você", icon: MapPin },
-    { label: "Abertos agora", icon: Clock },
-    { label: "Mais bem avaliados", icon: Star },
-  ],
-  "Hotéis": [
-    { label: "Perto de você", icon: MapPin },
-    { label: "Mais bem avaliados", icon: Star },
-  ],
-  "Atrações": [
-    { label: "Perto de você", icon: MapPin },
-    { label: "Mais bem avaliados", icon: Star },
-    { label: "Em alta hoje", icon: TrendingUp },
-  ],
-  "Compras": [
-    { label: "Perto de você", icon: MapPin },
-    { label: "Abertos agora", icon: Clock },
-    { label: "Mais bem avaliados", icon: Star },
-  ],
-  "Bares & Vinícolas": [
-    { label: "Perto de você", icon: MapPin },
-    { label: "Abertos agora", icon: Clock },
-    { label: "Mais bem avaliados", icon: Star },
-  ],
-  "Cupons": [
-    { label: "Restaurantes", icon: MapPin },
-    { label: "Cafés", icon: Clock },
-    { label: "Atrações", icon: Star },
-    { label: "Bares & Vinícolas", icon: TrendingUp },
-  ],
-};
-
 export default function Explore() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const isSearching = search.length > 0 || activeFilter !== null;
@@ -100,110 +48,6 @@ export default function Explore() {
     }
     return true;
   });
-
-  const categoryEstablishments = selectedCategory && selectedCategory !== "Cupons"
-    ? MOCK_ESTABLISHMENTS.filter((e) => e.category === selectedCategory).slice(0, 10)
-    : [];
-
-  const categoryCoupons = selectedCategory === "Cupons"
-    ? (categoryFilter ? MOCK_COUPONS.filter(c => c.category === categoryFilter) : MOCK_COUPONS)
-    : [];
-
-  // Category detail view
-  if (selectedCategory) {
-    const isCoupons = selectedCategory === "Cupons";
-    const catIcon = CATEGORIES.find(c => c.label === selectedCategory);
-    const CatIcon = isCoupons ? Ticket : catIcon?.icon;
-    const filters = CATEGORY_FILTER_CHIPS[selectedCategory] || CATEGORY_FILTER_CHIPS["Restaurantes"];
-
-    return (
-      <div className="min-h-screen bg-background">
-        <GlobalHeader showBack title={selectedCategory} onBack={() => { setSelectedCategory(null); setCategoryFilter(null); }} />
-        <main className="max-w-2xl mx-auto pb-20 pt-14 space-y-4">
-          {/* Banner */}
-          <div className="relative aspect-[2/1] overflow-hidden">
-            <img src={CATEGORY_BANNERS[selectedCategory] || CATEGORY_BANNERS["Restaurantes"]} alt={selectedCategory} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute bottom-4 left-4 flex items-center gap-2">
-              {CatIcon && <CatIcon className="w-5 h-5 text-primary-foreground" />}
-              <h2 className="text-xl font-bold text-primary-foreground">{selectedCategory}</h2>
-            </div>
-          </div>
-
-          {/* Filter Chips */}
-          <FilterChipsBar className="px-4 mx-0">
-            {filters.map(({ label, icon }) => (
-              <FilterChip
-                key={label}
-                label={label}
-                icon={icon}
-                active={categoryFilter === label}
-                onClick={() => setCategoryFilter(categoryFilter === label ? null : label)}
-              />
-            ))}
-          </FilterChipsBar>
-
-          {/* Results */}
-          <div className="px-4 space-y-4">
-            {isCoupons ? (
-              <>
-                <p className="text-sm text-muted-foreground">{categoryCoupons.length} cupom(ns) disponível(is)</p>
-                {categoryCoupons.map((coupon) => (
-                  <CouponCard key={coupon.id} coupon={coupon} />
-                ))}
-                {categoryCoupons.length === 0 && (
-                  <div className="py-12 text-center">
-                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                      <Ticket className="w-7 h-7 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-semibold text-foreground">Nenhum cupom encontrado</p>
-                    <p className="text-xs text-muted-foreground mt-1">Tente outra categoria</p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground">{categoryEstablishments.length} resultado(s)</p>
-                {categoryEstablishments.map((est) => (
-                  <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
-                    <div className="flex gap-4 p-4">
-                      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                        <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
-                        <p className="text-xs text-muted-foreground truncate">{est.category}</p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            <span>{est.rating}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            <span>{(Math.random() * 3 + 0.2).toFixed(1)} km</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-                {categoryEstablishments.length === 0 && (
-                  <div className="py-12 text-center">
-                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                      <Search className="w-7 h-7 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-semibold text-foreground">Nenhum estabelecimento</p>
-                    <p className="text-xs text-muted-foreground mt-1">Tente outra categoria</p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </main>
-        <BottomNav />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background pt-14">
@@ -257,7 +101,7 @@ export default function Explore() {
                 {CATEGORIES.map(({ label, icon: Icon }) => (
                   <button
                     key={label}
-                    onClick={() => setSelectedCategory(label)}
+                    onClick={() => navigate(`/map/categoria/${encodeURIComponent(label)}`)}
                     className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-200"
                   >
                     <Icon className="w-5 h-5 text-primary" />
@@ -268,7 +112,7 @@ export default function Explore() {
               {/* Cupons - centered below grid */}
               <div className="flex justify-center mt-4">
                 <button
-                  onClick={() => setSelectedCategory("Cupons")}
+                  onClick={() => navigate(`/map/categoria/${encodeURIComponent("Cupons")}`)}
                   className="flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-200 w-[calc(33.333%-0.667rem)]"
                 >
                   <Ticket className="w-5 h-5 text-primary" />
@@ -377,20 +221,19 @@ export default function Explore() {
           </>
         ) : (
           <>
-            {/* Results list */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {filteredEstablishments.length} resultado(s)
-              </p>
-              <button
-                onClick={() => { setShowMap(true); setActiveFilter(null); setSearch(""); }}
-                className="flex items-center gap-1.5 text-xs text-primary font-medium"
-              >
-                <MapIcon className="w-4 h-4" />
-                Ver mapa
-              </button>
-            </div>
+            {/* Search Results */}
             <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">{filteredEstablishments.length} resultado(s)</p>
+                {!showMap && (
+                  <button
+                    onClick={() => { setSearch(""); setActiveFilter(null); setShowMap(true); }}
+                    className="flex items-center gap-1 text-xs text-primary font-medium"
+                  >
+                    <MapIcon className="w-3 h-3" /> Ver mapa
+                  </button>
+                )}
+              </div>
               {filteredEstablishments.map((est) => (
                 <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
                   <div className="flex gap-4 p-4">
@@ -414,6 +257,15 @@ export default function Explore() {
                   </div>
                 </Card>
               ))}
+              {filteredEstablishments.length === 0 && (
+                <div className="py-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                    <Search className="w-7 h-7 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">Nenhum resultado</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tente outra busca</p>
+                </div>
+              )}
             </div>
           </>
         )}
