@@ -5,7 +5,7 @@ import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { MOCK_BADGES, MOCK_TIMELINE } from "@/data/mock";
 import ImageLightbox from "@/components/ui/ImageLightbox";
 
@@ -123,21 +123,13 @@ export default function Profile() {
         </div>
 
 
-        {/* Timeline */}
+        {/* Timeline Preview */}
         <div className="px-4 mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold tracking-widest text-muted-foreground uppercase">Minha viagem</span>
-            <Badge variant="secondary" className="text-xs gap-1 font-medium">
-              <TrendingUp className="w-3 h-3" />
-              {MOCK_TIMELINE.length} atividades
-            </Badge>
-          </div>
-
           <div className="relative pl-6">
             <div className="absolute left-[9px] top-2 bottom-2 w-[2px] bg-border" />
 
             <div className="space-y-2">
-              {MOCK_TIMELINE.map((item, idx) => {
+              {MOCK_TIMELINE.slice(0, 3).map((item, idx) => {
                 const TimeIcon = TIMELINE_ICONS[item.type] || CheckCircle2;
                 return (
                   <div
@@ -164,18 +156,20 @@ export default function Profile() {
               })}
             </div>
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-4 rounded-full gap-1.5 h-9 text-xs font-medium"
+            onClick={() => navigate("/perfil/timeline")}
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            Ver linha do tempo completa
+          </Button>
         </div>
 
         {/* Memories */}
         <div className="px-4 mt-6">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-1.5">
-              <Camera className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold tracking-widest text-muted-foreground uppercase">Memórias ({MEMORIES.length})</span>
-            </div>
-            <button className="text-xs text-primary font-medium">+ Adicionar</button>
-          </div>
-
           <div className="grid grid-cols-3 gap-1.5">
             {MEMORIES.slice(0, 12).map((mem, i) => (
               <div
@@ -195,6 +189,15 @@ export default function Profile() {
               </div>
             ))}
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-4 rounded-full gap-1.5 h-9 text-xs font-medium"
+          >
+            <Camera className="w-3.5 h-3.5" />
+            Adicionar fotos
+          </Button>
         </div>
       </main>
 
