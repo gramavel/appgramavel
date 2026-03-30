@@ -169,7 +169,7 @@ export default function Profile() {
         </div>
 
         {/* Memories */}
-        <div className="px-4 mt-6">
+        <div className="px-4">
           <div className="grid grid-cols-3 gap-1.5">
             {MEMORIES.slice(0, 12).map((mem, i) => (
               <div
