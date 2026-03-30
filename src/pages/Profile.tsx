@@ -5,7 +5,7 @@ import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { MOCK_BADGES, MOCK_TIMELINE } from "@/data/mock";
 import ImageLightbox from "@/components/ui/ImageLightbox";
 
