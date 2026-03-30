@@ -124,7 +124,7 @@ export default function Profile() {
 
 
         {/* Timeline Preview */}
-        <div className="px-4 mt-6">
+        <div className="px-4">
           <div className="relative pl-6">
             <div className="absolute left-[9px] top-2 bottom-2 w-[2px] bg-border" />
 
