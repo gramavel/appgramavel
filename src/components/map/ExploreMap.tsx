@@ -84,6 +84,7 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   const { latitude, longitude, requestLocation } = useLocation();
   const navigate = useNavigate();
   const [showSearchArea, setShowSearchArea] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Initialize map
   useEffect(() => {
