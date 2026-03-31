@@ -62,6 +62,18 @@ interface NotificationsSheetProps {
 export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetProps) {
   const unreadCount = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
 
+  useEffect(() => {
+    if (!open) return;
+    const handlePopState = () => {
+      onOpenChange(false);
+    };
+    window.history.pushState({ notifications: true }, "");
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [open, onOpenChange]);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md p-0 [&>button]:top-5 [&>button]:right-5 [&>button]:z-10">
