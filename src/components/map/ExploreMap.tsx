@@ -201,11 +201,11 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
     });
   }, []);
 
-  return (
+  const mapContent = (
     <div
-      className={`relative overflow-hidden transition-all duration-300 ease-in-out ${
+      className={`relative overflow-hidden ${
         isFullscreen
-          ? "fixed inset-0 z-50 rounded-none"
+          ? "fixed inset-0 z-50"
           : "h-[45vh] min-h-[350px] rounded-xl border border-border shadow-card"
       }`}
     >
@@ -247,4 +247,16 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       </button>
     </div>
   );
+
+  // Use portal for fullscreen to escape any ancestor transforms/overflow
+  if (isFullscreen) {
+    return (
+      <>
+        <div className="h-[45vh] min-h-[350px]" /> {/* placeholder */}
+        {createPortal(mapContent, document.body)}
+      </>
+    );
+  }
+
+  return mapContent;
 }
