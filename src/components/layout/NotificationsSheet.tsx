@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Ticket, Award, MapPin, TrendingUp, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { ComponentType } from "react";

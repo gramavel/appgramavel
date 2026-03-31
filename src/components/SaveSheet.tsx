@@ -20,6 +20,12 @@ export function SaveSheet({ open, onOpenChange, itemName, onSaved }: SaveSheetPr
     toast.success(`"${itemName}" salvo na sua wishlist!`);
   };
 
+  const handleVisited = () => {
+    onOpenChange(false);
+    onSaved?.();
+    toast.success(`"${itemName}" marcado como visitado!`);
+  };
+
   const handleAddToRoute = (routeId: string) => {
     const route = MOCK_ROUTES.find((r) => r.id === routeId);
     setShowRouteSelect(false);

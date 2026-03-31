@@ -218,7 +218,7 @@ export default function Establishment() {
                 ].map(({ day, hours }) => (
                   <div key={day} className="contents">
                     <span className="font-medium text-foreground">{day}:</span>
-                    <span className={hours ? "text-muted-foreground" : "text-destructive"}>
+                    <span className="text-muted-foreground">
                       {hours || "Fechado"}
                     </span>
                   </div>

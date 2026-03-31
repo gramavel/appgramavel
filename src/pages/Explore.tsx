@@ -230,7 +230,7 @@ export default function Explore() {
                     onClick={() => { setSearch(""); setActiveFilter(null); setShowMap(true); }}
                     className="flex items-center gap-1 text-xs text-primary font-medium"
                   >
-                    <MapIcon className="w-3 h-3" /> Ver mapa
+                    <X className="w-3 h-3" /> Fechar
                   </button>
                 )}
               </div>
