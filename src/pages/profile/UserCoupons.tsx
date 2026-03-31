@@ -42,7 +42,7 @@ export default function UserCoupons() {
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Meus Cupons" />
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[72px]">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16">
         <Tabs defaultValue="salvos">
           <TabsList className="w-full grid grid-cols-2 mb-4">
             <TabsTrigger value="salvos" className="gap-1.5">
