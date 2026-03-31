@@ -190,8 +190,24 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
     // In a real app, fetch establishments in the visible bounds
   }, []);
 
+  const toggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => {
+      const next = !prev;
+      setTimeout(() => {
+        mapInstance.current?.invalidateSize();
+      }, 350);
+      return next;
+    });
+  }, []);
+
   return (
-    <div className="relative h-[45vh] min-h-[350px] rounded-xl border border-border shadow-card overflow-hidden">
+    <div
+      className={`relative overflow-hidden transition-all duration-300 ease-in-out ${
+        isFullscreen
+          ? "fixed inset-0 z-50 rounded-none"
+          : "h-[45vh] min-h-[350px] rounded-xl border border-border shadow-card"
+      }`}
+    >
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
       {/* Search this area button */}
@@ -205,11 +221,26 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
         </button>
       )}
 
+      {/* Fullscreen toggle button */}
+      <button
+        onClick={toggleFullscreen}
+        aria-label={isFullscreen ? "Sair do modo tela cheia" : "Expandir mapa"}
+        className="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
+      >
+        {isFullscreen ? (
+          <Minimize2 className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <Maximize2 className="w-4 h-4 text-muted-foreground" />
+        )}
+      </button>
+
       {/* My location button */}
       <button
         onClick={handleLocateMe}
         aria-label="Minha localização"
-        className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
+        className={`absolute right-4 z-10 flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors ${
+          isFullscreen ? "bottom-8" : "bottom-4"
+        }`}
       >
         <Locate className="w-5 h-5 text-muted-foreground" />
       </button>
