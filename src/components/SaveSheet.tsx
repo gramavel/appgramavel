@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, Route as RouteIcon } from "lucide-react";
+import { Heart, Route as RouteIcon, CheckCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { MOCK_ROUTES } from "@/data/mock";
 import { toast } from "sonner";
