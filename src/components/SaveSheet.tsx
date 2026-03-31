@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, Route as RouteIcon } from "lucide-react";
+import { Heart, Route as RouteIcon, CheckCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { MOCK_ROUTES } from "@/data/mock";
 import { toast } from "sonner";
@@ -20,6 +20,12 @@ export function SaveSheet({ open, onOpenChange, itemName, onSaved }: SaveSheetPr
     toast.success(`"${itemName}" salvo na sua wishlist!`);
   };
 
+  const handleVisited = () => {
+    onOpenChange(false);
+    onSaved?.();
+    toast.success(`"${itemName}" marcado como visitado!`);
+  };
+
   const handleAddToRoute = (routeId: string) => {
     const route = MOCK_ROUTES.find((r) => r.id === routeId);
     setShowRouteSelect(false);
@@ -31,10 +37,7 @@ export function SaveSheet({ open, onOpenChange, itemName, onSaved }: SaveSheetPr
     <>
       <Sheet open={open && !showRouteSelect} onOpenChange={onOpenChange}>
         <SheetContent side="bottom" className="rounded-t-2xl">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="text-lg font-bold text-foreground">Salvar em...</SheetTitle>
-          </SheetHeader>
-          <div className="space-y-2 pb-4">
+          <div className="space-y-2 pb-4 pt-2">
             <button
               onClick={() => { onOpenChange(false); setShowRouteSelect(true); }}
               className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
@@ -57,6 +60,18 @@ export function SaveSheet({ open, onOpenChange, itemName, onSaved }: SaveSheetPr
               <div className="text-left flex-1">
                 <p className="text-sm font-semibold text-foreground">Quero visitar</p>
                 <p className="text-xs text-muted-foreground">Guardar para visitar nessa viagem</p>
+              </div>
+            </button>
+            <button
+              onClick={handleVisited}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left flex-1">
+                <p className="text-sm font-semibold text-foreground">Já visitei</p>
+                <p className="text-xs text-muted-foreground">Marcar como lugar já visitado</p>
               </div>
             </button>
           </div>

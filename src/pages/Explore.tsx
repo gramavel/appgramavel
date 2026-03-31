@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Map as MapIcon, Heart } from "lucide-react";
+import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Heart } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
@@ -230,7 +230,7 @@ export default function Explore() {
                     onClick={() => { setSearch(""); setActiveFilter(null); setShowMap(true); }}
                     className="flex items-center gap-1 text-xs text-primary font-medium"
                   >
-                    <MapIcon className="w-3 h-3" /> Ver mapa
+                    <X className="w-3 h-3" /> Fechar
                   </button>
                 )}
               </div>

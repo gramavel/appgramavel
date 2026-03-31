@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Ticket, Award, MapPin, TrendingUp, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { ComponentType } from "react";
@@ -61,6 +62,18 @@ interface NotificationsSheetProps {
 
 export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetProps) {
   const unreadCount = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePopState = () => {
+      onOpenChange(false);
+    };
+    window.history.pushState({ notifications: true }, "");
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [open, onOpenChange]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
