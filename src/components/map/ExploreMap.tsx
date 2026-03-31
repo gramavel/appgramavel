@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { createPortal } from "react-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Search, Locate, Maximize2, Minimize2 } from "lucide-react";
+import { Search, Locate } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
 import { useNavigate } from "react-router-dom";
@@ -85,7 +84,6 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   const { latitude, longitude, requestLocation } = useLocation();
   const navigate = useNavigate();
   const [showSearchArea, setShowSearchArea] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Initialize map
   useEffect(() => {
@@ -191,24 +189,8 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
     // In a real app, fetch establishments in the visible bounds
   }, []);
 
-  const toggleFullscreen = useCallback(() => {
-    setIsFullscreen((prev) => {
-      const next = !prev;
-      setTimeout(() => {
-        mapInstance.current?.invalidateSize();
-      }, 350);
-      return next;
-    });
-  }, []);
-
-  const mapContent = (
-    <div
-      className={`relative overflow-hidden ${
-        isFullscreen
-          ? "fixed inset-0 z-50"
-          : "h-[45vh] min-h-[350px] rounded-xl border border-border shadow-card"
-      }`}
-    >
+  return (
+    <div className="relative h-[45vh] min-h-[350px] rounded-xl border border-border shadow-card overflow-hidden">
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
       {/* Search this area button */}
@@ -222,41 +204,14 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
         </button>
       )}
 
-      {/* Fullscreen toggle button */}
-      <button
-        onClick={toggleFullscreen}
-        aria-label={isFullscreen ? "Sair do modo tela cheia" : "Expandir mapa"}
-        className="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
-      >
-        {isFullscreen ? (
-          <Minimize2 className="w-4 h-4 text-muted-foreground" />
-        ) : (
-          <Maximize2 className="w-4 h-4 text-muted-foreground" />
-        )}
-      </button>
-
       {/* My location button */}
       <button
         onClick={handleLocateMe}
         aria-label="Minha localização"
-        className={`absolute right-4 z-10 flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors ${
-          isFullscreen ? "bottom-8" : "bottom-4"
-        }`}
+        className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
       >
         <Locate className="w-5 h-5 text-muted-foreground" />
       </button>
     </div>
   );
-
-  // Use portal for fullscreen to escape any ancestor transforms/overflow
-  if (isFullscreen) {
-    return (
-      <>
-        <div className="h-[45vh] min-h-[350px]" /> {/* placeholder */}
-        {createPortal(mapContent, document.body)}
-      </>
-    );
-  }
-
-  return mapContent;
 }
