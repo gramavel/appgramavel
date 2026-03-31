@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Search, Locate } from "lucide-react";
+import { Search, Locate, Maximize2, Minimize2 } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
 import { useNavigate } from "react-router-dom";
