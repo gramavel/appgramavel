@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Map as MapIcon, Heart } from "lucide-react";
+import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Heart } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
