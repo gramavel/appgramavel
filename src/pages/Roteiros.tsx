@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronRight, Clock, MapPin, Star, Plus, X, Search, MoreVertical, Trash2, Edit3 } from "lucide-react";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useNavigate } from "react-router-dom";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
