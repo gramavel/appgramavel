@@ -164,7 +164,7 @@ export default function RoteiroNavigation() {
               <span>{est?.address || "Gramado, RS"}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+              <Star className="w-4 h-4 text-rating fill-rating" />
               <span>{est?.rating || 4.5} · {est?.category || stop.category}</span>
             </div>
             {est && (
