@@ -118,7 +118,7 @@ export default function Roteiros() {
 
         {/* SECTION 1: Roteiros Sugeridos */}
         <div className="space-y-3">
-          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase">Roteiros sugeridos</p>
+          <SectionHeading>Roteiros sugeridos</SectionHeading>
 
           {/* Featured Route */}
           {filteredSuggested.length > 0 && (
