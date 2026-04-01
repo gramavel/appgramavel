@@ -188,7 +188,7 @@ export default function Roteiros() {
 
         {/* SECTION 2: Meus Roteiros */}
         <div className="space-y-3">
-          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase">Meus roteiros</p>
+          <SectionHeading>Meus roteiros</SectionHeading>
 
           {filteredUser.length > 0 ? (
             <div className="space-y-2">
