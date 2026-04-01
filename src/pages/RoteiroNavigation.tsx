@@ -188,7 +188,7 @@ export default function RoteiroNavigation() {
                 <img src={nextStop.image} alt={nextStop.name} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">A seguir</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">A seguir</p>
                 <p className="text-sm font-medium text-foreground truncate">{nextStop.name}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />

@@ -368,7 +368,7 @@ export default function Roteiros() {
                       </div>
                       <div className="flex-1 text-left min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{est.name}</p>
-                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
                           {est.category}
                         </p>
