@@ -89,7 +89,7 @@ export default function RoteiroNavigation() {
                 <div key={i} className="flex items-center gap-3 text-left">
                   <div className={cn(
                     "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
-                    visited[i] ? "bg-green-500 text-white" : "bg-secondary text-muted-foreground"
+                    visited[i] ? "bg-success text-success-foreground" : "bg-secondary text-muted-foreground"
                   )}>
                     {visited[i] ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
                   </div>
