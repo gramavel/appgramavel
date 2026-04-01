@@ -94,6 +94,24 @@
     --input: 217 33% 17%;
     --ring: 233 100% 69%;
 
+    /* Semantic status tokens — dark */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-soft: 142 40% 15%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 38 40% 15%;
+
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+    --info-soft: 217 40% 15%;
+
+    --rating: 45 93% 47%;
+
+    --surface-elevated: 222 47% 12%;
+    --surface-glass: 222 47% 9% / 0.9;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
