@@ -52,7 +52,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
                 {post.establishment_category}
               </Badge>
               <span className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <Star className="w-3 h-3 fill-rating text-rating" />
                 <span className="text-xs text-muted-foreground">
                   {post.rating} ({post.total_reviews})
                 </span>
@@ -91,7 +91,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         </span>
       </div>
 
-      {/* Image — LCP optimization for first card */}
+      {/* Image */}
       <div className="w-full aspect-[4/5] overflow-hidden">
         <img
           src={post.image}

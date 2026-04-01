@@ -1,6 +1,7 @@
 import { Compass, UtensilsCrossed, Wine, Camera, FerrisWheel, Ticket, CheckCircle2, Lock, CalendarDays } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MOCK_BADGES } from "@/data/mock";
 import type { ComponentType } from "react";
 
@@ -14,12 +15,12 @@ const BADGE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
 };
 
 const BADGE_COLOR_PALETTES: Record<string, { bg: string; border: string; icon: string; ring: string }> = {
-  compass: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-600", ring: "#2563eb" },
-  "utensils-crossed": { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", ring: "#d97706" },
-  wine: { bg: "bg-rose-50", border: "border-rose-200", icon: "text-rose-600", ring: "#e11d48" },
-  camera: { bg: "bg-cyan-50", border: "border-cyan-200", icon: "text-cyan-600", ring: "#0891b2" },
-  "ferris-wheel": { bg: "bg-green-50", border: "border-green-200", icon: "text-green-600", ring: "#16a34a" },
-  ticket: { bg: "bg-yellow-50", border: "border-yellow-200", icon: "text-yellow-600", ring: "#ca8a04" },
+  compass: { bg: "bg-info-soft", border: "border-info/30", icon: "text-info", ring: "hsl(var(--info))" },
+  "utensils-crossed": { bg: "bg-warning-soft", border: "border-warning/30", icon: "text-warning", ring: "hsl(var(--warning))" },
+  wine: { bg: "bg-destructive/10", border: "border-destructive/30", icon: "text-destructive", ring: "hsl(var(--destructive))" },
+  camera: { bg: "bg-info-soft", border: "border-info/30", icon: "text-info", ring: "hsl(var(--info))" },
+  "ferris-wheel": { bg: "bg-success-soft", border: "border-success/30", icon: "text-success", ring: "hsl(var(--success))" },
+  ticket: { bg: "bg-warning-soft", border: "border-warning/30", icon: "text-warning", ring: "hsl(var(--warning))" },
 };
 
 const EARNED_DATES: Record<string, string> = {
@@ -58,10 +59,9 @@ export default function BadgesPage() {
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-6">
         {/* Earned */}
         <div>
-          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-4 flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
+          <SectionHeading icon={CheckCircle2} className="mb-4 [&_svg]:text-success">
             Conquistadas ({earned.length})
-          </p>
+          </SectionHeading>
           <div className="grid grid-cols-2 gap-4">
             {earned.map((b, i) => {
               const BadgeIcon = BADGE_ICONS[b.iconName] || Compass;
@@ -72,8 +72,8 @@ export default function BadgesPage() {
                   className={`relative p-4 rounded-xl border-2 ${palette.bg} ${palette.border} overflow-hidden animate-fade-in-scale`}
                   style={{ animationDelay: `${i * 100}ms` }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer pointer-events-none" />
-                  <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-green-600" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-card/30 to-transparent animate-shimmer pointer-events-none" />
+                  <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-success" />
                   <BadgeIcon className={`w-8 h-8 mb-2 ${palette.icon}`} />
                   <p className="font-semibold text-sm text-foreground">{b.name}</p>
                   <p className="text-xs text-muted-foreground mt-1">{b.description}</p>
@@ -91,14 +91,13 @@ export default function BadgesPage() {
 
         {/* In progress */}
         <div>
-          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-4 flex items-center gap-1.5">
-            <Lock className="w-4 h-4" />
+          <SectionHeading icon={Lock} className="mb-4">
             Em progresso ({inProgress.length})
-          </p>
+          </SectionHeading>
           <div className="grid grid-cols-2 gap-4">
             {inProgress.map((b, i) => {
               const BadgeIcon = BADGE_ICONS[b.iconName] || Compass;
-              const palette = BADGE_COLOR_PALETTES[b.iconName] || { bg: "", border: "", icon: "", ring: "#888" };
+              const palette = BADGE_COLOR_PALETTES[b.iconName] || { bg: "", border: "", icon: "", ring: "hsl(var(--muted-foreground))" };
               return (
                 <div
                   key={b.id}

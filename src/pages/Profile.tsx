@@ -17,9 +17,9 @@ const STATS = [
 ];
 
 const TIMELINE_COLORS: Record<string, string> = {
-  visit: "bg-green-500/10 text-green-600",
-  coupon: "bg-amber-500/10 text-amber-600",
-  review: "bg-yellow-500/10 text-yellow-600",
+  visit: "bg-success-soft text-success",
+  coupon: "bg-warning-soft text-warning",
+  review: "bg-warning-soft text-warning",
   route: "bg-primary/10 text-primary",
 };
 
@@ -80,7 +80,7 @@ export default function Profile() {
           </div>
 
           <div className="flex flex-col items-center -mt-11 relative z-10 px-4">
-            <div className="p-[3px] rounded-full bg-gradient-to-tr from-primary to-primary/60 shadow-lg">
+            <div className="p-0.5 rounded-full bg-gradient-to-tr from-primary to-primary/60 shadow-lg">
               <Avatar className="w-[88px] h-[88px] border-[3px] border-background">
                 <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop" />
                 <AvatarFallback>JD</AvatarFallback>
@@ -126,7 +126,7 @@ export default function Profile() {
         {/* Timeline Preview */}
         <div className="px-4">
           <div className="relative pl-6">
-            <div className="absolute left-[9px] top-2 bottom-2 w-[2px] bg-border" />
+            <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-border" />
 
             <div className="space-y-2">
               {MOCK_TIMELINE.slice(0, 3).map((item, idx) => {
@@ -137,7 +137,7 @@ export default function Profile() {
                     className="relative flex items-center gap-4 p-4 bg-card/60 rounded-xl border border-border/30 hover:bg-card transition-colors animate-fade-in-up"
                     style={{ animationDelay: `${idx * 60}ms` }}
                   >
-                    <div className={`absolute -left-6 w-[18px] h-[18px] rounded-full flex items-center justify-center ring-2 ring-background ${TIMELINE_COLORS[item.type]}`}>
+                    <div className={`absolute -left-6 w-4.5 h-4.5 rounded-full flex items-center justify-center ring-2 ring-background ${TIMELINE_COLORS[item.type]}`}>
                       <TimeIcon className="w-3 h-3" />
                     </div>
 
