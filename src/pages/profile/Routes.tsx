@@ -101,7 +101,7 @@ function RouteCard({ route }: { route: UserRoute }) {
           {route.stops.slice(0, 6).map((stop, j) => (
             <div key={j} className="relative flex-shrink-0">
               <div className={`w-10 h-10 rounded-lg overflow-hidden border-2 ${
-                j < route.completedStops ? "border-green-500" : "border-border opacity-50"
+                j < route.completedStops ? "border-success" : "border-border opacity-50"
               }`}>
                 <img src={stop.image} alt={stop.name} className="w-full h-full object-cover" />
               </div>
