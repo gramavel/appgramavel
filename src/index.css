@@ -53,7 +53,8 @@
 
     /* Surface tokens */
     --surface-elevated: 0 0% 100%;
-    --surface-glass: 0 0% 100% / 0.9;
+    /* :root */
+    --surface-glass: hsl(0 0% 100% / 0.9);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -110,7 +111,8 @@
     --rating: 45 93% 47%;
 
     --surface-elevated: 222 47% 12%;
-    --surface-glass: 222 47% 9% / 0.9;
+    /* .dark */
+    --surface-glass: hsl(222 47% 9% / 0.9);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
