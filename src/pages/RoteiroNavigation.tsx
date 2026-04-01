@@ -89,7 +89,7 @@ export default function RoteiroNavigation() {
                 <div key={i} className="flex items-center gap-3 text-left">
                   <div className={cn(
                     "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
-                    visited[i] ? "bg-green-500 text-white" : "bg-secondary text-muted-foreground"
+                    visited[i] ? "bg-success text-success-foreground" : "bg-secondary text-muted-foreground"
                   )}>
                     {visited[i] ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
                   </div>
@@ -142,7 +142,7 @@ export default function RoteiroNavigation() {
                 <div className={cn(
                   "w-2.5 h-2.5 rounded-full transition-all duration-300",
                   i < currentStop
-                    ? visited[i] ? "bg-green-500" : "bg-muted-foreground/40"
+                    ? visited[i] ? "bg-success" : "bg-muted-foreground/40"
                     : i === currentStop
                       ? "bg-primary ring-2 ring-primary/30 ring-offset-1 ring-offset-background"
                       : "bg-muted"
@@ -164,7 +164,7 @@ export default function RoteiroNavigation() {
               <span>{est?.address || "Gramado, RS"}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+              <Star className="w-4 h-4 text-rating fill-rating" />
               <span>{est?.rating || 4.5} · {est?.category || stop.category}</span>
             </div>
             {est && (
@@ -188,7 +188,7 @@ export default function RoteiroNavigation() {
                 <img src={nextStop.image} alt={nextStop.name} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">A seguir</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">A seguir</p>
                 <p className="text-sm font-medium text-foreground truncate">{nextStop.name}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />

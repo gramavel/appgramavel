@@ -61,7 +61,7 @@ function RouteCard({ route }: { route: UserRoute }) {
           <Badge
             className={`text-xs px-2 py-0.5 border-0 ${
               isCompleted
-                ? "bg-green-500/90 text-primary-foreground"
+                ? "bg-success/90 text-success-foreground"
                 : "bg-primary/90 text-primary-foreground"
             }`}
           >
@@ -101,12 +101,12 @@ function RouteCard({ route }: { route: UserRoute }) {
           {route.stops.slice(0, 6).map((stop, j) => (
             <div key={j} className="relative flex-shrink-0">
               <div className={`w-10 h-10 rounded-lg overflow-hidden border-2 ${
-                j < route.completedStops ? "border-green-500" : "border-border opacity-50"
+                j < route.completedStops ? "border-success" : "border-border opacity-50"
               }`}>
                 <img src={stop.image} alt={stop.name} className="w-full h-full object-cover" />
               </div>
               {j < route.completedStops && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-green-500 flex items-center justify-center ring-2 ring-card">
+                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-success flex items-center justify-center ring-2 ring-card">
                   <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
                 </div>
               )}
