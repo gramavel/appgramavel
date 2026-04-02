@@ -353,8 +353,8 @@ export default function Roteiros() {
                     <button
                       key={est.id}
                       onClick={() => toggleStop(est.id)}
-                      className={cn(
-                        "w-full flex items-center gap-3 p-2.5 rounded-lg border transition-all active:scale-[0.98]",
+                        className={cn(
+                        "w-full flex items-center gap-3 p-3 rounded-xl border transition-all active:scale-[0.98]",
                         selected ? "border-primary bg-primary/5" : "border-border hover:bg-secondary/50"
                       )}
                     >
@@ -414,7 +414,7 @@ export default function Roteiros() {
                 <div className="absolute left-[15px] top-3 bottom-3 w-0.5 bg-primary/20" />
                 <div className="space-y-1">
                   {selectedStopDetails.map((est, i) => (
-                    <div key={est!.id} className="relative flex items-center gap-3 p-2.5 bg-card rounded-lg border border-border/50">
+                    <div key={est!.id} className="relative flex items-center gap-3 p-3 bg-card rounded-xl border border-border/50">
                       <div className="absolute -left-8 w-[30px] h-[30px] rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold z-10">
                         {i + 1}
                       </div>

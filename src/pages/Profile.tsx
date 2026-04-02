@@ -17,9 +17,9 @@ const STATS = [
 ];
 
 const TIMELINE_COLORS: Record<string, string> = {
-  visit: "bg-green-500/10 text-green-600",
-  coupon: "bg-amber-500/10 text-amber-600",
-  review: "bg-yellow-500/10 text-yellow-600",
+  visit: "bg-success/10 text-success",
+  coupon: "bg-warning/10 text-warning",
+  review: "bg-rating/10 text-rating",
   route: "bg-primary/10 text-primary",
 };
 

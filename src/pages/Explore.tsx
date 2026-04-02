@@ -136,7 +136,7 @@ export default function Explore() {
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-xs text-muted-foreground">{place.category}</span>
                           <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-3 h-3 fill-rating text-rating" />
                             <span className="text-xs font-medium">{place.rating}</span>
                           </div>
                         </div>
@@ -162,7 +162,7 @@ export default function Explore() {
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-xs text-muted-foreground">{place.category}</span>
                           <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-3 h-3 fill-rating text-rating" />
                             <span className="text-xs font-medium">{place.rating}</span>
                           </div>
                         </div>
@@ -204,7 +204,7 @@ export default function Explore() {
                         <p className="text-xs text-muted-foreground truncate">{est.category}</p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-3 h-3 fill-rating text-rating" />
                             <span>{est.rating}</span>
                           </div>
                           <div className="flex items-center gap-1">
@@ -245,7 +245,7 @@ export default function Explore() {
                       <p className="text-xs text-muted-foreground truncate">{est.category}</p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          <Star className="w-3 h-3 fill-rating text-rating" />
                           <span>{est.rating}</span>
                         </div>
                         <div className="flex items-center gap-1">
