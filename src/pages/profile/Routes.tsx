@@ -61,7 +61,7 @@ function RouteCard({ route }: { route: UserRoute }) {
           <Badge
             className={`text-xs px-2 py-0.5 border-0 ${
               isCompleted
-                ? "bg-green-500/90 text-primary-foreground"
+                ? "bg-success/90 text-success-foreground"
                 : "bg-primary/90 text-primary-foreground"
             }`}
           >
