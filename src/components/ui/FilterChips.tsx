@@ -13,7 +13,7 @@ export function FilterChip({ label, icon: Icon, active, onClick }: FilterChipPro
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 shrink-0 active:scale-95",
+        "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all duration-200 shrink-0 active:scale-95",
         active
           ? "bg-primary text-primary-foreground"
           : "bg-card border border-primary/30 text-foreground hover:border-primary"

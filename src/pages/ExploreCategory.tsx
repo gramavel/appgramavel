@@ -137,7 +137,7 @@ export default function ExploreCategory() {
                       <p className="text-xs text-muted-foreground truncate">{est.category}</p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-rating text-rating" />
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                           <span>{est.rating}</span>
                         </div>
                         <div className="flex items-center gap-1">

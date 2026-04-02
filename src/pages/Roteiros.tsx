@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ChevronRight, Clock, MapPin, Star, Plus, X, Search, MoreVertical, Trash2, Edit3 } from "lucide-react";
-import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useNavigate } from "react-router-dom";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
@@ -119,7 +118,7 @@ export default function Roteiros() {
 
         {/* SECTION 1: Roteiros Sugeridos */}
         <div className="space-y-3">
-          <SectionHeading>Roteiros sugeridos</SectionHeading>
+          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase">Roteiros sugeridos</p>
 
           {/* Featured Route */}
           {filteredSuggested.length > 0 && (
@@ -189,7 +188,7 @@ export default function Roteiros() {
 
         {/* SECTION 2: Meus Roteiros */}
         <div className="space-y-3">
-          <SectionHeading>Meus roteiros</SectionHeading>
+          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase">Meus roteiros</p>
 
           {filteredUser.length > 0 ? (
             <div className="space-y-2">
@@ -369,7 +368,7 @@ export default function Roteiros() {
                       </div>
                       <div className="flex-1 text-left min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{est.name}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
                           {est.category}
                         </p>
