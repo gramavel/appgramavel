@@ -34,6 +34,15 @@
 
     --radius: 1rem;
 
+    /* Semantic status tokens */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+    --rating: 45 93% 47%;
+
     --gradient-primary: linear-gradient(135deg, hsl(233 100% 69%), hsl(236 100% 79%));
 
     --sidebar-background: 0 0% 98%;
