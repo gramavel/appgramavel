@@ -202,7 +202,7 @@ export default function Establishment() {
               <div className="flex items-center gap-4">
                 <Clock className="h-5 w-5 text-primary shrink-0" />
                 <span className="text-sm font-semibold text-foreground">Horários</span>
-                <Badge className={isOpen ? "bg-green-500/10 text-green-600 border-0 text-xs" : "bg-destructive/10 text-destructive border-0 text-xs"}>
+                <Badge className={isOpen ? "bg-success/10 text-success border-0 text-xs" : "bg-destructive/10 text-destructive border-0 text-xs"}>
                   {isOpen ? "Aberto" : "Fechado"}
                 </Badge>
               </div>
