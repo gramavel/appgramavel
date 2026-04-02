@@ -63,6 +63,10 @@ export default {
           soft: "hsl(var(--info-soft))",
         },
         rating: "hsl(var(--rating))",
+        surface: {
+          elevated: "hsl(var(--surface-elevated))",
+          glass: "var(--surface-glass)",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
