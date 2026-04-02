@@ -59,7 +59,7 @@ export default function BadgesPage() {
         {/* Earned */}
         <div>
           <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-4 flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
+            <CheckCircle2 className="w-4 h-4 text-success" />
             Conquistadas ({earned.length})
           </p>
           <div className="grid grid-cols-2 gap-4">
