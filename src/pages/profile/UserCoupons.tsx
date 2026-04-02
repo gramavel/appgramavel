@@ -21,7 +21,7 @@ function CouponItem({ coupon, used }: { coupon: typeof MOCK_COUPONS[0]; used?: b
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-semibold text-foreground leading-tight">{coupon.title}</p>
           {used ? (
-            <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
           ) : (
             <Badge variant="secondary" className="text-xs px-1.5 py-0 flex-shrink-0">
               <Tag className="w-3 h-3 mr-0.5" />

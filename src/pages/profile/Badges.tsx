@@ -73,7 +73,7 @@ export default function BadgesPage() {
                   style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer pointer-events-none" />
-                  <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-green-600" />
+                  <CheckCircle2 className="absolute top-2 right-2 w-5 h-5 text-success" />
                   <BadgeIcon className={`w-8 h-8 mb-2 ${palette.icon}`} />
                   <p className="font-semibold text-sm text-foreground">{b.name}</p>
                   <p className="text-xs text-muted-foreground mt-1">{b.description}</p>

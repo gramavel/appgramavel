@@ -107,7 +107,7 @@ function RouteCard({ route }: { route: UserRoute }) {
               </div>
               {j < route.completedStops && (
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-success flex items-center justify-center ring-2 ring-card">
-                  <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
+                  <CheckCircle2 className="w-3 h-3 text-success-foreground" />
                 </div>
               )}
             </div>
