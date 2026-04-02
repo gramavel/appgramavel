@@ -170,7 +170,7 @@ export default function Establishment() {
                       <span className="text-xs font-semibold">Usuário {i}</span>
                       <div className="flex gap-0.5">
                         {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className={`h-3 w-3 ${s <= 5 - i + 1 ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`} />
+                          <Star key={s} className={`h-3 w-3 ${s <= 5 - i + 1 ? "fill-rating text-rating" : "text-muted-foreground"}`} />
                         ))}
                       </div>
                     </div>
