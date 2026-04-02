@@ -142,7 +142,7 @@ export default function RoteiroNavigation() {
                 <div className={cn(
                   "w-2.5 h-2.5 rounded-full transition-all duration-300",
                   i < currentStop
-                    ? visited[i] ? "bg-green-500" : "bg-muted-foreground/40"
+                    ? visited[i] ? "bg-success" : "bg-muted-foreground/40"
                     : i === currentStop
                       ? "bg-primary ring-2 ring-primary/30 ring-offset-1 ring-offset-background"
                       : "bg-muted"
