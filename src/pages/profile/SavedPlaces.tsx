@@ -1,17 +1,30 @@
 import { useState } from "react";
-import { Star, MapPin, Bookmark, Search, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Star, MapPin, Bookmark, BookmarkCheck, Search, X, TrendingUp } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { MOCK_ESTABLISHMENTS } from "@/data/mock";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useLocation } from "@/contexts/LocationContext";
 
 export default function SavedPlaces() {
   const [search, setSearch] = useState("");
-  const places = MOCK_ESTABLISHMENTS.slice(0, 4);
+  const navigate = useNavigate();
+  const { savedPlaces, isPlaceSaved, toggleSavedPlace } = useFavorites();
+  const { getDistance, loading } = useLocation();
+
+  const places = MOCK_ESTABLISHMENTS.filter((e) => isPlaceSaved(e.id));
   const filtered = places.filter((est) =>
     est.name.toLowerCase().includes(search.toLowerCase()) ||
     est.category.toLowerCase().includes(search.toLowerCase())
   );
+
+  const popularPlaces = MOCK_ESTABLISHMENTS
+    .slice()
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,19 +47,70 @@ export default function SavedPlaces() {
         </div>
 
         {/* Results */}
-        {filtered.length === 0 ? (
+        {filtered.length === 0 && places.length === 0 ? (
+          <div className="space-y-6">
+            <div className="py-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                <Bookmark className="w-7 h-7 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Nenhum lugar salvo ainda</p>
+              <p className="text-xs text-muted-foreground mt-1">Salve seus lugares favoritos para vê-los aqui</p>
+            </div>
+
+            {/* Popular suggestions */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <TrendingUp className="w-4 h-4 text-primary" />
+                Populares perto de você
+              </h3>
+              <div className="space-y-3">
+                {popularPlaces.map((est, i) => (
+                  <div
+                    key={est.id}
+                    onClick={() => navigate(`/estabelecimento/${est.slug}`)}
+                    className="flex gap-4 p-4 bg-card rounded-xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer animate-fade-in-up"
+                    style={{ animationDelay: `${i * 80}ms` }}
+                  >
+                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                      <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm">{est.name}</p>
+                      <p className="text-xs text-muted-foreground">{est.category}</p>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-rating text-rating" />
+                          {est.rating}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {loading ? (
+                            <Skeleton className="w-8 h-3" />
+                          ) : (
+                            getDistance(est.latitude, est.longitude) ?? `${est.distance_km.toFixed(1)} km`
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="py-12 text-center">
             <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-              <Bookmark className="w-7 h-7 text-muted-foreground" />
+              <Search className="w-7 h-7 text-muted-foreground" />
             </div>
             <p className="text-sm font-semibold text-foreground">Nenhum lugar encontrado</p>
-            <p className="text-xs text-muted-foreground mt-1">Salve seus lugares favoritos para vê-los aqui</p>
+            <p className="text-xs text-muted-foreground mt-1">Tente outra busca</p>
           </div>
         ) : (
           filtered.map((est, i) => (
             <div
               key={est.id}
-              className="flex gap-4 p-4 bg-card rounded-xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] animate-fade-in-up"
+              onClick={() => navigate(`/estabelecimento/${est.slug}`)}
+              className="flex gap-4 p-4 bg-card rounded-xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer animate-fade-in-up"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
@@ -58,7 +122,12 @@ export default function SavedPlaces() {
                     <p className="font-semibold text-foreground text-sm">{est.name}</p>
                     <p className="text-xs text-muted-foreground">{est.category}</p>
                   </div>
-                  <Bookmark className="w-5 h-5 text-primary fill-primary flex-shrink-0" />
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleSavedPlace(est.id); }}
+                    className="p-1"
+                  >
+                    <BookmarkCheck className="w-5 h-5 text-primary fill-primary flex-shrink-0" />
+                  </button>
                 </div>
                 <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
@@ -67,7 +136,11 @@ export default function SavedPlaces() {
                   </span>
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
-                    {(Math.random() * 3 + 0.3).toFixed(1)} km
+                    {loading ? (
+                      <Skeleton className="w-8 h-3" />
+                    ) : (
+                      getDistance(est.latitude, est.longitude) ?? `${est.distance_km.toFixed(1)} km`
+                    )}
                   </span>
                 </div>
               </div>
@@ -76,7 +149,6 @@ export default function SavedPlaces() {
         )}
       </main>
       <BottomNav />
-
     </div>
   );
 }
