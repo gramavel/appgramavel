@@ -434,7 +434,7 @@ export default function Roteiros() {
                 <Button variant="outline" className="flex-1 rounded-full" onClick={() => setCreateStep(2)}>
                   Voltar
                 </Button>
-                <Button className="flex-1 rounded-full gap-2" onClick={resetForm}>
+                <Button className="flex-1 rounded-full gap-2" onClick={handleCreateRoute}>
                   <Plus className="w-4 h-4" />
                   Criar Roteiro
                 </Button>
