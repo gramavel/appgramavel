@@ -1,23 +1,15 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { CITIES } from "@/data/mock";
 
 interface LocationContextType {
+  coords: { lat: number; lng: number } | null;
+  loading: boolean;
+  hasLocation: boolean;
   city: string;
-  latitude: number | null;
-  longitude: number | null;
-  error: string | null;
-  requestLocation: () => void;
-  locationRequested: boolean;
+  getDistance: (lat: number, lng: number) => string | null;
 }
 
-const LocationContext = createContext<LocationContextType>({
-  city: "Gramado",
-  latitude: null,
-  longitude: null,
-  error: null,
-  requestLocation: () => {},
-  locationRequested: false,
-});
+const LocationContext = createContext<LocationContextType | null>(null);
 
 function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -32,44 +24,52 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState({
-    city: "Gramado",
-    latitude: CITIES.gramado.latitude as number | null,
-    longitude: CITIES.gramado.longitude as number | null,
-    error: null as string | null,
-  });
-  const [locationRequested, setLocationRequested] = useState(false);
-  const [watchId, setWatchId] = useState<number | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const requestLocation = useCallback(() => {
-    if (locationRequested || !navigator.geolocation) return;
-    setLocationRequested(true);
-
-    const id = navigator.geolocation.watchPosition(
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const distGramado = haversine(latitude, longitude, CITIES.gramado.latitude, CITIES.gramado.longitude);
-        const distCanela = haversine(latitude, longitude, CITIES.canela.latitude, CITIES.canela.longitude);
-        setState({
-          city: distGramado <= distCanela ? "Gramado" : "Canela",
-          latitude,
-          longitude,
-          error: null,
-        });
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLoading(false);
       },
-      () => {
-        setState((s) => ({ ...s, error: "Geolocalização indisponível" }));
+      (e) => {
+        console.warn("Geolocation failed, using mock distances", e);
+        setLoading(false);
       },
-      { enableHighAccuracy: true }
+      { timeout: 5000 }
     );
-    setWatchId(id);
-  }, [locationRequested]);
+  }, []);
+
+  const getDistance = useCallback(
+    (lat: number, lng: number): string | null => {
+      if (!coords) return null;
+      const d = haversine(coords.lat, coords.lng, lat, lng);
+      return `${d.toFixed(1)} km`;
+    },
+    [coords]
+  );
+
+  const city = coords
+    ? haversine(coords.lat, coords.lng, CITIES.gramado.latitude, CITIES.gramado.longitude) <=
+      haversine(coords.lat, coords.lng, CITIES.canela.latitude, CITIES.canela.longitude)
+      ? "Gramado"
+      : "Canela"
+    : "Gramado";
 
   return (
-    <LocationContext.Provider value={{ ...state, requestLocation, locationRequested }}>
+    <LocationContext.Provider value={{ coords, loading, hasLocation: !!coords, city, getDistance }}>
       {children}
     </LocationContext.Provider>
   );
 }
 
-export const useLocation = () => useContext(LocationContext);
+export function useLocation() {
+  const ctx = useContext(LocationContext);
+  if (!ctx) throw new Error("useLocation must be used within LocationProvider");
+  return ctx;
+}
