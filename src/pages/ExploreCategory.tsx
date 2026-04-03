@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Search, MapPin, Star, Ticket } from "lucide-react";
+import { Search, MapPin, Star, Ticket, Clock, TrendingUp, Dog } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { CouponCard } from "@/components/coupons/CouponCard";
 import { CATEGORIES, MOCK_ESTABLISHMENTS, MOCK_COUPONS } from "@/data/mock";
-import { Clock, TrendingUp, Dog } from "lucide-react";
 
 const CATEGORY_BANNERS: Record<string, string> = {
   "Restaurantes": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=400&fit=crop",
@@ -142,7 +141,7 @@ export default function ExploreCategory() {
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
-                          <span>{(Math.random() * 3 + 0.2).toFixed(1)} km</span>
+                          <span>{est.distance_km.toFixed(1)} km</span>
                         </div>
                       </div>
                     </div>

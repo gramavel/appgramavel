@@ -6,7 +6,6 @@ import { useLocation } from "@/contexts/LocationContext";
 import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
 import { useNavigate } from "react-router-dom";
 
-// IDs of "visited" establishments (mock)
 const VISITED_IDS = new Set(["1", "3"]);
 
 function createPinIcon(visited: boolean) {
@@ -81,18 +80,17 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
-  const { latitude, longitude, requestLocation } = useLocation();
+  const { coords } = useLocation();
   const navigate = useNavigate();
   const [showSearchArea, setShowSearchArea] = useState(false);
 
-  // Initialize map
+  const lat = coords?.lat ?? -29.3733;
+  const lng = coords?.lng ?? -50.8767;
+
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
-    const center: L.LatLngExpression = [
-      latitude ?? -29.3733,
-      longitude ?? -50.8767,
-    ];
+    const center: L.LatLngExpression = [lat, lng];
 
     const map = L.map(mapRef.current, {
       center,
@@ -101,25 +99,16 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       attributionControl: false,
     });
 
-    // CartoDB Voyager tiles
     L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      {
-        maxZoom: 19,
-        subdomains: "abcd",
-      }
+      { maxZoom: 19, subdomains: "abcd" }
     ).addTo(map);
 
-    // Attribution (subtle)
     L.control
-      .attribution({
-        position: "bottomright",
-        prefix: false,
-      })
+      .attribution({ position: "bottomright", prefix: false })
       .addAttribution('© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>')
       .addTo(map);
 
-    // Style attribution
     setTimeout(() => {
       const attr = mapRef.current?.querySelector(".leaflet-control-attribution");
       if (attr instanceof HTMLElement) {
@@ -132,7 +121,6 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       }
     }, 100);
 
-    // Add establishment markers
     MOCK_ESTABLISHMENTS.forEach((est) => {
       const visited = VISITED_IDS.has(est.id);
       const marker = L.marker([est.latitude, est.longitude], {
@@ -149,7 +137,6 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       });
     });
 
-    // Show "search this area" on map move
     map.on("moveend", () => {
       setShowSearchArea(true);
     });
@@ -162,38 +149,32 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
     };
   }, []);
 
-  // Update user marker when location changes
   useEffect(() => {
-    if (!mapInstance.current || !latitude || !longitude) return;
+    if (!mapInstance.current || !coords) return;
 
     if (userMarkerRef.current) {
-      userMarkerRef.current.setLatLng([latitude, longitude]);
+      userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
     } else {
-      userMarkerRef.current = L.marker([latitude, longitude], {
+      userMarkerRef.current = L.marker([coords.lat, coords.lng], {
         icon: createUserIcon(),
         zIndexOffset: 1000,
       }).addTo(mapInstance.current);
     }
-  }, [latitude, longitude]);
+  }, [coords]);
 
   const handleLocateMe = useCallback(() => {
-    requestLocation();
     if (!mapInstance.current) return;
-    const lat = latitude ?? -29.3733;
-    const lng = longitude ?? -50.8767;
     mapInstance.current.flyTo([lat, lng], 17, { duration: 0.8 });
-  }, [latitude, longitude, requestLocation]);
+  }, [lat, lng]);
 
   const handleSearchArea = useCallback(() => {
     setShowSearchArea(false);
-    // In a real app, fetch establishments in the visible bounds
   }, []);
 
   return (
     <div className="relative h-[45vh] min-h-[350px] rounded-xl border border-border shadow-card overflow-hidden">
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
-      {/* Search this area button */}
       {showSearchArea && (
         <button
           onClick={handleSearchArea}
@@ -204,7 +185,6 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
         </button>
       )}
 
-      {/* My location button */}
       <button
         onClick={handleLocateMe}
         aria-label="Minha localização"

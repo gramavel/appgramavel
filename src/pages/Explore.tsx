@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket, Heart } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
@@ -7,7 +7,6 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES } from "@/data/mock";
-import { cn } from "@/lib/utils";
 import ExploreMap from "@/components/map/ExploreMap";
 import "@/components/map/map-styles.css";
 
@@ -34,20 +33,43 @@ const RECOMMENDED_PLACES = [
 
 export default function Explore() {
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showMap, setShowMap] = useState(true);
   const navigate = useNavigate();
 
-  const isSearching = search.length > 0 || activeFilter !== null;
+  const isSearching = search.length > 0 || activeFilters.length > 0;
 
-  const filteredEstablishments = MOCK_ESTABLISHMENTS.filter((e) => {
-    if (search && !e.name.toLowerCase().includes(search.toLowerCase()) && !e.category.toLowerCase().includes(search.toLowerCase())) return false;
-    if (activeFilter) {
-      const catMatch = CATEGORIES.find(c => c.label === activeFilter);
-      if (catMatch && e.category !== activeFilter) return false;
+  const toggleFilter = (label: string) => {
+    setActiveFilters((prev) =>
+      prev.includes(label) ? prev.filter((f) => f !== label) : [...prev, label]
+    );
+    setShowMap(false);
+  };
+
+  const filteredEstablishments = useMemo(() => {
+    let result = [...MOCK_ESTABLISHMENTS];
+
+    if (activeFilters.includes("Abertos agora"))
+      result = result.filter((e) => e.is_open);
+    if (activeFilters.includes("Em alta hoje"))
+      result = result.filter((e) => e.is_popular);
+    if (activeFilters.includes("Pet friendly"))
+      result = result.filter((e) => e.pet_friendly);
+
+    if (search)
+      result = result.filter((e) =>
+        e.name.toLowerCase().includes(search.toLowerCase()) ||
+        e.category.toLowerCase().includes(search.toLowerCase())
+      );
+
+    if (activeFilters.includes("Mais bem avaliados")) {
+      result = result.slice().sort((a, b) => b.rating - a.rating);
+    } else if (activeFilters.includes("Perto de você")) {
+      result = result.slice().sort((a, b) => a.distance_km - b.distance_km);
     }
-    return true;
-  });
+
+    return result;
+  }, [activeFilters, search]);
 
   return (
     <div className="min-h-screen bg-background pt-14">
@@ -66,7 +88,7 @@ export default function Explore() {
           {search && (
             <button
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => { setSearch(""); setShowMap(true); }}
+              onClick={() => { setSearch(""); if (activeFilters.length === 0) setShowMap(true); }}
             >
               <X className="h-4 w-4" />
             </button>
@@ -80,11 +102,8 @@ export default function Explore() {
               key={label}
               label={label}
               icon={icon}
-              active={activeFilter === label}
-              onClick={() => {
-                setActiveFilter(activeFilter === label ? null : label);
-                if (activeFilter !== label) setShowMap(false); else setShowMap(true);
-              }}
+              active={activeFilters.includes(label)}
+              onClick={() => toggleFilter(label)}
             />
           ))}
         </FilterChipsBar>
@@ -109,7 +128,6 @@ export default function Explore() {
                   </button>
                 ))}
               </div>
-              {/* Cupons - centered below grid */}
               <div className="flex justify-center mt-4">
                 <button
                   onClick={() => navigate(`/map/categoria/${encodeURIComponent("Cupons")}`)}
@@ -209,7 +227,7 @@ export default function Explore() {
                           </div>
                           <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            <span>{(Math.random() * 3 + 0.2).toFixed(1)} km</span>
+                            <span>{est.distance_km.toFixed(1)} km</span>
                           </div>
                         </div>
                       </div>
@@ -225,14 +243,12 @@ export default function Explore() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">{filteredEstablishments.length} resultado(s)</p>
-                {!showMap && (
-                  <button
-                    onClick={() => { setSearch(""); setActiveFilter(null); setShowMap(true); }}
-                    className="flex items-center gap-1 text-xs text-primary font-medium"
-                  >
-                    <X className="w-3 h-3" /> Fechar
-                  </button>
-                )}
+                <button
+                  onClick={() => { setSearch(""); setActiveFilters([]); setShowMap(true); }}
+                  className="flex items-center gap-1 text-xs text-primary font-medium"
+                >
+                  <X className="w-3 h-3" /> Fechar
+                </button>
               </div>
               {filteredEstablishments.map((est) => (
                 <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
@@ -250,7 +266,7 @@ export default function Explore() {
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
-                          <span>{(Math.random() * 3 + 0.2).toFixed(1)} km</span>
+                          <span>{est.distance_km.toFixed(1)} km</span>
                         </div>
                       </div>
                     </div>

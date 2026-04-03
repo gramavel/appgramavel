@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
   Star, Navigation, Info, Bookmark, BookmarkCheck, Share,
@@ -11,42 +11,38 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { MOCK_ESTABLISHMENTS } from "@/data/mock";
+import { CANONICAL_REACTIONS } from "@/lib/constants";
 import { SaveSheet } from "@/components/SaveSheet";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import ImageLightbox from "@/components/ui/ImageLightbox";
+import { useFavorites } from "@/contexts/FavoritesContext";
 import { toast } from "sonner";
-
-const CANONICAL_REACTIONS = [
-  { emoji: "❤️", label: "Amei" },
-  { emoji: "⭐", label: "Recomendo" },
-  { emoji: "😋", label: "Delícia" },
-  { emoji: "😍", label: "Encantador" },
-  { emoji: "📌", label: "Visitar" },
-];
 
 export default function Establishment() {
   const { slug } = useParams();
   const [showDetails, setShowDetails] = useState(false);
   const [showSave, setShowSave] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const { isPlaceSaved, toggleSavedPlace } = useFavorites();
 
   const est = MOCK_ESTABLISHMENTS.find((e) => e.slug === slug);
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
+  const isSaved = isPlaceSaved(est.id);
   const isOpen = est.is_open;
-  const postImages = [est.image_url, est.logo_url, est.image_url, est.logo_url, est.image_url, est.image_url];
-  const allImages = [est.image_url, ...postImages];
-  const allTitles = [est.name, ...postImages.map((_, i) => `Foto ${i + 1}`)];
-  const allCaptions = [est.description, ...postImages.map(() => est.category)];
 
-  const allReactions = allImages.map(() =>
-    CANONICAL_REACTIONS.map((r) => ({
+  const allImages = [est.image_url, ...est.gallery];
+  const allTitles = [est.name, ...est.gallery.map((_, i) => `Foto ${i + 1}`)];
+  const allCaptions = [est.description, ...est.gallery.map(() => est.category)];
+
+  const allReactions = allImages.map((_, idx) =>
+    CANONICAL_REACTIONS.map((r, ri) => ({
       emoji: r.emoji,
       label: r.label,
-      count: Math.floor(Math.random() * 80) + 5,
+      count: [45, 22, 15, 8, 5][ri] + idx * 3,
     }))
   );
 
@@ -75,7 +71,7 @@ export default function Establishment() {
     { icon: Navigation, label: "Como chegar", action: handleNavigate },
     { icon: Info, label: "Informações", action: () => setShowDetails(true) },
     { icon: Share, label: "Compartilhar", action: handleShare },
-    { icon: isSaved ? BookmarkCheck : Bookmark, label: "Salvar", action: () => setShowSave(true), active: isSaved },
+    { icon: isSaved ? BookmarkCheck : Bookmark, label: "Salvar", action: () => isSaved ? toggleSavedPlace(est.id) : setShowSave(true), active: isSaved },
   ];
 
   return (
@@ -137,7 +133,7 @@ export default function Establishment() {
 
             <TabsContent value="fotos" className="p-2">
               <div className="grid grid-cols-3 gap-1.5">
-                {postImages.map((src, i) => (
+                {est.gallery.map((src, i) => (
                   <div
                     key={i}
                     className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative"
@@ -264,7 +260,7 @@ export default function Establishment() {
         open={showSave}
         onOpenChange={setShowSave}
         itemName={est.name}
-        onSaved={() => setIsSaved(true)}
+        onSaved={() => toggleSavedPlace(est.id)}
       />
 
       <ImageLightbox

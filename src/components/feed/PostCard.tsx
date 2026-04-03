@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { SaveSheet } from "@/components/SaveSheet";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useReactions } from "@/contexts/ReactionsContext";
+import { CANONICAL_REACTIONS } from "@/lib/constants";
 import type { Post } from "@/data/mock";
 
 interface PostCardProps {
@@ -14,19 +17,22 @@ interface PostCardProps {
 export function PostCard({ post, isFirst = false }: PostCardProps) {
   const navigate = useNavigate();
   const [showReactions, setShowReactions] = useState(false);
-  const [userReaction, setUserReaction] = useState<string | null>(null);
   const [showSave, setShowSave] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
 
-  const CANONICAL_EMOJIS = ["❤️", "⭐", "😋", "😍", "📌"];
+  const { isPostSaved, toggleSavedPost } = useFavorites();
+  const { getReaction, setReaction } = useReactions();
+
+  const isSaved = isPostSaved(post.id);
+  const userReaction = getReaction(post.id);
+
   const totalReactions = post.reactions.reduce((sum, r) => sum + r.count, 0);
-  const displayReactions = CANONICAL_EMOJIS.slice(0, 3).map((emoji) => ({
-    emoji,
-    count: post.reactions.find((r) => r.emoji === emoji)?.count ?? 0,
+  const displayReactions = CANONICAL_REACTIONS.slice(0, 3).map((r) => ({
+    emoji: r.emoji,
+    count: post.reactions.find((pr) => pr.emoji === r.emoji)?.count ?? 0,
   }));
 
   const handleReact = (emoji: string) => {
-    setUserReaction(userReaction === emoji ? null : emoji);
+    setReaction(post.id, emoji);
     setShowReactions(false);
   };
 
@@ -62,7 +68,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         </div>
         <button
           className="p-3 hover:bg-secondary rounded-full transition-colors active:scale-95"
-          onClick={() => setShowSave(true)}
+          onClick={() => isSaved ? toggleSavedPost(post.id) : setShowSave(true)}
           aria-label="Salvar lugar"
         >
           {isSaved ? (
@@ -91,7 +97,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         </span>
       </div>
 
-      {/* Image — LCP optimization for first card */}
+      {/* Image */}
       <div className="w-full aspect-[4/5] overflow-hidden">
         <img
           src={post.image}
@@ -149,7 +155,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         open={showSave}
         onOpenChange={setShowSave}
         itemName={post.establishment_name}
-        onSaved={() => setIsSaved(true)}
+        onSaved={() => toggleSavedPost(post.id)}
       />
 
       {/* Reaction Modal */}
@@ -175,13 +181,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
               </button>
             </div>
             <div className="flex justify-around">
-              {[
-                { emoji: "❤️", name: "Amei" },
-                { emoji: "⭐", name: "Recomendo" },
-                { emoji: "😋", name: "Delícia" },
-                { emoji: "😍", name: "Encantador" },
-                { emoji: "📌", name: "Visitar" },
-              ].map((item) => {
+              {CANONICAL_REACTIONS.map((item) => {
                 const isActive = userReaction === item.emoji;
                 const count = post.reactions.find((r) => r.emoji === item.emoji)?.count ?? 0;
                 return (
@@ -191,10 +191,10 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
                     className={`flex flex-col items-center gap-1 p-4 rounded-lg transition-all min-w-[48px] min-h-[48px] ${
                       isActive ? "bg-primary/10 scale-110" : "hover:bg-secondary"
                     }`}
-                    aria-label={`Reagir com ${item.name}`}
+                    aria-label={`Reagir com ${item.label}`}
                   >
                     <span className="text-2xl">{item.emoji}</span>
-                    <span className="text-xs font-medium text-foreground">{item.name}</span>
+                    <span className="text-xs font-medium text-foreground">{item.label}</span>
                     <span className="text-xs text-muted-foreground">{count}</span>
                   </button>
                 );

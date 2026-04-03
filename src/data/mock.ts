@@ -10,6 +10,7 @@ export interface Establishment {
   description: string;
   logo_url: string;
   image_url: string;
+  gallery: string[];
   latitude: number;
   longitude: number;
   address: string;
@@ -25,6 +26,9 @@ export interface Establishment {
   total_reviews: number;
   opening_hours: string;
   is_open: boolean;
+  is_popular: boolean;
+  pet_friendly: boolean;
+  distance_km: number;
   sunday_hours: string | null;
 }
 
@@ -105,12 +109,17 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
   {
     id: "1",
     name: "Bella Gramado Ristorante",
-    slug: "bella-gramado-ristorante",
+    slug: "bella-gramado-ristorante-1",
     category: "Restaurantes",
     city: "Gramado",
     description: "Autêntica culinária italiana com vista para o Vale do Quilombo. Massa fresca feita diariamente.",
     logo_url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&h=100&fit=crop",
     image_url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop",
+    ],
     latitude: -29.3750,
     longitude: -50.8780,
     address: "Rua Coberta, 123 - Centro, Gramado",
@@ -126,17 +135,25 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     total_reviews: 342,
     opening_hours: "11:30 - 23:00",
     is_open: true,
+    is_popular: true,
+    pet_friendly: true,
+    distance_km: 0.3,
     sunday_hours: null,
   },
   {
     id: "2",
     name: "Café Colonial Bela Vista",
-    slug: "cafe-colonial-bela-vista",
+    slug: "cafe-colonial-bela-vista-2",
     category: "Cafés",
     city: "Gramado",
     description: "O melhor café colonial da Serra Gaúcha. Mais de 80 itens entre doces e salgados.",
     logo_url: "https://images.unsplash.com/photo-1559305616-3f99cd43e353?w=100&h=100&fit=crop",
     image_url: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=800&h=600&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1559305616-3f99cd43e353?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=600&fit=crop",
+    ],
     latitude: -29.3720,
     longitude: -50.8750,
     address: "Av. das Hortênsias, 456 - Planalto, Gramado",
@@ -152,17 +169,25 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     total_reviews: 218,
     opening_hours: "08:00 - 18:00",
     is_open: false,
+    is_popular: true,
+    pet_friendly: false,
+    distance_km: 0.8,
     sunday_hours: null,
   },
   {
     id: "3",
     name: "Vinícola Ravanello",
-    slug: "vinicola-ravanello",
+    slug: "vinicola-ravanello-3",
     category: "Bares & Vinícolas",
     city: "Gramado",
     description: "Degustação de vinhos premiados com tour pela vinícola. Experiência única na Serra.",
     logo_url: "https://images.unsplash.com/photo-1474722883778-792e7990302f?w=100&h=100&fit=crop",
     image_url: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&h=600&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1474722883778-792e7990302f?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&h=600&fit=crop",
+    ],
     latitude: -29.3690,
     longitude: -50.8810,
     address: "RS-235, Km 22 - Gramado",
@@ -178,17 +203,25 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     total_reviews: 567,
     opening_hours: "10:00 - 19:00",
     is_open: true,
+    is_popular: true,
+    pet_friendly: false,
+    distance_km: 1.2,
     sunday_hours: "10:00 - 16:00",
   },
   {
     id: "4",
     name: "Mini Mundo",
-    slug: "mini-mundo",
+    slug: "mini-mundo-4",
     category: "Atrações",
     city: "Gramado",
     description: "Parque temático com réplicas em miniatura de construções famosas do mundo todo.",
     logo_url: "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=100&h=100&fit=crop",
     image_url: "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=800&h=600&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&h=600&fit=crop",
+    ],
     latitude: -29.3780,
     longitude: -50.8730,
     address: "Rua Horácio Cardoso, 291 - Centro, Gramado",
@@ -204,17 +237,25 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     total_reviews: 892,
     opening_hours: "09:00 - 17:00",
     is_open: true,
+    is_popular: false,
+    pet_friendly: true,
+    distance_km: 1.5,
     sunday_hours: "09:00 - 14:00",
   },
   {
     id: "5",
     name: "Chocolate Lugano",
-    slug: "chocolate-lugano",
+    slug: "chocolate-lugano-5",
     category: "Compras",
     city: "Canela",
     description: "Fábrica de chocolates artesanais. Degustação gratuita e loja com produtos exclusivos.",
     logo_url: "https://images.unsplash.com/photo-1549007994-cb92caefdbd1?w=100&h=100&fit=crop",
     image_url: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=800&h=600&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1549007994-cb92caefdbd1?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1511381939415-e44015466834?w=800&h=600&fit=crop",
+    ],
     latitude: -29.3630,
     longitude: -50.8130,
     address: "Av. Júlio de Castilhos, 1580 - Centro, Canela",
@@ -230,17 +271,25 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     total_reviews: 445,
     opening_hours: "09:00 - 19:00",
     is_open: false,
+    is_popular: false,
+    pet_friendly: false,
+    distance_km: 3.2,
     sunday_hours: null,
   },
   {
     id: "6",
     name: "Hotel Casa da Montanha",
-    slug: "hotel-casa-da-montanha",
+    slug: "hotel-casa-da-montanha-6",
     category: "Hotéis",
     city: "Gramado",
     description: "Hotel boutique aconchegante com lareira, café da manhã colonial e vista panorâmica.",
     logo_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=100&h=100&fit=crop",
     image_url: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=600&fit=crop",
+    ],
     latitude: -29.3740,
     longitude: -50.8760,
     address: "Rua Garibaldi, 80 - Centro, Gramado",
@@ -256,6 +305,9 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     total_reviews: 156,
     opening_hours: "24 horas",
     is_open: true,
+    is_popular: false,
+    pet_friendly: true,
+    distance_km: 0.5,
     sunday_hours: "24 horas",
   },
 ];
@@ -269,27 +321,27 @@ export const MOCK_POSTS: Post[] = MOCK_ESTABLISHMENTS.map((est, i) => ({
   establishment_slug: est.slug,
   establishment_category: est.category,
   establishment_avatar: est.logo_url,
-  likes: Math.floor(Math.random() * 200) + 50,
+  likes: [120, 85, 200, 67, 145, 92][i],
   user_id: `user-${i}`,
   user_name: ["Ana Silva", "Pedro Santos", "Maria Oliveira", "João Costa", "Laura Mendes", "Carlos Ramos"][i],
   user_avatar: `https://i.pravatar.cc/100?img=${i + 10}`,
   rating: est.rating,
   total_reviews: est.total_reviews,
-  distance_km: Math.random() * 5 + 0.3,
+  distance_km: est.distance_km,
   is_popular: i < 3,
   reactions: [
-    { emoji: "❤️", count: Math.floor(Math.random() * 100) + 20 },
-    { emoji: "⭐", count: Math.floor(Math.random() * 50) + 10 },
-    { emoji: "😋", count: Math.floor(Math.random() * 30) + 5 },
-    { emoji: "😍", count: Math.floor(Math.random() * 20) + 3 },
-    { emoji: "📌", count: Math.floor(Math.random() * 15) + 2 },
+    { emoji: "❤️", count: [89, 45, 112, 32, 67, 54][i] },
+    { emoji: "⭐", count: [42, 28, 56, 18, 35, 22][i] },
+    { emoji: "😋", count: [23, 15, 34, 9, 19, 12][i] },
+    { emoji: "😍", count: [15, 8, 22, 5, 11, 7][i] },
+    { emoji: "📌", count: [10, 6, 17, 3, 8, 5][i] },
   ],
   recent_users: [
     { avatar: `https://i.pravatar.cc/40?img=${i + 20}` },
     { avatar: `https://i.pravatar.cc/40?img=${i + 21}` },
     { avatar: `https://i.pravatar.cc/40?img=${i + 22}` },
   ],
-  created_at: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+  created_at: new Date(2026, 2, 8 - i).toISOString(),
 }));
 
 export const MOCK_COUPONS: Coupon[] = [
