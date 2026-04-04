@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { Compass, UtensilsCrossed, Wine, Camera, FerrisWheel, Ticket, CheckCircle2, Lock, CalendarDays } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { MOCK_BADGES } from "@/data/mock";
+import { MOCK_BADGES, type Badge as BadgeType } from "@/data/mock";
+import { getUserBadges, getBadges } from "@/services/badges";
 import type { ComponentType } from "react";
 
 const BADGE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
@@ -20,12 +22,6 @@ const BADGE_COLOR_PALETTES: Record<string, { bg: string; border: string; icon: s
   camera: { bg: "bg-cyan-50", border: "border-cyan-200", icon: "text-cyan-600", ring: "#0891b2" },
   "ferris-wheel": { bg: "bg-green-50", border: "border-green-200", icon: "text-green-600", ring: "#16a34a" },
   ticket: { bg: "bg-yellow-50", border: "border-yellow-200", icon: "text-yellow-600", ring: "#ca8a04" },
-};
-
-const EARNED_DATES: Record<string, string> = {
-  b1: "08/03/2026",
-  b2: "05/03/2026",
-  b6: "01/03/2026",
 };
 
 function ProgressRing({ progress, total, color, size = 56 }: { progress: number; total: number; color: string; size?: number }) {
@@ -49,8 +45,34 @@ function ProgressRing({ progress, total, color, size = 56 }: { progress: number;
 }
 
 export default function BadgesPage() {
-  const earned = MOCK_BADGES.filter((b) => b.earned);
-  const inProgress = MOCK_BADGES.filter((b) => !b.earned);
+  const [badges, setBadges] = useState<BadgeType[]>(MOCK_BADGES);
+
+  useEffect(() => {
+    Promise.all([getBadges(), getUserBadges()]).then(([allBadges, userBadges]) => {
+      if (allBadges.data && allBadges.data.length > 0 && userBadges.data) {
+        const userBadgeMap = new Map(
+          userBadges.data.map((ub: any) => [ub.badge_id, ub])
+        );
+        const mapped: BadgeType[] = allBadges.data.map((b: any) => {
+          const ub = userBadgeMap.get(b.id) as any;
+          return {
+            id: b.id,
+            name: b.name,
+            description: b.description || "",
+            iconName: b.icon_name,
+            color: "hsl(233, 100%, 69%)",
+            earned: ub?.earned || false,
+            progress: ub?.progress || 0,
+            total: b.total || 10,
+          };
+        });
+        setBadges(mapped);
+      }
+    });
+  }, []);
+
+  const earned = badges.filter((b) => b.earned);
+  const inProgress = badges.filter((b) => !b.earned);
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,12 +99,6 @@ export default function BadgesPage() {
                   <BadgeIcon className={`w-8 h-8 mb-2 ${palette.icon}`} />
                   <p className="font-semibold text-sm text-foreground">{b.name}</p>
                   <p className="text-xs text-muted-foreground mt-1">{b.description}</p>
-                  {EARNED_DATES[b.id] && (
-                    <p className="text-xs text-muted-foreground/70 mt-2 flex items-center gap-1">
-                      <CalendarDays className="w-3 h-3" />
-                      {EARNED_DATES[b.id]}
-                    </p>
-                  )}
                 </div>
               );
             })}
@@ -123,7 +139,6 @@ export default function BadgesPage() {
         </div>
       </main>
       <BottomNav />
-
     </div>
   );
 }

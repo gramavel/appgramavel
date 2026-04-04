@@ -1,10 +1,13 @@
-import { useState } from "react";
-import { ChevronLeft, Bell, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/contexts/LocationContext";
 import { Badge } from "@/components/ui/badge";
+import { MapPin } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import logoSrc from "@/assets/logo_gramavel_header.svg";
 import { NotificationsSheet } from "./NotificationsSheet";
+import { getUnreadCount } from "@/services/notifications";
 
 interface GlobalHeaderProps {
   showBack?: boolean;
@@ -16,6 +19,11 @@ export function GlobalHeader({ showBack, title = "Gramável", onBack }: GlobalHe
   const navigate = useNavigate();
   const { city } = useLocation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    getUnreadCount().then(({ data }) => setUnreadCount(data ?? 0));
+  }, []);
 
   return (
     <>
@@ -50,7 +58,9 @@ export function GlobalHeader({ showBack, title = "Gramável", onBack }: GlobalHe
               aria-label="Notificações"
             >
               <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
+              )}
             </button>
           </div>
         </div>

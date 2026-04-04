@@ -1,17 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Ticket } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CategoryBar } from "@/components/layout/CategoryBar";
 import { CouponCard } from "@/components/coupons/CouponCard";
-import { MOCK_COUPONS } from "@/data/mock";
+import { MOCK_COUPONS, type Coupon } from "@/data/mock";
+import { getAllCoupons } from "@/services/coupons";
 
 export default function Coupons() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [coupons, setCoupons] = useState<Coupon[]>(MOCK_COUPONS);
+
+  useEffect(() => {
+    getAllCoupons().then(({ data }) => {
+      if (data && data.length > 0) {
+        setCoupons(data.map((c: any) => ({
+          id: c.id,
+          title: c.title,
+          description: "",
+          code: c.code,
+          image: c.image || "",
+          establishment_id: c.establishment?.id || c.establishment_id || "",
+          establishment_name: c.establishment?.name || "",
+          establishment_avatar: c.establishment?.logo_url || "",
+          status: c.status || "active",
+          expires_at: c.expires_at,
+          category: c.category || "",
+        })));
+      }
+    });
+  }, []);
 
   const filtered = selectedCategory
-    ? MOCK_COUPONS.filter((c) => c.category === selectedCategory)
-    : MOCK_COUPONS;
+    ? coupons.filter((c) => c.category === selectedCategory)
+    : coupons;
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +6,10 @@ import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES } from "@/data/mock";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES, type Establishment } from "@/data/mock";
+import { getEstablishments } from "@/services/establishments";
+import { getExperiences } from "@/services/experiences";
 import ExploreMap from "@/components/map/ExploreMap";
 import "@/components/map/map-styles.css";
 
@@ -19,23 +22,39 @@ const FILTER_CHIPS = [
   { label: "Com cupons", icon: Ticket },
 ];
 
-const POPULAR_PLACES = [
-  { name: "Lago Negro", category: "Natureza", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop", rating: 4.8 },
-  { name: "Rua Coberta", category: "Atrações", image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=300&fit=crop", rating: 4.7 },
-  { name: "Snowland", category: "Atrações", image: "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=400&h=300&fit=crop", rating: 4.6 },
-];
-
-const RECOMMENDED_PLACES = [
-  { name: "Vinícola Ravanello", category: "Bares & Vinícolas", image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=300&fit=crop", rating: 4.9 },
-  { name: "Chocolate Lugano", category: "Compras", image: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&h=300&fit=crop", rating: 4.7 },
-  { name: "Casa da Montanha", category: "Hotéis", image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop", rating: 4.8 },
-];
-
 export default function Explore() {
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showMap, setShowMap] = useState(true);
+  const [establishments, setEstablishments] = useState<Establishment[]>(MOCK_ESTABLISHMENTS);
+  const [experiences, setExperiences] = useState(EXPERIENCES);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getEstablishments().then(({ data }) => {
+      if (data && data.length > 0) {
+        setEstablishments(data.map((e: any) => ({
+          ...e,
+          city: "Gramado",
+          is_active: true,
+          is_verified: true,
+          gallery: e.gallery || [],
+          sunday_hours: e.sunday_hours || null,
+        })) as Establishment[]);
+      }
+      setLoading(false);
+    });
+    getExperiences().then(({ data }) => {
+      if (data && data.length > 0) {
+        setExperiences(data.map((e: any) => ({
+          id: e.id,
+          title: e.title,
+          image: e.image_url || "",
+        })));
+      }
+    });
+  }, []);
 
   const isSearching = search.length > 0 || activeFilters.length > 0;
 
@@ -47,7 +66,7 @@ export default function Explore() {
   };
 
   const filteredEstablishments = useMemo(() => {
-    let result = [...MOCK_ESTABLISHMENTS];
+    let result = [...establishments];
 
     if (activeFilters.includes("Abertos agora"))
       result = result.filter((e) => e.is_open);
@@ -63,13 +82,28 @@ export default function Explore() {
       );
 
     if (activeFilters.includes("Mais bem avaliados")) {
-      result = result.slice().sort((a, b) => b.rating - a.rating);
+      result = result.slice().sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
     } else if (activeFilters.includes("Perto de você")) {
-      result = result.slice().sort((a, b) => a.distance_km - b.distance_km);
+      result = result.slice().sort((a, b) => (a.distance_km ?? 0) - (b.distance_km ?? 0));
     }
 
     return result;
-  }, [activeFilters, search]);
+  }, [activeFilters, search, establishments]);
+
+  const popularPlaces = useMemo(() =>
+    establishments.filter(e => e.is_popular).slice(0, 3),
+    [establishments]
+  );
+
+  const recommendedPlaces = useMemo(() =>
+    [...establishments].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 3),
+    [establishments]
+  );
+
+  const nearbyPlaces = useMemo(() =>
+    [...establishments].sort((a, b) => (a.distance_km ?? 0) - (b.distance_km ?? 0)).slice(0, 3),
+    [establishments]
+  );
 
   return (
     <div className="min-h-screen bg-background pt-14">
@@ -144,10 +178,10 @@ export default function Explore() {
               <h2 className="text-base font-semibold tracking-tight mb-4">Populares agora</h2>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
-                  {POPULAR_PLACES.map((place) => (
-                    <div key={place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-card">
+                  {popularPlaces.map((place) => (
+                    <div key={place.id || place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-card cursor-pointer" onClick={() => navigate(`/estabelecimento/${place.slug}`)}>
                       <div className="aspect-[3/2] overflow-hidden">
-                        <img src={place.image} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
+                        <img src={place.image_url} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
                       </div>
                       <div className="p-4">
                         <h4 className="font-semibold text-sm">{place.name}</h4>
@@ -170,10 +204,10 @@ export default function Explore() {
               <h2 className="text-base font-semibold tracking-tight mb-4">Recomendados</h2>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
-                  {RECOMMENDED_PLACES.map((place) => (
-                    <div key={place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-card">
+                  {recommendedPlaces.map((place) => (
+                    <div key={place.id || place.name} className="shrink-0 w-[60%] rounded-xl overflow-hidden border border-border bg-card shadow-card cursor-pointer" onClick={() => navigate(`/estabelecimento/${place.slug}`)}>
                       <div className="aspect-[3/2] overflow-hidden">
-                        <img src={place.image} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
+                        <img src={place.image_url} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
                       </div>
                       <div className="p-4">
                         <h4 className="font-semibold text-sm">{place.name}</h4>
@@ -196,7 +230,7 @@ export default function Explore() {
               <h2 className="text-base font-semibold tracking-tight mb-4">Experiências</h2>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
-                  {EXPERIENCES.map((exp) => (
+                  {experiences.map((exp) => (
                     <div key={exp.id} className="relative shrink-0 w-[70%] h-36 rounded-xl overflow-hidden">
                       <img src={exp.image} alt={exp.title} className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -211,7 +245,7 @@ export default function Explore() {
             <div>
               <h2 className="text-base font-semibold tracking-tight mb-4">Próximos de você</h2>
               <div className="space-y-4">
-                {MOCK_ESTABLISHMENTS.slice(0, 3).map((est) => (
+                {nearbyPlaces.map((est) => (
                   <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
                     <div className="flex gap-4 p-4">
                       <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
@@ -227,7 +261,7 @@ export default function Explore() {
                           </div>
                           <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            <span>{est.distance_km.toFixed(1)} km</span>
+                            <span>{(est.distance_km ?? 0).toFixed(1)} km</span>
                           </div>
                         </div>
                       </div>
@@ -266,7 +300,7 @@ export default function Explore() {
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
-                          <span>{est.distance_km.toFixed(1)} km</span>
+                          <span>{(est.distance_km ?? 0).toFixed(1)} km</span>
                         </div>
                       </div>
                     </div>

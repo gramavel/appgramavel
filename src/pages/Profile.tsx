@@ -1,20 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Ticket, Map, Award, Camera, CheckCircle2, Star, Pencil, TrendingUp, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-
+import { Skeleton } from "@/components/ui/skeleton";
 import { MOCK_BADGES, MOCK_TIMELINE } from "@/data/mock";
 import ImageLightbox from "@/components/ui/ImageLightbox";
-
-const STATS = [
-  { label: "Lugares", value: "12", icon: MapPin, to: "/perfil/lugares" },
-  { label: "Cupons", value: "5", icon: Ticket, to: "/perfil/cupons" },
-  { label: "Roteiros", value: "2", icon: Map, to: "/perfil/roteiros" },
-  { label: "Badges", value: String(MOCK_BADGES.filter((b) => b.earned).length), icon: Award, to: "/perfil/badges" },
-];
+import { getProfile } from "@/services/profile";
+import { getTimeline } from "@/services/timeline";
+import { getMemories } from "@/services/memories";
+import { getUserBadges } from "@/services/badges";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useCoupons } from "@/contexts/CouponsContext";
 
 const TIMELINE_COLORS: Record<string, string> = {
   visit: "bg-success/10 text-success",
@@ -30,38 +29,72 @@ const TIMELINE_ICONS: Record<string, typeof CheckCircle2 | typeof Star> = {
   route: Map,
 };
 
-const MEMORIES = [
-  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop", caption: "Lago Negro" },
-  { src: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop", caption: "Café Colonial" },
-  { src: "https://images.unsplash.com/photo-1530610476181-d83430b64dcd?w=400&h=400&fit=crop", caption: "Pôr do sol" },
-  { src: "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=400&h=400&fit=crop", caption: "Rua Coberta" },
-  { src: "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=400&h=400&fit=crop", caption: "Chocolate artesanal" },
-  { src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=400&fit=crop", caption: "Montanha nevada" },
-  { src: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=400&fit=crop", caption: "Jantar especial" },
-  { src: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=400&h=400&fit=crop", caption: "Café da manhã" },
-  { src: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=400&fit=crop", caption: "Vinícola" },
-  { src: "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=400&h=400&fit=crop", caption: "Vista panorâmica" },
-  { src: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&h=400&fit=crop", caption: "Praça" },
-  { src: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=400&fit=crop", caption: "Hotel aconchegante" },
-  { src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=400&fit=crop", caption: "Trilha na serra" },
-  { src: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=400&fit=crop", caption: "Gastronomia local" },
-  { src: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400&h=400&fit=crop", caption: "Paisagem de inverno" },
-  { src: "https://images.unsplash.com/photo-1543373014-cfe4f4bc1cdf?w=400&h=400&fit=crop", caption: "Fondue perfeito" },
-  { src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=400&fit=crop", caption: "Vale do Quilombo" },
-  { src: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=400&fit=crop", caption: "Prato típico" },
-];
-
 export default function Profile() {
   const navigate = useNavigate();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [profile, setProfile] = useState<any>(null);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [memories, setMemories] = useState<any[]>([]);
+  const [badgeCount, setBadgeCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const { savedPlaces } = useFavorites();
+  const { savedCoupons } = useCoupons();
+
+  useEffect(() => {
+    Promise.all([
+      getProfile(),
+      getTimeline(),
+      getMemories(),
+      getUserBadges(),
+    ]).then(([profileRes, timelineRes, memoriesRes, badgesRes]) => {
+      if (profileRes.data) setProfile(profileRes.data);
+      if (timelineRes.data && timelineRes.data.length > 0) {
+        setTimeline(timelineRes.data.map((t: any) => ({
+          id: t.id,
+          type: t.type,
+          action: t.action,
+          place: t.establishment?.name || "",
+          image: t.image_url || t.establishment?.logo_url || "",
+          date: t.created_at,
+        })));
+      } else {
+        setTimeline(MOCK_TIMELINE);
+      }
+      if (memoriesRes.data && memoriesRes.data.length > 0) {
+        setMemories(memoriesRes.data.map((m: any) => ({
+          src: m.image_url,
+          caption: m.caption || "",
+        })));
+      } else {
+        setMemories(MOCK_MEMORIES);
+      }
+      if (badgesRes.data) {
+        setBadgeCount(badgesRes.data.filter((b: any) => b.earned).length);
+      } else {
+        setBadgeCount(MOCK_BADGES.filter(b => b.earned).length);
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  const STATS = [
+    { label: "Lugares", value: String(savedPlaces.length), icon: MapPin, to: "/perfil/lugares" },
+    { label: "Cupons", value: String(savedCoupons.length), icon: Ticket, to: "/perfil/cupons" },
+    { label: "Roteiros", value: "0", icon: Map, to: "/perfil/roteiros" },
+    { label: "Badges", value: String(badgeCount), icon: Award, to: "/perfil/badges" },
+  ];
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
 
-  const earnedBadges = MOCK_BADGES.filter(b => b.earned).slice(0, 4);
+  const displayName = profile?.name || "João da Silva";
+  const avatarUrl = profile?.avatar_url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop";
+  const city = profile?.city || "Gramado";
+  const state = profile?.state || "RS";
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,16 +115,16 @@ export default function Profile() {
           <div className="flex flex-col items-center -mt-11 relative z-10 px-4">
             <div className="p-[3px] rounded-full bg-gradient-to-tr from-primary to-primary/60 shadow-lg">
               <Avatar className="w-[88px] h-[88px] border-[3px] border-background">
-                <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop" />
+                <AvatarImage src={avatarUrl} />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
             </div>
 
-            <h1 className="text-lg font-bold text-foreground mt-2">João da Silva</h1>
+            <h1 className="text-lg font-bold text-foreground mt-2">{displayName}</h1>
 
             <div className="flex items-center gap-1.5 mt-0.5">
               <MapPin className="w-3 h-3 text-primary" />
-              <span className="text-xs text-muted-foreground">Gramado, RS</span>
+              <span className="text-xs text-muted-foreground">{city}, {state}</span>
               <span className="text-xs text-muted-foreground">·</span>
               <span className="text-xs text-muted-foreground">Viajando há 5 dias</span>
             </div>
@@ -122,14 +155,13 @@ export default function Profile() {
           ))}
         </div>
 
-
         {/* Timeline Preview */}
         <div className="px-4">
           <div className="relative pl-6">
             <div className="absolute left-[9px] top-2 bottom-2 w-[2px] bg-border" />
 
             <div className="space-y-2">
-              {MOCK_TIMELINE.slice(0, 3).map((item, idx) => {
+              {timeline.slice(0, 3).map((item, idx) => {
                 const TimeIcon = TIMELINE_ICONS[item.type] || CheckCircle2;
                 return (
                   <div
@@ -171,7 +203,7 @@ export default function Profile() {
         {/* Memories */}
         <div className="px-4">
           <div className="grid grid-cols-3 gap-1.5">
-            {MEMORIES.slice(0, 12).map((mem, i) => (
+            {memories.slice(0, 12).map((mem, i) => (
               <div
                 key={i}
                 className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative"
@@ -204,14 +236,28 @@ export default function Profile() {
       <BottomNav />
 
       <ImageLightbox
-        images={MEMORIES.slice(0, 12).map(m => m.src)}
-        captions={MEMORIES.slice(0, 12).map(m => m.caption)}
+        images={memories.slice(0, 12).map(m => m.src)}
+        captions={memories.slice(0, 12).map(m => m.caption)}
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         aspectRatio="4/5"
       />
-
     </div>
   );
 }
+
+const MOCK_MEMORIES = [
+  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop", caption: "Lago Negro" },
+  { src: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop", caption: "Café Colonial" },
+  { src: "https://images.unsplash.com/photo-1530610476181-d83430b64dcd?w=400&h=400&fit=crop", caption: "Pôr do sol" },
+  { src: "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=400&h=400&fit=crop", caption: "Rua Coberta" },
+  { src: "https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=400&h=400&fit=crop", caption: "Chocolate artesanal" },
+  { src: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=400&fit=crop", caption: "Montanha nevada" },
+  { src: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=400&fit=crop", caption: "Jantar especial" },
+  { src: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=400&h=400&fit=crop", caption: "Café da manhã" },
+  { src: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=400&fit=crop", caption: "Vinícola" },
+  { src: "https://images.unsplash.com/photo-1597466765990-64ad1c35dafc?w=400&h=400&fit=crop", caption: "Vista panorâmica" },
+  { src: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&h=400&fit=crop", caption: "Praça" },
+  { src: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=400&fit=crop", caption: "Hotel aconchegante" },
+];
