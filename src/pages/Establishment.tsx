@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
   Star, Navigation, Info, Bookmark, BookmarkCheck, Share,
@@ -10,13 +10,16 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { MOCK_ESTABLISHMENTS } from "@/data/mock";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
 import { CANONICAL_REACTIONS } from "@/lib/constants";
 import { SaveSheet } from "@/components/SaveSheet";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import ImageLightbox from "@/components/ui/ImageLightbox";
 import { useFavorites } from "@/contexts/FavoritesContext";
+import { getEstablishmentBySlug } from "@/services/establishments";
+import { getReviewsByEstablishment } from "@/services/reviews";
 import { toast } from "sonner";
 
 export default function Establishment() {
@@ -25,18 +28,59 @@ export default function Establishment() {
   const [showSave, setShowSave] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [est, setEst] = useState<Establishment | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<any[]>([]);
 
   const { isPlaceSaved, toggleSavedPlace } = useFavorites();
 
-  const est = MOCK_ESTABLISHMENTS.find((e) => e.slug === slug);
+  useEffect(() => {
+    if (!slug) return;
+    getEstablishmentBySlug(slug).then(({ data }) => {
+      if (data) {
+        setEst({
+          ...data,
+          city: "Gramado",
+          is_active: true,
+          is_verified: true,
+          gallery: data.gallery || [],
+          sunday_hours: data.sunday_hours || null,
+        } as unknown as Establishment);
+        // Load reviews
+        getReviewsByEstablishment(data.id).then(({ data: revs }) => {
+          if (revs) setReviews(revs);
+        });
+      } else {
+        // Fallback to mock
+        const mock = MOCK_ESTABLISHMENTS.find((e) => e.slug === slug);
+        setEst(mock || null);
+      }
+      setLoading(false);
+    });
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <GlobalHeader showBack />
+        <main className="max-w-2xl mx-auto px-4 pb-20 pt-20 space-y-4">
+          <Skeleton className="w-full aspect-[2/1] rounded-lg" />
+          <Skeleton className="h-6 w-48 mx-auto" />
+          <Skeleton className="h-4 w-32 mx-auto" />
+        </main>
+        <BottomNav />
+      </div>
+    );
+  }
+
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
   const isSaved = isPlaceSaved(est.id);
   const isOpen = est.is_open;
 
-  const allImages = [est.image_url, ...est.gallery];
-  const allTitles = [est.name, ...est.gallery.map((_, i) => `Foto ${i + 1}`)];
-  const allCaptions = [est.description, ...est.gallery.map(() => est.category)];
+  const allImages = [est.image_url, ...(est.gallery || [])];
+  const allTitles = [est.name, ...(est.gallery || []).map((_, i) => `Foto ${i + 1}`)];
+  const allCaptions = [est.description, ...(est.gallery || []).map(() => est.category)];
 
   const allReactions = allImages.map((_, idx) =>
     CANONICAL_REACTIONS.map((r, ri) => ({
@@ -133,7 +177,7 @@ export default function Establishment() {
 
             <TabsContent value="fotos" className="p-2">
               <div className="grid grid-cols-3 gap-1.5">
-                {est.gallery.map((src, i) => (
+                {(est.gallery || []).map((src, i) => (
                   <div
                     key={i}
                     className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative"
@@ -156,24 +200,45 @@ export default function Establishment() {
               <Button variant="outline" className="w-full gap-2 rounded-full">
                 <MessageSquarePlus className="h-4 w-4" /> Deixar avaliação
               </Button>
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-4 p-4 border rounded-xl">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold">Usuário {i}</span>
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className={`h-3 w-3 ${s <= 5 - i + 1 ? "fill-rating text-rating" : "text-muted-foreground"}`} />
-                        ))}
+              {reviews.length > 0 ? (
+                reviews.map((rev) => (
+                  <div key={rev.id} className="flex gap-4 p-4 border rounded-xl">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold">Usuário</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} className={`h-3 w-3 ${s <= rev.rating ? "fill-rating text-rating" : "text-muted-foreground"}`} />
+                          ))}
+                        </div>
                       </div>
+                      <p className="text-xs text-muted-foreground">{rev.comment || "Sem comentário"}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground">Lugar incrível! Adorei a experiência. Recomendo muito.</p>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                [1, 2, 3].map((i) => (
+                  <div key={i} className="flex gap-4 p-4 border rounded-xl">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold">Usuário {i}</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} className={`h-3 w-3 ${s <= 5 - i + 1 ? "fill-rating text-rating" : "text-muted-foreground"}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Lugar incrível! Adorei a experiência. Recomendo muito.</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </TabsContent>
           </Tabs>
         </div>

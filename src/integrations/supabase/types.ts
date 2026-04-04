@@ -14,7 +14,813 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      badges: {
+        Row: {
+          condition: string | null
+          created_at: string | null
+          description: string | null
+          icon_name: string
+          id: string
+          name: string
+          total: number | null
+        }
+        Insert: {
+          condition?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_name: string
+          id?: string
+          name: string
+          total?: number | null
+        }
+        Update: {
+          condition?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string
+          id?: string
+          name?: string
+          total?: number | null
+        }
+        Relationships: []
+      }
+      check_ins: {
+        Row: {
+          created_at: string | null
+          establishment_id: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          establishment_id: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          establishment_id?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string | null
+          establishment_id: string | null
+          expires_at: string
+          id: string
+          image: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string | null
+          establishment_id?: string | null
+          expires_at: string
+          id?: string
+          image?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string | null
+          establishment_id?: string | null
+          expires_at?: string
+          id?: string
+          image?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      establishments: {
+        Row: {
+          address: string | null
+          category: string
+          created_at: string | null
+          description: string | null
+          distance_km: number | null
+          facebook: string | null
+          gallery: string[] | null
+          id: string
+          image_url: string | null
+          instagram: string | null
+          is_open: boolean | null
+          is_popular: boolean | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          name: string
+          opening_hours: string | null
+          pet_friendly: boolean | null
+          phone: string | null
+          rating: number | null
+          slug: string
+          sunday_hours: string | null
+          tiktok: string | null
+          total_reviews: number | null
+          updated_at: string | null
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          distance_km?: number | null
+          facebook?: string | null
+          gallery?: string[] | null
+          id?: string
+          image_url?: string | null
+          instagram?: string | null
+          is_open?: boolean | null
+          is_popular?: boolean | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name: string
+          opening_hours?: string | null
+          pet_friendly?: boolean | null
+          phone?: string | null
+          rating?: number | null
+          slug: string
+          sunday_hours?: string | null
+          tiktok?: string | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          distance_km?: number | null
+          facebook?: string | null
+          gallery?: string[] | null
+          id?: string
+          image_url?: string | null
+          instagram?: string | null
+          is_open?: boolean | null
+          is_popular?: boolean | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string
+          opening_hours?: string | null
+          pet_friendly?: boolean | null
+          phone?: string | null
+          rating?: number | null
+          slug?: string
+          sunday_hours?: string | null
+          tiktok?: string | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      experiences: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          sort_order: number | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          sort_order?: number | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          sort_order?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          read: boolean | null
+          reference_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          read?: boolean | null
+          reference_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          read?: boolean | null
+          reference_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          establishment_id: string
+          id: string
+          image: string | null
+          is_popular: boolean | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          establishment_id: string
+          id?: string
+          image?: string | null
+          is_popular?: boolean | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          establishment_id?: string
+          id?: string
+          image?: string | null
+          is_popular?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reactions: {
+        Row: {
+          count: number | null
+          emoji: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          count?: number | null
+          emoji: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          count?: number | null
+          emoji?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          establishment_id: string
+          id: string
+          rating: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          establishment_id: string
+          id?: string
+          rating: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          establishment_id?: string
+          id?: string
+          rating?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stops: {
+        Row: {
+          created_at: string | null
+          establishment_id: string
+          id: string
+          note: string | null
+          route_id: string
+          stop_order: number
+        }
+        Insert: {
+          created_at?: string | null
+          establishment_id: string
+          id?: string
+          note?: string | null
+          route_id: string
+          stop_order: number
+        }
+        Update: {
+          created_at?: string | null
+          establishment_id?: string
+          id?: string
+          note?: string | null
+          route_id?: string
+          stop_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          duration: string
+          icon_name: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          sort_order: number | null
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration: string
+          icon_name?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          sort_order?: number | null
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration?: string
+          icon_name?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          sort_order?: number | null
+          subtitle?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          created_at: string | null
+          earned: boolean | null
+          earned_at: string | null
+          id: string
+          progress: number | null
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          created_at?: string | null
+          earned?: boolean | null
+          earned_at?: string | null
+          id?: string
+          progress?: number | null
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          created_at?: string | null
+          earned?: boolean | null
+          earned_at?: string | null
+          id?: string
+          progress?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_coupons: {
+        Row: {
+          coupon_id: string
+          created_at: string | null
+          id: string
+          status: string | null
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_coupons_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_favorites: {
+        Row: {
+          created_at: string | null
+          establishment_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          establishment_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          establishment_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_memories: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          establishment_id: string | null
+          id: string
+          image_url: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          establishment_id?: string | null
+          id?: string
+          image_url: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          establishment_id?: string | null
+          id?: string
+          image_url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_memories_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          cover_url: string | null
+          created_at: string | null
+          id: string
+          name: string | null
+          state: string | null
+          travel_since: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          id: string
+          name?: string | null
+          state?: string | null
+          travel_since?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          state?: string | null
+          travel_since?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_reactions: {
+        Row: {
+          created_at: string | null
+          emoji: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          emoji: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          emoji?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_route_stops: {
+        Row: {
+          created_at: string | null
+          establishment_id: string
+          id: string
+          stop_order: number
+          user_route_id: string
+          visited: boolean | null
+          visited_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          establishment_id: string
+          id?: string
+          stop_order: number
+          user_route_id: string
+          visited?: boolean | null
+          visited_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          establishment_id?: string
+          id?: string
+          stop_order?: number
+          user_route_id?: string
+          visited?: boolean | null
+          visited_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_route_stops_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_route_stops_user_route_id_fkey"
+            columns: ["user_route_id"]
+            isOneToOne: false
+            referencedRelation: "user_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_routes: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          started_at: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_saved_posts: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_saved_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_timeline: {
+        Row: {
+          action: string
+          created_at: string | null
+          establishment_id: string | null
+          id: string
+          image_url: string | null
+          reference_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          establishment_id?: string | null
+          id?: string
+          image_url?: string | null
+          reference_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          establishment_id?: string | null
+          id?: string
+          image_url?: string | null
+          reference_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_timeline_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

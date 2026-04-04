@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Search, MapPin, Star, Ticket, Clock, TrendingUp, Dog } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
@@ -6,7 +6,9 @@ import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { CouponCard } from "@/components/coupons/CouponCard";
-import { CATEGORIES, MOCK_ESTABLISHMENTS, MOCK_COUPONS } from "@/data/mock";
+import { CATEGORIES, MOCK_ESTABLISHMENTS, MOCK_COUPONS, type Establishment } from "@/data/mock";
+import { getEstablishmentsByCategory } from "@/services/establishments";
+import { getAllCoupons } from "@/services/coupons";
 
 const CATEGORY_BANNERS: Record<string, string> = {
   "Restaurantes": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=400&fit=crop",
@@ -61,6 +63,8 @@ export default function ExploreCategory() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [categoryEstablishments, setCategoryEstablishments] = useState<Establishment[]>([]);
+  const [categoryCoupons, setCategoryCoupons] = useState<any[]>([]);
 
   const selectedCategory = decodeURIComponent(category || "");
   const isCoupons = selectedCategory === "Cupons";
@@ -69,13 +73,48 @@ export default function ExploreCategory() {
   const CatIcon = isCoupons ? Ticket : catIcon?.icon;
   const filters = CATEGORY_FILTER_CHIPS[selectedCategory] || CATEGORY_FILTER_CHIPS["Restaurantes"];
 
-  const categoryEstablishments = !isCoupons
-    ? MOCK_ESTABLISHMENTS.filter((e) => e.category === selectedCategory).slice(0, 10)
-    : [];
+  useEffect(() => {
+    if (isCoupons) {
+      getAllCoupons().then(({ data }) => {
+        if (data && data.length > 0) {
+          setCategoryCoupons(data.map((c: any) => ({
+            id: c.id,
+            title: c.title,
+            description: "",
+            code: c.code,
+            image: c.image || "",
+            establishment_id: c.establishment?.id || c.establishment_id || "",
+            establishment_name: c.establishment?.name || "",
+            establishment_avatar: c.establishment?.logo_url || "",
+            status: c.status || "active",
+            expires_at: c.expires_at,
+            category: c.category || "",
+          })));
+        } else {
+          setCategoryCoupons(MOCK_COUPONS);
+        }
+      });
+    } else {
+      getEstablishmentsByCategory(selectedCategory).then(({ data }) => {
+        if (data && data.length > 0) {
+          setCategoryEstablishments(data.map((e: any) => ({
+            ...e,
+            city: "Gramado",
+            is_active: true,
+            is_verified: true,
+            gallery: e.gallery || [],
+            sunday_hours: e.sunday_hours || null,
+          })) as Establishment[]);
+        } else {
+          setCategoryEstablishments(MOCK_ESTABLISHMENTS.filter((e) => e.category === selectedCategory));
+        }
+      });
+    }
+  }, [selectedCategory, isCoupons]);
 
-  const categoryCoupons = isCoupons
-    ? (categoryFilter ? MOCK_COUPONS.filter(c => c.category === categoryFilter) : MOCK_COUPONS)
-    : [];
+  const filteredCoupons = categoryFilter
+    ? categoryCoupons.filter(c => c.category === categoryFilter)
+    : categoryCoupons;
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,11 +147,11 @@ export default function ExploreCategory() {
         <div className="px-4 space-y-4">
           {isCoupons ? (
             <>
-              <p className="text-sm text-muted-foreground">{categoryCoupons.length} cupom(ns) disponível(is)</p>
-              {categoryCoupons.map((coupon) => (
+              <p className="text-sm text-muted-foreground">{filteredCoupons.length} cupom(ns) disponível(is)</p>
+              {filteredCoupons.map((coupon) => (
                 <CouponCard key={coupon.id} coupon={coupon} />
               ))}
-              {categoryCoupons.length === 0 && (
+              {filteredCoupons.length === 0 && (
                 <div className="py-12 text-center">
                   <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
                     <Ticket className="w-7 h-7 text-muted-foreground" />
@@ -141,7 +180,7 @@ export default function ExploreCategory() {
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
-                          <span>{est.distance_km.toFixed(1)} km</span>
+                          <span>{(est.distance_km ?? 0).toFixed(1)} km</span>
                         </div>
                       </div>
                     </div>

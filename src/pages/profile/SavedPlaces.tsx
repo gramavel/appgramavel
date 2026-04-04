@@ -1,29 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, MapPin, Bookmark, BookmarkCheck, Search, X, TrendingUp } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { MOCK_ESTABLISHMENTS } from "@/data/mock";
+import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useLocation } from "@/contexts/LocationContext";
+import { getEstablishments } from "@/services/establishments";
 
 export default function SavedPlaces() {
   const [search, setSearch] = useState("");
+  const [allEstablishments, setAllEstablishments] = useState<Establishment[]>(MOCK_ESTABLISHMENTS);
   const navigate = useNavigate();
   const { savedPlaces, isPlaceSaved, toggleSavedPlace } = useFavorites();
   const { getDistance, loading } = useLocation();
 
-  const places = MOCK_ESTABLISHMENTS.filter((e) => isPlaceSaved(e.id));
+  useEffect(() => {
+    getEstablishments().then(({ data }) => {
+      if (data && data.length > 0) {
+        setAllEstablishments(data.map((e: any) => ({
+          ...e,
+          city: "Gramado",
+          is_active: true,
+          is_verified: true,
+          gallery: e.gallery || [],
+          sunday_hours: e.sunday_hours || null,
+        })) as Establishment[]);
+      }
+    });
+  }, []);
+
+  const places = allEstablishments.filter((e) => isPlaceSaved(e.id));
   const filtered = places.filter((est) =>
     est.name.toLowerCase().includes(search.toLowerCase()) ||
     est.category.toLowerCase().includes(search.toLowerCase())
   );
 
-  const popularPlaces = MOCK_ESTABLISHMENTS
+  const popularPlaces = allEstablishments
     .slice()
-    .sort((a, b) => b.rating - a.rating)
+    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
     .slice(0, 3);
 
   return (
@@ -87,7 +104,7 @@ export default function SavedPlaces() {
                           {loading ? (
                             <Skeleton className="w-8 h-3" />
                           ) : (
-                            getDistance(est.latitude, est.longitude) ?? `${est.distance_km.toFixed(1)} km`
+                            getDistance(est.latitude, est.longitude) ?? `${(est.distance_km ?? 0).toFixed(1)} km`
                           )}
                         </span>
                       </div>
@@ -139,7 +156,7 @@ export default function SavedPlaces() {
                     {loading ? (
                       <Skeleton className="w-8 h-3" />
                     ) : (
-                      getDistance(est.latitude, est.longitude) ?? `${est.distance_km.toFixed(1)} km`
+                      getDistance(est.latitude, est.longitude) ?? `${(est.distance_km ?? 0).toFixed(1)} km`
                     )}
                   </span>
                 </div>
