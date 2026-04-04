@@ -60,7 +60,7 @@ const CATEGORY_FILTER_CHIPS: Record<string, { label: string; icon: typeof MapPin
 };
 
 export default function ExploreCategory() {
-  const { category } = require("react-router-dom").useParams<{ category: string }>();
+  const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [categoryEstablishments, setCategoryEstablishments] = useState<Establishment[]>([]);
