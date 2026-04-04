@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useReducer, useMemo, useEffect } from "react";
-import { safeParse, safeSave } from "@/lib/storage";
+import { getUserCoupons, saveCoupon, unsaveCoupon, useCouponService } from "@/services/coupons";
 
-type State = { savedCoupons: string[]; usedCoupons: string[] };
+type State = { savedCoupons: string[]; usedCoupons: string[]; loaded: boolean };
 
 type Action =
+  | { type: "INIT"; savedCoupons: string[]; usedCoupons: string[] }
   | { type: "TOGGLE_COUPON"; id: string }
   | { type: "USE_COUPON"; id: string };
 
 function couponsReducer(state: State, action: Action): State {
   switch (action.type) {
+    case "INIT":
+      return { savedCoupons: action.savedCoupons, usedCoupons: action.usedCoupons, loaded: true };
     case "TOGGLE_COUPON": {
       const isUsed = state.usedCoupons.includes(action.id);
       const isSaved = state.savedCoupons.includes(action.id);
@@ -41,30 +44,55 @@ interface CouponsContextType {
   useCoupon: (id: string) => void;
   isCouponSaved: (id: string) => boolean;
   isCouponUsed: (id: string) => boolean;
+  loaded: boolean;
 }
 
 const CouponsContext = createContext<CouponsContextType | null>(null);
 
 export function CouponsProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(
-    couponsReducer,
-    null,
-    () => safeParse<State>("coupons", { savedCoupons: [], usedCoupons: [] })
-  );
+  const [state, dispatch] = useReducer(couponsReducer, {
+    savedCoupons: [],
+    usedCoupons: [],
+    loaded: false,
+  });
 
   const savedSet = useMemo(() => new Set(state.savedCoupons), [state.savedCoupons]);
   const usedSet = useMemo(() => new Set(state.usedCoupons), [state.usedCoupons]);
 
   useEffect(() => {
-    const handler = setTimeout(() => safeSave("coupons", state), 300);
-    return () => clearTimeout(handler);
-  }, [state]);
+    async function load() {
+      const { data } = await getUserCoupons();
+      const saved: string[] = [];
+      const used: string[] = [];
+      data?.forEach((uc) => {
+        if (uc.status === "used") used.push(uc.coupon_id);
+        else saved.push(uc.coupon_id);
+      });
+      dispatch({ type: "INIT", savedCoupons: saved, usedCoupons: used });
+    }
+    load();
+  }, []);
 
   const value = useMemo(() => ({
     savedCoupons: state.savedCoupons,
     usedCoupons: state.usedCoupons,
-    toggleCoupon: (id: string) => dispatch({ type: "TOGGLE_COUPON", id }),
-    useCoupon: (id: string) => dispatch({ type: "USE_COUPON", id }),
+    loaded: state.loaded,
+    toggleCoupon: async (id: string) => {
+      const wasSaved = savedSet.has(id);
+      dispatch({ type: "TOGGLE_COUPON", id });
+      const result = wasSaved ? await unsaveCoupon(id) : await saveCoupon(id);
+      if (result.error) {
+        dispatch({ type: "TOGGLE_COUPON", id }); // revert
+        console.error("Failed to sync coupon", result.error);
+      }
+    },
+    useCoupon: async (id: string) => {
+      dispatch({ type: "USE_COUPON", id });
+      const result = await useCouponService(id);
+      if (result.error) {
+        console.error("Failed to use coupon", result.error);
+      }
+    },
     isCouponSaved: (id: string) => savedSet.has(id),
     isCouponUsed: (id: string) => usedSet.has(id),
   }), [state, savedSet, usedSet]);
