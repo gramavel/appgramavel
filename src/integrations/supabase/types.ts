@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_notifications: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          image_url: string | null
+          reference_id: string | null
+          scheduled_at: string | null
+          segment: string | null
+          sent: boolean | null
+          sent_at: string | null
+          target: string | null
+          target_ids: string[] | null
+          title: string
+          type: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          reference_id?: string | null
+          scheduled_at?: string | null
+          segment?: string | null
+          sent?: boolean | null
+          sent_at?: string | null
+          target?: string | null
+          target_ids?: string[] | null
+          title: string
+          type?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          reference_id?: string | null
+          scheduled_at?: string | null
+          segment?: string | null
+          sent?: boolean | null
+          sent_at?: string | null
+          target?: string | null
+          target_ids?: string[] | null
+          title?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
+      admin_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           condition: string | null
@@ -82,6 +151,53 @@ export type Database = {
           },
         ]
       }
+      coupon_rules: {
+        Row: {
+          coupon_id: string
+          created_at: string | null
+          current_uses: number | null
+          id: string
+          max_uses: number | null
+          max_uses_per_user: number | null
+          min_order_value: number | null
+          qr_code_url: string | null
+          rules: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string | null
+          current_uses?: number | null
+          id?: string
+          max_uses?: number | null
+          max_uses_per_user?: number | null
+          min_order_value?: number | null
+          qr_code_url?: string | null
+          rules?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string | null
+          current_uses?: number | null
+          id?: string
+          max_uses?: number | null
+          max_uses_per_user?: number | null
+          min_order_value?: number | null
+          qr_code_url?: string | null
+          rules?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_rules_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: true
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           category: string | null
@@ -119,6 +235,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "coupons_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      establishment_photos: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          establishment_id: string
+          id: string
+          sort_order: number | null
+          url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          establishment_id: string
+          id?: string
+          sort_order?: number | null
+          url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          establishment_id?: string
+          id?: string
+          sort_order?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "establishment_photos_establishment_id_fkey"
             columns: ["establishment_id"]
             isOneToOne: false
             referencedRelation: "establishments"
@@ -242,6 +393,51 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      feed_events: {
+        Row: {
+          created_at: string | null
+          establishment_id: string | null
+          event_type: string
+          id: string
+          post_id: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          establishment_id?: string | null
+          event_type: string
+          id?: string
+          post_id?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          establishment_id?: string | null
+          event_type?: string
+          id?: string
+          post_id?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_events_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_events_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -381,6 +577,47 @@ export type Database = {
           },
         ]
       }
+      route_banners: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          id: string
+          image_url: string
+          link_url: string | null
+          route_id: string | null
+          sort_order: number | null
+          title: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          image_url: string
+          link_url?: string | null
+          route_id?: string | null
+          sort_order?: number | null
+          title: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          link_url?: string | null
+          route_id?: string | null
+          sort_order?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_banners_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       route_stops: {
         Row: {
           created_at: string | null
@@ -462,6 +699,30 @@ export type Database = {
           sort_order?: number | null
           subtitle?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      search_queries: {
+        Row: {
+          created_at: string | null
+          id: string
+          query: string
+          results: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          query: string
+          results?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          query?: string
+          results?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }

@@ -28,6 +28,10 @@ const RoutesPage = lazy(() => import("./pages/profile/Routes"));
 const Settings = lazy(() => import("./pages/profile/Settings"));
 const UserCoupons = lazy(() => import("./pages/profile/UserCoupons"));
 
+// Admin
+const AdminApp = lazy(() => import("./admin/AdminApp"));
+const AdminRouter = lazy(() => import("./admin/AdminRouter"));
+
 const queryClient = new QueryClient();
 
 function ScrollRestore() {
@@ -71,6 +75,11 @@ const App = () => (
                     <Route path="/perfil/roteiros" element={<RoutesPage />} />
                     <Route path="/perfil/configuracoes" element={<Settings />} />
                     <Route path="/perfil/cupons" element={<UserCoupons />} />
+                    {/* Admin */}
+                    <Route path="/admin" element={<AdminApp />}>
+                      <Route path="*" element={<AdminRouter />} />
+                      <Route index element={<AdminRouter />} />
+                    </Route>
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
