@@ -367,13 +367,13 @@ export default function Establishment() {
       />
 
       <ImageLightbox
-        images={allImages}
+        images={lightboxImages}
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         aspectRatio="4/5"
-        titles={allTitles}
-        captions={allCaptions}
+        titles={lightboxTitles}
+        captions={lightboxCaptions}
         reactions={allReactions}
       />
 
