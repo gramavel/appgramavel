@@ -68,6 +68,19 @@ export default function Establishment() {
     });
   }, [slug]);
 
+  // Fetch photos from establishment_photos
+  useEffect(() => {
+    if (!est?.id) return;
+    supabase
+      .from("establishment_photos")
+      .select("id, url, caption, sort_order")
+      .eq("establishment_id", est.id)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) setPhotos(data);
+      });
+  }, [est?.id]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -84,18 +97,6 @@ export default function Establishment() {
 
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
-  // Fetch photos from establishment_photos
-  useEffect(() => {
-    if (!est?.id) return;
-    supabase
-      .from("establishment_photos")
-      .select("id, url, caption, sort_order")
-      .eq("establishment_id", est.id)
-      .order("sort_order", { ascending: true })
-      .then(({ data }) => {
-        if (data && data.length > 0) setPhotos(data);
-      });
-  }, [est?.id]);
 
   const isSaved = isPlaceSaved(est.id);
   const isOpen = est.is_open;
