@@ -208,20 +208,26 @@ export default function Establishment() {
             </TabsList>
 
             <TabsContent value="fotos" className="p-2">
-              <div className="grid grid-cols-3 gap-1.5">
-                {(est.gallery || []).map((src, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative"
-                    onClick={() => openLightbox(i + 1)}
-                  >
-                    <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 transition-all flex items-center justify-center">
-                      <Heart className="h-4 w-4 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              {displayPhotos.length === 0 ? (
+                <div className="py-12 text-center">
+                  <p className="text-sm text-muted-foreground">Nenhuma foto cadastrada ainda</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-1.5">
+                  {displayPhotos.map((photo, i) => (
+                    <div
+                      key={photo.id}
+                      className="aspect-[4/5] rounded-lg overflow-hidden group cursor-pointer relative"
+                      onClick={() => openLightbox(i + 1)}
+                    >
+                      <img src={photo.url} alt={photo.caption || `Foto ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 transition-all flex items-center justify-center">
+                        <Heart className="h-4 w-4 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="cupons" className="p-4">
