@@ -20,7 +20,15 @@ import ImageLightbox from "@/components/ui/ImageLightbox";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { getEstablishmentBySlug } from "@/services/establishments";
 import { getReviewsByEstablishment } from "@/services/reviews";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+interface EstablishmentPhoto {
+  id: string;
+  url: string;
+  caption: string | null;
+  sort_order: number;
+}
 
 export default function Establishment() {
   const { slug } = useParams();
@@ -31,6 +39,7 @@ export default function Establishment() {
   const [est, setEst] = useState<Establishment | null>(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [photos, setPhotos] = useState<EstablishmentPhoto[]>([]);
 
   const { isPlaceSaved, toggleSavedPlace } = useFavorites();
 
@@ -59,6 +68,19 @@ export default function Establishment() {
     });
   }, [slug]);
 
+  // Fetch photos from establishment_photos
+  useEffect(() => {
+    if (!est?.id) return;
+    supabase
+      .from("establishment_photos")
+      .select("id, url, caption, sort_order")
+      .eq("establishment_id", est.id)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) setPhotos(data);
+      });
+  }, [est?.id]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -75,14 +97,25 @@ export default function Establishment() {
 
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
+
   const isSaved = isPlaceSaved(est.id);
   const isOpen = est.is_open;
 
-  const allImages = [est.image_url, ...(est.gallery || [])];
-  const allTitles = [est.name, ...(est.gallery || []).map((_, i) => `Foto ${i + 1}`)];
-  const allCaptions = [est.description, ...(est.gallery || []).map(() => est.category)];
+  // Fallback: use est.gallery if no photos from admin
+  const displayPhotos: EstablishmentPhoto[] = photos.length > 0
+    ? photos
+    : (est.gallery || []).map((url, i) => ({
+        id: `gallery-${i}`,
+        url,
+        caption: null,
+        sort_order: i,
+      }));
 
-  const allReactions = allImages.map((_, idx) =>
+  const lightboxImages = [est.image_url, ...displayPhotos.map(p => p.url)].filter(Boolean) as string[];
+  const lightboxTitles = [est.name, ...displayPhotos.map((_, i) => `Foto ${i + 1}`)];
+  const lightboxCaptions = [est.description || "", ...displayPhotos.map(p => p.caption || "")];
+
+  const allReactions = lightboxImages.map((_, idx) =>
     CANONICAL_REACTIONS.map((r, ri) => ({
       emoji: r.emoji,
       label: r.label,
@@ -176,20 +209,26 @@ export default function Establishment() {
             </TabsList>
 
             <TabsContent value="fotos" className="p-2">
-              <div className="grid grid-cols-3 gap-1.5">
-                {(est.gallery || []).map((src, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square rounded-lg overflow-hidden group cursor-pointer relative"
-                    onClick={() => openLightbox(i + 1)}
-                  >
-                    <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 transition-all flex items-center justify-center">
-                      <Heart className="h-4 w-4 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              {displayPhotos.length === 0 ? (
+                <div className="py-12 text-center">
+                  <p className="text-sm text-muted-foreground">Nenhuma foto cadastrada ainda</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-1.5">
+                  {displayPhotos.map((photo, i) => (
+                    <div
+                      key={photo.id}
+                      className="aspect-[4/5] rounded-lg overflow-hidden group cursor-pointer relative"
+                      onClick={() => openLightbox(i + 1)}
+                    >
+                      <img src={photo.url} alt={photo.caption || `Foto ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/30 transition-all flex items-center justify-center">
+                        <Heart className="h-4 w-4 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="cupons" className="p-4">
@@ -329,13 +368,13 @@ export default function Establishment() {
       />
 
       <ImageLightbox
-        images={allImages}
+        images={lightboxImages}
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         aspectRatio="4/5"
-        titles={allTitles}
-        captions={allCaptions}
+        titles={lightboxTitles}
+        captions={lightboxCaptions}
         reactions={allReactions}
       />
 
