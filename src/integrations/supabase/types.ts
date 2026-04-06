@@ -246,26 +246,38 @@ export type Database = {
         Row: {
           caption: string | null
           created_at: string | null
+          crop_data: Json | null
           establishment_id: string
+          height: number | null
           id: string
           sort_order: number | null
+          storage_path: string | null
           url: string
+          width: number | null
         }
         Insert: {
           caption?: string | null
           created_at?: string | null
+          crop_data?: Json | null
           establishment_id: string
+          height?: number | null
           id?: string
           sort_order?: number | null
+          storage_path?: string | null
           url: string
+          width?: number | null
         }
         Update: {
           caption?: string | null
           created_at?: string | null
+          crop_data?: Json | null
           establishment_id?: string
+          height?: number | null
           id?: string
           sort_order?: number | null
+          storage_path?: string | null
           url?: string
+          width?: number | null
         }
         Relationships: [
           {
@@ -286,6 +298,12 @@ export type Database = {
           distance_km: number | null
           facebook: string | null
           gallery: string[] | null
+          hours_friday: string | null
+          hours_monday: string | null
+          hours_saturday: string | null
+          hours_thursday: string | null
+          hours_tuesday: string | null
+          hours_wednesday: string | null
           id: string
           image_url: string | null
           instagram: string | null
@@ -303,9 +321,11 @@ export type Database = {
           sunday_hours: string | null
           tiktok: string | null
           total_reviews: number | null
+          twitter: string | null
           updated_at: string | null
           website: string | null
           whatsapp: string | null
+          youtube: string | null
         }
         Insert: {
           address?: string | null
@@ -315,6 +335,12 @@ export type Database = {
           distance_km?: number | null
           facebook?: string | null
           gallery?: string[] | null
+          hours_friday?: string | null
+          hours_monday?: string | null
+          hours_saturday?: string | null
+          hours_thursday?: string | null
+          hours_tuesday?: string | null
+          hours_wednesday?: string | null
           id?: string
           image_url?: string | null
           instagram?: string | null
@@ -332,9 +358,11 @@ export type Database = {
           sunday_hours?: string | null
           tiktok?: string | null
           total_reviews?: number | null
+          twitter?: string | null
           updated_at?: string | null
           website?: string | null
           whatsapp?: string | null
+          youtube?: string | null
         }
         Update: {
           address?: string | null
@@ -344,6 +372,12 @@ export type Database = {
           distance_km?: number | null
           facebook?: string | null
           gallery?: string[] | null
+          hours_friday?: string | null
+          hours_monday?: string | null
+          hours_saturday?: string | null
+          hours_thursday?: string | null
+          hours_tuesday?: string | null
+          hours_wednesday?: string | null
           id?: string
           image_url?: string | null
           instagram?: string | null
@@ -361,9 +395,11 @@ export type Database = {
           sunday_hours?: string | null
           tiktok?: string | null
           total_reviews?: number | null
+          twitter?: string | null
           updated_at?: string | null
           website?: string | null
           whatsapp?: string | null
+          youtube?: string | null
         }
         Relationships: []
       }
@@ -438,6 +474,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      media_uploads: {
+        Row: {
+          bucket: string
+          created_at: string | null
+          crop_data: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          original_name: string | null
+          public_url: string
+          size_bytes: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          bucket?: string
+          created_at?: string | null
+          crop_data?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          original_name?: string | null
+          public_url: string
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          bucket?: string
+          created_at?: string | null
+          crop_data?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          original_name?: string | null
+          public_url?: string
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
