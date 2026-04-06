@@ -20,7 +20,15 @@ import ImageLightbox from "@/components/ui/ImageLightbox";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { getEstablishmentBySlug } from "@/services/establishments";
 import { getReviewsByEstablishment } from "@/services/reviews";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+interface EstablishmentPhoto {
+  id: string;
+  url: string;
+  caption: string | null;
+  sort_order: number;
+}
 
 export default function Establishment() {
   const { slug } = useParams();
