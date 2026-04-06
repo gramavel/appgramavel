@@ -84,14 +84,37 @@ export default function Establishment() {
 
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
+  // Fetch photos from establishment_photos
+  useEffect(() => {
+    if (!est?.id) return;
+    supabase
+      .from("establishment_photos")
+      .select("id, url, caption, sort_order")
+      .eq("establishment_id", est.id)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) setPhotos(data);
+      });
+  }, [est?.id]);
+
   const isSaved = isPlaceSaved(est.id);
   const isOpen = est.is_open;
 
-  const allImages = [est.image_url, ...(est.gallery || [])];
-  const allTitles = [est.name, ...(est.gallery || []).map((_, i) => `Foto ${i + 1}`)];
-  const allCaptions = [est.description, ...(est.gallery || []).map(() => est.category)];
+  // Fallback: use est.gallery if no photos from admin
+  const displayPhotos: EstablishmentPhoto[] = photos.length > 0
+    ? photos
+    : (est.gallery || []).map((url, i) => ({
+        id: `gallery-${i}`,
+        url,
+        caption: null,
+        sort_order: i,
+      }));
 
-  const allReactions = allImages.map((_, idx) =>
+  const lightboxImages = [est.image_url, ...displayPhotos.map(p => p.url)].filter(Boolean) as string[];
+  const lightboxTitles = [est.name, ...displayPhotos.map((_, i) => `Foto ${i + 1}`)];
+  const lightboxCaptions = [est.description || "", ...displayPhotos.map(p => p.caption || "")];
+
+  const allReactions = lightboxImages.map((_, idx) =>
     CANONICAL_REACTIONS.map((r, ri) => ({
       emoji: r.emoji,
       label: r.label,
