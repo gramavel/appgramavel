@@ -99,7 +99,35 @@ export default function Establishment() {
 
 
   const isSaved = isPlaceSaved(est.id);
-  const isOpen = est.is_open;
+
+  // Calculate open/closed dynamically from hours
+  const isOpen = useMemo(() => {
+    const now = new Date();
+    const day = now.getDay(); // 0=dom, 1=seg...
+    const fields = ['sunday_hours','hours_monday','hours_tuesday',
+      'hours_wednesday','hours_thursday','hours_friday','hours_saturday'] as const;
+    const fieldKey = fields[day];
+    const hours = (est as any)[fieldKey] as string | null | undefined;
+    if (!hours) {
+      // fallback to legacy opening_hours for weekdays or is_open
+      if (day >= 1 && day <= 6 && est.opening_hours) {
+        const match = est.opening_hours.match(/(\d{2}:\d{2})\s*(?:às|a|-)\s*(\d{2}:\d{2})/);
+        if (match) {
+          const current = now.getHours() * 60 + now.getMinutes();
+          const [oh, om] = match[1].split(':').map(Number);
+          const [ch, cm] = match[2].split(':').map(Number);
+          return current >= oh * 60 + om && current <= ch * 60 + cm;
+        }
+      }
+      return false;
+    }
+    const match = hours.match(/(\d{2}:\d{2})\s*(?:às|a|-)\s*(\d{2}:\d{2})/);
+    if (!match) return false;
+    const current = now.getHours() * 60 + now.getMinutes();
+    const [oh, om] = match[1].split(':').map(Number);
+    const [ch, cm] = match[2].split(':').map(Number);
+    return current >= oh * 60 + om && current <= ch * 60 + cm;
+  }, [est]);
 
   // Fallback: use est.gallery if no photos from admin
   const displayPhotos: EstablishmentPhoto[] = photos.length > 0
