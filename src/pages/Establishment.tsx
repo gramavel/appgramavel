@@ -81,35 +81,16 @@ export default function Establishment() {
       });
   }, [est?.id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <GlobalHeader showBack />
-        <main className="max-w-2xl mx-auto px-4 pb-20 pt-20 space-y-4">
-          <Skeleton className="w-full aspect-[2/1] rounded-lg" />
-          <Skeleton className="h-6 w-48 mx-auto" />
-          <Skeleton className="h-4 w-32 mx-auto" />
-        </main>
-        <BottomNav />
-      </div>
-    );
-  }
-
-  if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
-
-
-  const isSaved = isPlaceSaved(est.id);
-
   // Calculate open/closed dynamically from hours
   const isOpen = useMemo(() => {
+    if (!est) return false;
     const now = new Date();
-    const day = now.getDay(); // 0=dom, 1=seg...
+    const day = now.getDay();
     const fields = ['sunday_hours','hours_monday','hours_tuesday',
       'hours_wednesday','hours_thursday','hours_friday','hours_saturday'] as const;
     const fieldKey = fields[day];
     const hours = (est as any)[fieldKey] as string | null | undefined;
     if (!hours) {
-      // fallback to legacy opening_hours for weekdays or is_open
       if (day >= 1 && day <= 6 && est.opening_hours) {
         const match = est.opening_hours.match(/(\d{2}:\d{2})\s*(?:às|a|-)\s*(\d{2}:\d{2})/);
         if (match) {
@@ -128,6 +109,25 @@ export default function Establishment() {
     const [ch, cm] = match[2].split(':').map(Number);
     return current >= oh * 60 + om && current <= ch * 60 + cm;
   }, [est]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <GlobalHeader showBack />
+        <main className="max-w-2xl mx-auto px-4 pb-20 pt-20 space-y-4">
+          <Skeleton className="w-full aspect-[2/1] rounded-lg" />
+          <Skeleton className="h-6 w-48 mx-auto" />
+          <Skeleton className="h-4 w-32 mx-auto" />
+        </main>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
+
+
+  const isSaved = isPlaceSaved(est.id);
 
   // Fallback: use est.gallery if no photos from admin
   const displayPhotos: EstablishmentPhoto[] = photos.length > 0
