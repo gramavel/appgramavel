@@ -244,6 +244,14 @@ export default function RoteiroNavigation() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {mapTarget && (
+        <MapSheet
+          open={showMapSheet}
+          onClose={() => setShowMapSheet(false)}
+          establishment={mapTarget}
+        />
+      )}
     </div>
   );
 }
