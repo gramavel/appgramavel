@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MapSheet from "@/components/map/MapSheet";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapPin, Star, Navigation, CheckCircle2, SkipForward, PartyPopper } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
