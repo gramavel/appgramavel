@@ -42,6 +42,7 @@ export default function Establishment() {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
   const [photos, setPhotos] = useState<EstablishmentPhoto[]>([]);
+  const [showMapSheet, setShowMapSheet] = useState(false);
 
   const { isPlaceSaved, toggleSavedPlace } = useFavorites();
 
