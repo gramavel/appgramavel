@@ -4,6 +4,8 @@ import {
   Star, Navigation, Info, Bookmark, BookmarkCheck, Share,
   MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, Heart, User
 } from "lucide-react";
+import MapSheet from "@/components/map/MapSheet";
+import { useLocation } from "@/contexts/LocationContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
