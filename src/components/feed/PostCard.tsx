@@ -45,7 +45,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
           onClick={() => navigate(`/estabelecimento/${post.establishment_slug}`)}
         >
           <img
-            src={post.establishment_avatar}
+            src={post.establishment_avatar || post.image || "/placeholder.svg"}
             alt={post.establishment_name}
             className="w-12 h-12 rounded-full object-cover border-2 border-border"
             width={48}

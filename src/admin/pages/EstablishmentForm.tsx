@@ -312,8 +312,6 @@ export default function EstablishmentForm() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-6 mb-4">
-            <div className="flex items-center gap-2"><Switch checked={form.is_open} onCheckedChange={v => updateField("is_open", v)} /><Label>Aberto</Label></div>
-            <div className="flex items-center gap-2"><Switch checked={form.is_popular} onCheckedChange={v => updateField("is_popular", v)} /><Label>Popular</Label></div>
             <div className="flex items-center gap-2"><Switch checked={form.pet_friendly} onCheckedChange={v => updateField("pet_friendly", v)} /><Label>Pet Friendly</Label></div>
           </div>
 
