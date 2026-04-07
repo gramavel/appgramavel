@@ -22,6 +22,8 @@ export default function RoteiroNavigation() {
   const [visited, setVisited] = useState<boolean[]>(() => new Array(route?.stops.length || 0).fill(false));
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [showConclusion, setShowConclusion] = useState(false);
+  const [showMapSheet, setShowMapSheet] = useState(false);
+  const [mapTarget, setMapTarget] = useState<{ name: string; latitude: number | null; longitude: number | null; distance_km?: number | null } | null>(null);
 
   if (!route) {
     return (
