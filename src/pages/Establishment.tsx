@@ -158,8 +158,10 @@ export default function Establishment() {
     setLightboxOpen(true);
   };
 
+  const [showMapSheet, setShowMapSheet] = useState(false);
+
   const handleNavigate = () => {
-    window.open(`https://maps.google.com/?q=${est.latitude},${est.longitude}`);
+    setShowMapSheet(true);
   };
 
   const handleShare = async () => {
