@@ -336,13 +336,13 @@ export default function Establishment() {
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 pl-8 text-sm">
                 {[
-                  { day: "Segunda", hours: est.opening_hours },
-                  { day: "Terça", hours: est.opening_hours },
-                  { day: "Quarta", hours: est.opening_hours },
-                  { day: "Quinta", hours: est.opening_hours },
-                  { day: "Sexta", hours: est.opening_hours },
-                  { day: "Sábado", hours: est.opening_hours },
-                  { day: "Domingo", hours: est.sunday_hours },
+                  { day: "Segunda", hours: (est as any).hours_monday || est.opening_hours },
+                  { day: "Terça", hours: (est as any).hours_tuesday || est.opening_hours },
+                  { day: "Quarta", hours: (est as any).hours_wednesday || est.opening_hours },
+                  { day: "Quinta", hours: (est as any).hours_thursday || est.opening_hours },
+                  { day: "Sexta", hours: (est as any).hours_friday || est.opening_hours },
+                  { day: "Sábado", hours: (est as any).hours_saturday || est.opening_hours },
+                  { day: "Domingo", hours: (est as any).sunday_hours },
                 ].map(({ day, hours }) => (
                   <div key={day} className="contents">
                     <span className="font-medium text-foreground">{day}:</span>
