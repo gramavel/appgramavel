@@ -175,7 +175,13 @@ export default function RoteiroNavigation() {
                 variant="outline"
                 className="w-full rounded-full gap-2 text-sm"
                 onClick={() => {
-                  window.open(`https://www.google.com/maps/dir/?api=1&destination=${est.latitude},${est.longitude}`, "_blank");
+                  setMapTarget({
+                    name: est.name,
+                    latitude: est.latitude,
+                    longitude: est.longitude,
+                    distance_km: est.distance_km,
+                  });
+                  setShowMapSheet(true);
                 }}
               >
                 <Navigation className="w-4 h-4" />
