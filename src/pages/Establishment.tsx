@@ -419,6 +419,17 @@ export default function Establishment() {
         reactions={allReactions}
       />
 
+      <MapSheet
+        open={showMapSheet}
+        onClose={() => setShowMapSheet(false)}
+        establishment={{
+          name: est.name,
+          latitude: est.latitude,
+          longitude: est.longitude,
+          distance_km: est.distance_km,
+        }}
+      />
+
       <BottomNav />
     </div>
   );
