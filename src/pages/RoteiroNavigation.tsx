@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MapSheet from "@/components/map/MapSheet";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapPin, Star, Navigation, CheckCircle2, SkipForward, PartyPopper } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
@@ -21,6 +22,8 @@ export default function RoteiroNavigation() {
   const [visited, setVisited] = useState<boolean[]>(() => new Array(route?.stops.length || 0).fill(false));
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [showConclusion, setShowConclusion] = useState(false);
+  const [showMapSheet, setShowMapSheet] = useState(false);
+  const [mapTarget, setMapTarget] = useState<{ name: string; latitude: number | null; longitude: number | null; distance_km?: number | null } | null>(null);
 
   if (!route) {
     return (
@@ -172,7 +175,13 @@ export default function RoteiroNavigation() {
                 variant="outline"
                 className="w-full rounded-full gap-2 text-sm"
                 onClick={() => {
-                  window.open(`https://www.google.com/maps/dir/?api=1&destination=${est.latitude},${est.longitude}`, "_blank");
+                  setMapTarget({
+                    name: est.name,
+                    latitude: est.latitude,
+                    longitude: est.longitude,
+                    distance_km: est.distance_km,
+                  });
+                  setShowMapSheet(true);
                 }}
               >
                 <Navigation className="w-4 h-4" />
@@ -235,6 +244,14 @@ export default function RoteiroNavigation() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {mapTarget && (
+        <MapSheet
+          open={showMapSheet}
+          onClose={() => setShowMapSheet(false)}
+          establishment={mapTarget}
+        />
+      )}
     </div>
   );
 }

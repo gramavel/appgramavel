@@ -4,6 +4,8 @@ import {
   Star, Navigation, Info, Bookmark, BookmarkCheck, Share,
   MapPin, Clock, Phone, Globe, Copy, MessageSquarePlus, Heart, User
 } from "lucide-react";
+import MapSheet from "@/components/map/MapSheet";
+import { useLocation } from "@/contexts/LocationContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -40,6 +42,7 @@ export default function Establishment() {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
   const [photos, setPhotos] = useState<EstablishmentPhoto[]>([]);
+  const [showMapSheet, setShowMapSheet] = useState(false);
 
   const { isPlaceSaved, toggleSavedPlace } = useFavorites();
 
@@ -157,7 +160,7 @@ export default function Establishment() {
   };
 
   const handleNavigate = () => {
-    window.open(`https://maps.google.com/?q=${est.latitude},${est.longitude}`);
+    setShowMapSheet(true);
   };
 
   const handleShare = async () => {
@@ -414,6 +417,17 @@ export default function Establishment() {
         titles={lightboxTitles}
         captions={lightboxCaptions}
         reactions={allReactions}
+      />
+
+      <MapSheet
+        open={showMapSheet}
+        onClose={() => setShowMapSheet(false)}
+        establishment={{
+          name: est.name,
+          latitude: est.latitude,
+          longitude: est.longitude,
+          distance_km: est.distance_km,
+        }}
       />
 
       <BottomNav />
