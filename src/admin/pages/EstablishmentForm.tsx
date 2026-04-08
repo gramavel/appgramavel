@@ -206,9 +206,26 @@ export default function EstablishmentForm() {
       const { error } = await supabase.from("establishments").update(payload as never).eq("id", id);
       if (error) { toast.error("Erro ao salvar: " + error.message); setSaving(false); return; }
     } else {
-      const { data, error } = await supabase.from("establishments").insert(payload as never).select().single();
-      if (error || !data) { toast.error("Erro ao criar: " + (error?.message || "")); setSaving(false); return; }
-      estId = data.id;
+      // Try slug, add numeric suffix if conflict
+      let slug = payload.slug as string;
+      let attempt = 0;
+      let insertError: any = null;
+      let insertData: any = null;
+
+      while (attempt < 10) {
+        const trySlug = attempt === 0 ? slug : `${slug}-${attempt + 1}`;
+        const { data, error } = await supabase.from("establishments").insert({ ...payload, slug: trySlug } as never).select().single();
+        if (error && error.code === "23505") {
+          attempt++;
+          continue;
+        }
+        insertError = error;
+        insertData = data;
+        break;
+      }
+
+      if (insertError || !insertData) { toast.error("Erro ao criar: " + (insertError?.message || "")); setSaving(false); return; }
+      estId = insertData.id;
     }
 
     // Delete removed photos (those with id that are no longer in photos array)
