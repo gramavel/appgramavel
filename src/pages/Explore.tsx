@@ -57,6 +57,22 @@ export default function Explore() {
     });
   }, []);
 
+  // Refetch on window focus (e.g. after admin edits)
+  useEffect(() => {
+    const refetch = () => {
+      getEstablishments().then(({ data }) => {
+        if (data && data.length > 0) {
+          setEstablishments(data.map((e: any) => ({
+            ...e, city: "Gramado", is_active: true, is_verified: true,
+            gallery: e.gallery || [], sunday_hours: e.sunday_hours || null,
+          })) as Establishment[]);
+        }
+      });
+    };
+    window.addEventListener("focus", refetch);
+    return () => window.removeEventListener("focus", refetch);
+  }, []);
+
   const isSearching = search.length > 0 || activeFilters.length > 0;
 
   const toggleFilter = (label: string) => {
