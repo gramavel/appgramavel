@@ -70,7 +70,7 @@ export default function Explore() {
     let result = [...establishments];
 
     if (activeFilters.includes("Abertos agora"))
-      result = result.filter((e) => e.is_open);
+      result = result.filter((e) => isOpenNow(e as any));
     if (activeFilters.includes("Em alta hoje"))
       result = result.filter((e) => e.is_popular);
     if (activeFilters.includes("Pet friendly"))
