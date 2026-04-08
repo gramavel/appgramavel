@@ -41,7 +41,7 @@ export async function updateUserRouteStatus(
   routeId: string,
   status: "saved" | "in_progress" | "completed"
 ) {
-  const updates: Record<string, unknown> = { status };
+  const updates: { status: string; started_at?: string; completed_at?: string } = { status };
   if (status === "in_progress") updates.started_at = new Date().toISOString();
   if (status === "completed") updates.completed_at = new Date().toISOString();
 

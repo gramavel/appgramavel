@@ -30,7 +30,7 @@ type DaySchedule = { open: boolean; from: string; to: string };
 type Schedule = Record<string, DaySchedule>;
 
 function slugify(name: string) {
-  return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+  return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").trim();
 }
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
