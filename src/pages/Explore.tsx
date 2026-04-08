@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES, type Establishment } from "@/data/mock";
 import { getEstablishments } from "@/services/establishments";
 import { getExperiences } from "@/services/experiences";
+import { isOpenNow } from "@/lib/utils";
 import ExploreMap from "@/components/map/ExploreMap";
 import "@/components/map/map-styles.css";
 
