@@ -24,6 +24,7 @@ import { getEstablishmentBySlug } from "@/services/establishments";
 import { getReviewsByEstablishment } from "@/services/reviews";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isOpenNow } from "@/lib/utils";
 
 interface EstablishmentPhoto {
   id: string;
@@ -32,7 +33,9 @@ interface EstablishmentPhoto {
   sort_order: number;
 }
 
-export default function Establishment() {
+const DAY_NAMES = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+export default function EstablishmentPage() {
   const { slug } = useParams();
   const [showDetails, setShowDetails] = useState(false);
   const [showSave, setShowSave] = useState(false);
@@ -58,12 +61,10 @@ export default function Establishment() {
           gallery: data.gallery || [],
           sunday_hours: data.sunday_hours || null,
         } as unknown as Establishment);
-        // Load reviews
         getReviewsByEstablishment(data.id).then(({ data: revs }) => {
           if (revs) setReviews(revs);
         });
       } else {
-        // Fallback to mock
         const mock = MOCK_ESTABLISHMENTS.find((e) => e.slug === slug);
         setEst(mock || null);
       }
@@ -71,7 +72,6 @@ export default function Establishment() {
     });
   }, [slug]);
 
-  // Fetch photos from establishment_photos
   useEffect(() => {
     if (!est?.id) return;
     supabase
@@ -84,33 +84,9 @@ export default function Establishment() {
       });
   }, [est?.id]);
 
-  // Calculate open/closed dynamically from hours
   const isOpen = useMemo(() => {
     if (!est) return false;
-    const now = new Date();
-    const day = now.getDay();
-    const fields = ['sunday_hours','hours_monday','hours_tuesday',
-      'hours_wednesday','hours_thursday','hours_friday','hours_saturday'] as const;
-    const fieldKey = fields[day];
-    const hours = (est as any)[fieldKey] as string | null | undefined;
-    if (!hours) {
-      if (day >= 1 && day <= 6 && est.opening_hours) {
-        const match = est.opening_hours.match(/(\d{2}:\d{2})\s*(?:às|a|-)\s*(\d{2}:\d{2})/);
-        if (match) {
-          const current = now.getHours() * 60 + now.getMinutes();
-          const [oh, om] = match[1].split(':').map(Number);
-          const [ch, cm] = match[2].split(':').map(Number);
-          return current >= oh * 60 + om && current <= ch * 60 + cm;
-        }
-      }
-      return false;
-    }
-    const match = hours.match(/(\d{2}:\d{2})\s*(?:às|a|-)\s*(\d{2}:\d{2})/);
-    if (!match) return false;
-    const current = now.getHours() * 60 + now.getMinutes();
-    const [oh, om] = match[1].split(':').map(Number);
-    const [ch, cm] = match[2].split(':').map(Number);
-    return current >= oh * 60 + om && current <= ch * 60 + cm;
+    return isOpenNow(est as any);
   }, [est]);
 
   if (loading) {
@@ -129,10 +105,8 @@ export default function Establishment() {
 
   if (!est) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Estabelecimento não encontrado</div>;
 
-
   const isSaved = isPlaceSaved(est.id);
 
-  // Fallback: use est.gallery if no photos from admin
   const displayPhotos: EstablishmentPhoto[] = photos.length > 0
     ? photos
     : (est.gallery || []).map((url, i) => ({
@@ -181,6 +155,23 @@ export default function Establishment() {
     { icon: Share, label: "Compartilhar", action: handleShare },
     { icon: isSaved ? BookmarkCheck : Bookmark, label: "Salvar", action: () => isSaved ? toggleSavedPlace(est.id) : setShowSave(true), active: isSaved },
   ];
+
+  const todayIndex = new Date().getDay();
+
+  const hoursPerDay = [
+    { day: "Segunda", field: (est as any).hours_monday },
+    { day: "Terça", field: (est as any).hours_tuesday },
+    { day: "Quarta", field: (est as any).hours_wednesday },
+    { day: "Quinta", field: (est as any).hours_thursday },
+    { day: "Sexta", field: (est as any).hours_friday },
+    { day: "Sábado", field: (est as any).hours_saturday },
+    { day: "Domingo", field: (est as any).sunday_hours },
+  ];
+  // Map to match getDay(): 0=Dom, 1=Seg...
+  const dayToIndex: Record<string, number> = {
+    "Domingo": 0, "Segunda": 1, "Terça": 2, "Quarta": 3,
+    "Quinta": 4, "Sexta": 5, "Sábado": 6,
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -338,22 +329,17 @@ export default function Establishment() {
                 </Badge>
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 pl-8 text-sm">
-                {[
-                  { day: "Segunda", hours: (est as any).hours_monday || est.opening_hours },
-                  { day: "Terça", hours: (est as any).hours_tuesday || est.opening_hours },
-                  { day: "Quarta", hours: (est as any).hours_wednesday || est.opening_hours },
-                  { day: "Quinta", hours: (est as any).hours_thursday || est.opening_hours },
-                  { day: "Sexta", hours: (est as any).hours_friday || est.opening_hours },
-                  { day: "Sábado", hours: (est as any).hours_saturday || est.opening_hours },
-                  { day: "Domingo", hours: (est as any).sunday_hours },
-                ].map(({ day, hours }) => (
-                  <div key={day} className="contents">
-                    <span className="font-medium text-foreground">{day}:</span>
-                    <span className="text-muted-foreground">
-                      {hours || "Fechado"}
-                    </span>
-                  </div>
-                ))}
+                {hoursPerDay.map(({ day, field }) => {
+                  const isToday = dayToIndex[day] === todayIndex;
+                  return (
+                    <div key={day} className="contents">
+                      <span className={`font-medium ${isToday ? "text-primary" : "text-foreground"}`}>{day}:</span>
+                      <span className={isToday ? "text-primary font-semibold" : "text-muted-foreground"}>
+                        {field || "Fechado"}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

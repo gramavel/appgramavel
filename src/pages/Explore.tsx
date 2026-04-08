@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES, type Establishment } from "@/data/mock";
 import { getEstablishments } from "@/services/establishments";
 import { getExperiences } from "@/services/experiences";
+import { isOpenNow } from "@/lib/utils";
 import ExploreMap from "@/components/map/ExploreMap";
 import "@/components/map/map-styles.css";
 
@@ -56,6 +57,22 @@ export default function Explore() {
     });
   }, []);
 
+  // Refetch on window focus (e.g. after admin edits)
+  useEffect(() => {
+    const refetch = () => {
+      getEstablishments().then(({ data }) => {
+        if (data && data.length > 0) {
+          setEstablishments(data.map((e: any) => ({
+            ...e, city: "Gramado", is_active: true, is_verified: true,
+            gallery: e.gallery || [], sunday_hours: e.sunday_hours || null,
+          })) as Establishment[]);
+        }
+      });
+    };
+    window.addEventListener("focus", refetch);
+    return () => window.removeEventListener("focus", refetch);
+  }, []);
+
   const isSearching = search.length > 0 || activeFilters.length > 0;
 
   const toggleFilter = (label: string) => {
@@ -69,7 +86,7 @@ export default function Explore() {
     let result = [...establishments];
 
     if (activeFilters.includes("Abertos agora"))
-      result = result.filter((e) => e.is_open);
+      result = result.filter((e) => isOpenNow(e as any));
     if (activeFilters.includes("Em alta hoje"))
       result = result.filter((e) => e.is_popular);
     if (activeFilters.includes("Pet friendly"))

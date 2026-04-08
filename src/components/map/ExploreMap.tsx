@@ -3,18 +3,33 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Search, Locate } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
-import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
-const VISITED_IDS = new Set(["1", "3"]);
+const CATEGORY_COLORS: Record<string, string> = {
+  "Restaurantes": "#ef4444",
+  "Cafés": "#f97316",
+  "Hotéis": "#8b5cf6",
+  "Atrações": "#06b6d4",
+  "Compras": "#ec4899",
+  "Bares & Vinícolas": "#a855f7",
+  "Natureza": "#22c55e",
+};
 
-function createPinIcon(visited: boolean) {
-  const bg = visited ? "#22c55e" : "hsl(233, 100%, 69%)";
-  const inner = visited
-    ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
-    : `<circle cx="5" cy="5" r="5" fill="white"/>`;
-  const innerTransform = visited ? 'transform:rotate(45deg);margin-top:-1px;' : 'transform:rotate(45deg);';
+interface MapEstablishment {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  latitude: number;
+  longitude: number;
+  image_url: string | null;
+  logo_url: string | null;
+  rating: number | null;
+}
 
+function createPinIcon(category: string) {
+  const bg = CATEGORY_COLORS[category] ?? "hsl(233, 100%, 69%)";
   return L.divIcon({
     className: "",
     iconSize: [32, 32],
@@ -30,9 +45,7 @@ function createPinIcon(visited: boolean) {
         box-shadow:0 4px 12px rgba(0,0,0,0.25);
         display:flex;align-items:center;justify-content:center;
       ">
-        <div style="${innerTransform}display:flex;align-items:center;justify-content:center;">
-          ${visited ? inner : '<div style="width:10px;height:10px;background:white;border-radius:50%;"></div>'}
-        </div>
+        <div style="transform:rotate(45deg);width:10px;height:10px;background:white;border-radius:50%;"></div>
       </div>
     `,
   });
@@ -53,13 +66,9 @@ function createUserIcon() {
   });
 }
 
-function createPopupContent(est: Establishment, visited: boolean) {
-  const visitedBadge = visited
-    ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#16a34a;background:rgba(34,197,94,0.1);padding:2px 6px;border-radius:4px;margin-bottom:6px;">✓ Visitado</span><br/>`
-    : "";
+function createPopupContent(est: MapEstablishment) {
   return `
     <div style="min-width:150px;padding:4px;">
-      ${visitedBadge}
       <h4 style="font-weight:600;font-size:14px;margin:0 0 2px;">${est.name}</h4>
       <p style="font-size:12px;color:hsl(215 16% 47%);margin:0 0 8px;">${est.category}</p>
       <a href="/estabelecimento/${est.slug}" style="
@@ -73,20 +82,35 @@ function createPopupContent(est: Establishment, visited: boolean) {
 }
 
 interface ExploreMapProps {
-  onEstablishmentClick?: (est: Establishment) => void;
+  onEstablishmentClick?: (est: MapEstablishment) => void;
 }
 
 export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
   const { coords } = useLocation();
   const navigate = useNavigate();
   const [showSearchArea, setShowSearchArea] = useState(false);
+  const [establishments, setEstablishments] = useState<MapEstablishment[]>([]);
 
   const lat = coords?.lat ?? -29.3733;
   const lng = coords?.lng ?? -50.8767;
 
+  // Fetch establishments from Supabase
+  useEffect(() => {
+    supabase
+      .from("establishments")
+      .select("id, name, slug, category, latitude, longitude, image_url, logo_url, rating")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .then(({ data }) => {
+        if (data) setEstablishments(data as MapEstablishment[]);
+      });
+  }, []);
+
+  // Init map
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
@@ -121,22 +145,6 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       }
     }, 100);
 
-    MOCK_ESTABLISHMENTS.forEach((est) => {
-      const visited = VISITED_IDS.has(est.id);
-      const marker = L.marker([est.latitude, est.longitude], {
-        icon: createPinIcon(visited),
-      }).addTo(map);
-
-      marker.bindPopup(createPopupContent(est, visited), {
-        closeButton: false,
-        className: "custom-popup",
-      });
-
-      marker.on("click", () => {
-        onEstablishmentClick?.(est);
-      });
-    });
-
     map.on("moveend", () => {
       setShowSearchArea(true);
     });
@@ -149,6 +157,35 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
     };
   }, []);
 
+  // Add establishment markers when data loads
+  useEffect(() => {
+    if (!mapInstance.current) return;
+    const map = mapInstance.current;
+
+    // Clear old markers
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+
+    establishments.forEach((est) => {
+      if (est.latitude == null || est.longitude == null) return;
+      const marker = L.marker([est.latitude, est.longitude], {
+        icon: createPinIcon(est.category),
+      }).addTo(map);
+
+      marker.bindPopup(createPopupContent(est), {
+        closeButton: false,
+        className: "custom-popup",
+      });
+
+      marker.on("click", () => {
+        onEstablishmentClick?.(est as any);
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [establishments]);
+
+  // User marker
   useEffect(() => {
     if (!mapInstance.current || !coords) return;
 

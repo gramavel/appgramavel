@@ -1,13 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./map-styles.css";
+import { getRoute, type RouteResult } from "@/lib/routing";
 
 interface RouteMapProps {
   user: { lat: number; lng: number } | null;
   destination: { lat: number; lng: number };
-  /** Future: swap polyline for real route geometry from OSRM/Mapbox */
-  routeGeometry?: [number, number][];
+  onRouteCalculated?: (result: RouteResult | null) => void;
 }
 
 function createDestinationIcon() {
@@ -45,7 +45,7 @@ function createUserDot() {
   });
 }
 
-export default function RouteMap({ user, destination, routeGeometry }: RouteMapProps) {
+export default function RouteMap({ user, destination, onRouteCalculated }: RouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -66,29 +66,28 @@ export default function RouteMap({ user, destination, routeGeometry }: RouteMapP
     L.marker([destination.lat, destination.lng], { icon: createDestinationIcon() }).addTo(map);
 
     if (user) {
-      // User marker
       L.marker([user.lat, user.lng], { icon: createUserDot(), zIndexOffset: 1000 }).addTo(map);
 
-      // Route line (straight or real geometry)
-      const points: L.LatLngExpression[] = routeGeometry
-        ? routeGeometry.map(([lat, lng]) => [lat, lng] as L.LatLngExpression)
-        : [[user.lat, user.lng], [destination.lat, destination.lng]];
+      // Try OSRM route
+      getRoute(user, destination).then((result) => {
+        onRouteCalculated?.(result);
 
-      L.polyline(points, {
-        color: "hsl(233,100%,69%)",
-        weight: 4,
-        opacity: 0.7,
-        dashArray: "8 8",
-      }).addTo(map);
+        const points: L.LatLngExpression[] = result
+          ? result.coordinates.map(([lat, lng]) => [lat, lng] as L.LatLngExpression)
+          : [[user.lat, user.lng], [destination.lat, destination.lng]];
 
-      // Fit both points
-      const bounds = L.latLngBounds(
-        [user.lat, user.lng],
-        [destination.lat, destination.lng]
-      );
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+        const polyline = L.polyline(points, {
+          color: "hsl(233,100%,69%)",
+          weight: 4,
+          opacity: 0.8,
+          dashArray: result ? undefined : "8 8",
+        }).addTo(map);
+
+        map.fitBounds(polyline.getBounds(), { padding: [48, 48], maxZoom: 16 });
+      });
     } else {
       map.setView([destination.lat, destination.lng], 15);
+      onRouteCalculated?.(null);
     }
 
     mapRef.current = map;
