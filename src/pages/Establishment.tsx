@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
-import { CANONICAL_REACTIONS } from "@/lib/constants";
+
 import { SaveSheet } from "@/components/SaveSheet";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
