@@ -5,16 +5,7 @@ import { Search, Locate } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-
-const CATEGORY_COLORS: Record<string, string> = {
-  "Restaurantes": "#ef4444",
-  "Cafés": "#f97316",
-  "Hotéis": "#8b5cf6",
-  "Atrações": "#06b6d4",
-  "Compras": "#ec4899",
-  "Bares & Vinícolas": "#a855f7",
-  "Natureza": "#22c55e",
-};
+import { DEV_USER_ID } from "@/lib/constants";
 
 interface MapEstablishment {
   id: string;
@@ -28,8 +19,11 @@ interface MapEstablishment {
   rating: number | null;
 }
 
-function createPinIcon(category: string) {
-  const bg = CATEGORY_COLORS[category] ?? "hsl(233, 100%, 69%)";
+const PRIMARY_COLOR = "hsl(233, 100%, 69%)";
+const VISITED_COLOR = "#22c55e";
+
+function createPinIcon(visited: boolean) {
+  const bg = visited ? VISITED_COLOR : PRIMARY_COLOR;
   return L.divIcon({
     className: "",
     iconSize: [32, 32],
@@ -66,9 +60,13 @@ function createUserIcon() {
   });
 }
 
-function createPopupContent(est: MapEstablishment) {
+function createPopupContent(est: MapEstablishment, visited: boolean) {
+  const visitedBadge = visited
+    ? `<span style="display:inline-block;padding:2px 8px;background:#22c55e20;color:#22c55e;border-radius:999px;font-size:11px;font-weight:600;margin-bottom:6px;">✓ Visitado</span>`
+    : "";
   return `
     <div style="min-width:150px;padding:4px;">
+      ${visitedBadge}
       <h4 style="font-weight:600;font-size:14px;margin:0 0 2px;">${est.name}</h4>
       <p style="font-size:12px;color:hsl(215 16% 47%);margin:0 0 8px;">${est.category}</p>
       <a href="/estabelecimento/${est.slug}" style="
@@ -94,11 +92,12 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   const navigate = useNavigate();
   const [showSearchArea, setShowSearchArea] = useState(false);
   const [establishments, setEstablishments] = useState<MapEstablishment[]>([]);
+  const [visitedIds, setVisitedIds] = useState<Set<string>>(new Set());
 
   const lat = coords?.lat ?? -29.3733;
   const lng = coords?.lng ?? -50.8767;
 
-  // Fetch establishments from Supabase
+  // Fetch establishments + visited check-ins
   useEffect(() => {
     supabase
       .from("establishments")
@@ -107,6 +106,16 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       .not("longitude", "is", null)
       .then(({ data }) => {
         if (data) setEstablishments(data as MapEstablishment[]);
+      });
+
+    supabase
+      .from("check_ins")
+      .select("establishment_id")
+      .eq("user_id", DEV_USER_ID)
+      .then(({ data }) => {
+        if (data) {
+          setVisitedIds(new Set(data.map((r) => r.establishment_id)));
+        }
       });
   }, []);
 
@@ -168,11 +177,12 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
 
     establishments.forEach((est) => {
       if (est.latitude == null || est.longitude == null) return;
+      const visited = visitedIds.has(est.id);
       const marker = L.marker([est.latitude, est.longitude], {
-        icon: createPinIcon(est.category),
+        icon: createPinIcon(visited),
       }).addTo(map);
 
-      marker.bindPopup(createPopupContent(est), {
+      marker.bindPopup(createPopupContent(est, visited), {
         closeButton: false,
         className: "custom-popup",
       });
@@ -183,7 +193,7 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
 
       markersRef.current.push(marker);
     });
-  }, [establishments]);
+  }, [establishments, visitedIds]);
 
   // User marker
   useEffect(() => {
