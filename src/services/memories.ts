@@ -1,12 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserId } from "@/lib/auth";
 
-const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
-
-export async function getMemories(userId = DEV_USER_ID) {
+export async function getMemories(userId?: string) {
+  const uid = userId ?? await getCurrentUserId();
   return supabase
     .from("user_memories")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", uid)
     .order("created_at", { ascending: false });
 }
 
@@ -14,10 +14,11 @@ export async function addMemory(
   imageUrl: string,
   caption?: string,
   establishmentId?: string,
-  userId = DEV_USER_ID
+  userId?: string
 ) {
+  const uid = userId ?? await getCurrentUserId();
   return supabase.from("user_memories").insert({
-    user_id: userId,
+    user_id: uid,
     image_url: imageUrl,
     caption: caption ?? null,
     establishment_id: establishmentId ?? null,
