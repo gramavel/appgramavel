@@ -1,8 +1,20 @@
 export interface RouteResult {
   coordinates: [number, number][]; // [lat, lng][]
   distanceKm: number;
-  durationMin: number;
+  durationMin: {
+    car: number;
+    moto: number;
+    bike: number;
+    walking: number;
+  };
 }
+
+const SPEEDS = {
+  car: 50,
+  moto: 45,
+  bike: 15,
+  walking: 5,
+};
 
 export async function getRoute(
   from: { lat: number; lng: number },
@@ -24,10 +36,17 @@ export async function getRoute(
       ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
     );
 
+    const distKm = parseFloat((route.distance / 1000).toFixed(1));
+
     return {
       coordinates,
-      distanceKm: parseFloat((route.distance / 1000).toFixed(1)),
-      durationMin: Math.ceil(route.duration / 60),
+      distanceKm: distKm,
+      durationMin: {
+        car: Math.ceil((distKm / SPEEDS.car) * 60),
+        moto: Math.ceil((distKm / SPEEDS.moto) * 60),
+        bike: Math.ceil((distKm / SPEEDS.bike) * 60),
+        walking: Math.ceil((distKm / SPEEDS.walking) * 60),
+      },
     };
   } catch {
     return null;

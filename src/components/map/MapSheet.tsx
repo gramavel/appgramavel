@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, ExternalLink, Loader2, AlertCircle, Car, Bike } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MapPin, ExternalLink, Loader2, AlertCircle } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import RouteMap from "./RouteMap";
 import type { RouteResult } from "@/lib/routing";
@@ -18,41 +17,19 @@ interface MapSheetProps {
   };
 }
 
-function WalkingIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="5" r="1.5" />
-      <path d="M13.5 8.5L15 12l-3 3-1 5" />
-      <path d="M10.5 8.5L9 12l1.5 3" />
-    </svg>
-  );
-}
-
-function MotorcycleIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="5" cy="16" r="3" />
-      <circle cx="19" cy="16" r="3" />
-      <path d="M7.5 14L12 6l2 4h4" />
-      <path d="M12 10l-4.5 4" />
-    </svg>
-  );
-}
+const TRANSPORT_CHIPS = [
+  { key: "car", icon: "🚗", label: "Carro" },
+  { key: "moto", icon: "🏍️", label: "Moto" },
+  { key: "bike", icon: "🚲", label: "Bike" },
+  { key: "walking", icon: "🚶", label: "A pé" },
+] as const;
 
 function formatDuration(min: number) {
-  if (min < 60) return `${min} min`;
+  if (min < 60) return `${min}min`;
   const h = Math.floor(min / 60);
   const m = min % 60;
   return m > 0 ? `${h}h${m}` : `${h}h`;
 }
-
-// Speed multipliers relative to car
-const TRANSPORT_MODES = [
-  { key: "car", label: "Carro", icon: Car, factor: 1 },
-  { key: "moto", label: "Moto", icon: MotorcycleIcon, factor: 0.85 },
-  { key: "bike", label: "Bicicleta", icon: Bike, factor: 4 },
-  { key: "walk", label: "A pé", icon: WalkingIcon, factor: 6 },
-] as const;
 
 export default function MapSheet({ open, onClose, establishment }: MapSheetProps) {
   const { coords, loading } = useLocation();
@@ -81,41 +58,40 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
           </SheetTitle>
         </SheetHeader>
 
-        {/* Transport mode chips */}
+        {/* Transport chips */}
         <div className="px-4 pb-3">
           {loading ? (
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-8 w-24 rounded-full" />
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-7 w-20 rounded-full bg-secondary animate-pulse shrink-0" />
               ))}
             </div>
           ) : loadingRoute ? (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
-              Calculando rota...
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-7 w-20 rounded-full bg-secondary animate-pulse shrink-0" />
+              ))}
             </div>
           ) : routeData ? (
-            <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-              <div className="flex gap-2 pb-1">
-                {/* Distance chip */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[13px] font-medium whitespace-nowrap shrink-0">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {routeData.distanceKm} km
-                </div>
-                {/* Time per transport mode */}
-                {TRANSPORT_MODES.map(({ key, label, icon: Icon, factor }) => {
-                  const min = Math.ceil(routeData.durationMin * factor);
-                  return (
-                    <div
-                      key={key}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-primary/30 text-foreground text-[13px] font-medium whitespace-nowrap shrink-0"
-                    >
-                      <Icon className="w-3.5 h-3.5 text-primary" />
-                      {formatDuration(min)}
-                    </div>
-                  );
-                })}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-1 -mx-4 px-4">
+              {/* Distance chip */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-full border border-primary/20 text-xs font-semibold shrink-0">
+                <MapPin className="w-3.5 h-3.5" />
+                {routeData.distanceKm} km
               </div>
+              {/* Time per transport */}
+              {TRANSPORT_CHIPS.map(({ key, icon, label }) => (
+                <div
+                  key={key}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-card text-foreground rounded-full border border-border text-xs font-medium shrink-0 shadow-sm"
+                >
+                  <span className="text-sm">{icon}</span>
+                  <span className="text-muted-foreground">{label}</span>
+                  <span className="font-semibold">
+                    {formatDuration(routeData.durationMin[key as keyof typeof routeData.durationMin])}
+                  </span>
+                </div>
+              ))}
             </div>
           ) : coords ? (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -127,7 +103,7 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
           )}
         </div>
 
-        {/* Map area */}
+        {/* Map */}
         <div className="flex-1 min-h-0">
           <RouteMap
             user={coords}
@@ -136,7 +112,7 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
           />
         </div>
 
-        {/* Bottom actions */}
+        {/* Bottom */}
         <div className="p-4 border-t border-border space-y-2">
           <Button className="w-full rounded-full" onClick={onClose}>
             Fechar
