@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-
-const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
+import { getCurrentUserId } from "@/lib/auth";
 
 export async function getReviewsByEstablishment(establishmentId: string) {
   return supabase
@@ -14,10 +13,11 @@ export async function createReview(
   establishmentId: string,
   rating: number,
   comment?: string,
-  userId = DEV_USER_ID
+  userId?: string
 ) {
+  const uid = userId ?? await getCurrentUserId();
   return supabase.from("reviews").insert({
-    user_id: userId,
+    user_id: uid,
     establishment_id: establishmentId,
     rating,
     comment: comment ?? null,

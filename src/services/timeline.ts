@@ -1,12 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserId } from "@/lib/auth";
 
-const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
-
-export async function getTimeline(userId = DEV_USER_ID) {
+export async function getTimeline(userId?: string) {
+  const uid = userId ?? await getCurrentUserId();
   return supabase
     .from("user_timeline")
     .select("*, establishment:establishments(name, logo_url)")
-    .eq("user_id", userId)
+    .eq("user_id", uid)
     .order("created_at", { ascending: false })
     .limit(20);
 }

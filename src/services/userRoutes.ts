@@ -1,12 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserId } from "@/lib/auth";
 
-const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
-
-export async function getUserRoutes(userId = DEV_USER_ID) {
+export async function getUserRoutes(userId?: string) {
+  const uid = userId ?? await getCurrentUserId();
   return supabase
     .from("user_routes")
     .select("*, user_route_stops(id, stop_order, visited, visited_at, establishment:establishments(*))")
-    .eq("user_id", userId)
+    .eq("user_id", uid)
     .order("created_at", { ascending: false });
 }
 
@@ -14,11 +14,12 @@ export async function createUserRoute(
   title: string,
   description: string,
   stopIds: string[],
-  userId = DEV_USER_ID
+  userId?: string
 ) {
+  const uid = userId ?? await getCurrentUserId();
   const { data: route, error: routeError } = await supabase
     .from("user_routes")
-    .insert({ user_id: userId, title, description })
+    .insert({ user_id: uid, title, description })
     .select("id")
     .single();
 

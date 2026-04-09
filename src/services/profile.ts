@@ -1,12 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserId } from "@/lib/auth";
 
-const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
-
-export async function getProfile(userId = DEV_USER_ID) {
+export async function getProfile(userId?: string) {
+  const uid = userId ?? await getCurrentUserId();
   return supabase
     .from("user_profiles")
     .select("*")
-    .eq("id", userId)
+    .eq("id", uid)
     .single();
 }
 
@@ -18,11 +18,13 @@ export async function updateProfile(
     city?: string;
     state?: string;
     travel_since?: string;
+    bio?: string;
   },
-  userId = DEV_USER_ID
+  userId?: string
 ) {
+  const uid = userId ?? await getCurrentUserId();
   return supabase
     .from("user_profiles")
     .update(data)
-    .eq("id", userId);
+    .eq("id", uid);
 }

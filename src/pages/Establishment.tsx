@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
-import { CANONICAL_REACTIONS } from "@/lib/constants";
+
 import { SaveSheet } from "@/components/SaveSheet";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
@@ -119,14 +119,7 @@ export default function EstablishmentPage() {
   const lightboxImages = [est.image_url, ...displayPhotos.map(p => p.url)].filter(Boolean) as string[];
   const lightboxTitles = [est.name, ...displayPhotos.map((_, i) => `Foto ${i + 1}`)];
   const lightboxCaptions = [est.description || "", ...displayPhotos.map(p => p.caption || "")];
-
-  const allReactions = lightboxImages.map((_, idx) =>
-    CANONICAL_REACTIONS.map((r, ri) => ({
-      emoji: r.emoji,
-      label: r.label,
-      count: [45, 22, 15, 8, 5][ri] + idx * 3,
-    }))
-  );
+  const lightboxPhotoIds = [null, ...displayPhotos.map(p => p.id)];
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
@@ -393,7 +386,7 @@ export default function EstablishmentPage() {
         aspectRatio="4/5"
         titles={lightboxTitles}
         captions={lightboxCaptions}
-        reactions={allReactions}
+        photoIds={lightboxPhotoIds}
       />
 
       <MapSheet
