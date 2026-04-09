@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { MapPin, ExternalLink, Loader2, AlertCircle } from "lucide-react";
+import { MapPin, ExternalLink, Loader2, AlertCircle, Car, Bike, Footprints, Zap } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import RouteMap from "./RouteMap";
 import type { RouteResult } from "@/lib/routing";
@@ -18,10 +18,10 @@ interface MapSheetProps {
 }
 
 const TRANSPORT_CHIPS = [
-  { key: "car", icon: "🚗", label: "Carro" },
-  { key: "moto", icon: "🏍️", label: "Moto" },
-  { key: "bike", icon: "🚲", label: "Bike" },
-  { key: "walking", icon: "🚶", label: "A pé" },
+  { key: "car", Icon: Car, label: "Carro" },
+  { key: "moto", Icon: Zap, label: "Moto" },
+  { key: "bike", Icon: Bike, label: "Bike" },
+  { key: "walking", Icon: Footprints, label: "A pé" },
 ] as const;
 
 function formatDuration(min: number) {
@@ -80,12 +80,12 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
                 {routeData.distanceKm} km
               </div>
               {/* Time per transport */}
-              {TRANSPORT_CHIPS.map(({ key, icon, label }) => (
+              {TRANSPORT_CHIPS.map(({ key, Icon, label }) => (
                 <div
                   key={key}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-card text-foreground rounded-full border border-border text-xs font-medium shrink-0 shadow-sm"
                 >
-                  <span className="text-sm">{icon}</span>
+                  <Icon className="w-3.5 h-3.5 text-primary" />
                   <span className="text-muted-foreground">{label}</span>
                   <span className="font-semibold">
                     {formatDuration(routeData.durationMin[key as keyof typeof routeData.durationMin])}
