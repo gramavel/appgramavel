@@ -46,7 +46,7 @@ export default function SavedPlaces() {
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Lugares Salvos" />
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-16 space-y-4">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-20 space-y-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
