@@ -20,28 +20,26 @@ interface MapEstablishment {
 }
 
 function createPinIcon(visited: boolean) {
-  const color = visited ? "hsl(142, 71%, 45%)" : "hsl(233, 100%, 69%)";
-  const inner = visited
-    ? `<span style="transform:rotate(45deg);color:white;font-size:12px;font-weight:bold;line-height:1;">✓</span>`
-    : `<div style="transform:rotate(45deg);width:10px;height:10px;background:white;border-radius:50%;"></div>`;
+  const color = visited ? "hsl(var(--success))" : "hsl(var(--primary))";
+  const checkmark = visited
+    ? `<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%) rotate(45deg);color:white;font-size:10px;font-weight:bold;">✓</span>`
+    : "";
   return L.divIcon({
     className: "",
     iconSize: [32, 32],
     iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
-    html: `
+    popupAnchor: [0, -36],
+    html: `<div style="position:relative">
       <div style="
-        width:32px;height:32px;
         background:${color};
-        border:3px solid white;
+        width:32px;height:32px;
         border-radius:50% 50% 50% 0;
         transform:rotate(-45deg);
-        box-shadow:0 4px 12px rgba(0,0,0,0.25);
-        display:flex;align-items:center;justify-content:center;
-      ">
-        ${inner}
-      </div>
-    `,
+        border:3px solid white;
+        box-shadow:0 2px 8px rgba(0,0,0,0.25);
+      "></div>
+      ${checkmark}
+    </div>`,
   });
 }
 
