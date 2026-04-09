@@ -5,7 +5,7 @@ import { Search, Locate } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
+import { getVisitedEstablishmentIds } from "@/services/checkIns";
 
 interface MapEstablishment {
   id: string;
@@ -19,11 +19,11 @@ interface MapEstablishment {
   rating: number | null;
 }
 
-const PRIMARY_COLOR = "hsl(233, 100%, 69%)";
-const VISITED_COLOR = "#22c55e";
-
 function createPinIcon(visited: boolean) {
-  const bg = visited ? VISITED_COLOR : PRIMARY_COLOR;
+  const color = visited ? "hsl(142, 71%, 45%)" : "hsl(233, 100%, 69%)";
+  const inner = visited
+    ? `<span style="transform:rotate(45deg);color:white;font-size:12px;font-weight:bold;line-height:1;">✓</span>`
+    : `<div style="transform:rotate(45deg);width:10px;height:10px;background:white;border-radius:50%;"></div>`;
   return L.divIcon({
     className: "",
     iconSize: [32, 32],
@@ -32,14 +32,14 @@ function createPinIcon(visited: boolean) {
     html: `
       <div style="
         width:32px;height:32px;
-        background:${bg};
+        background:${color};
         border:3px solid white;
         border-radius:50% 50% 50% 0;
         transform:rotate(-45deg);
         box-shadow:0 4px 12px rgba(0,0,0,0.25);
         display:flex;align-items:center;justify-content:center;
       ">
-        <div style="transform:rotate(45deg);width:10px;height:10px;background:white;border-radius:50%;"></div>
+        ${inner}
       </div>
     `,
   });
@@ -54,7 +54,7 @@ function createUserIcon() {
       <div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
         <div style="position:absolute;width:40px;height:40px;background:hsl(233 100% 69% / 0.15);border-radius:50%;animation:pulse-ring 2s cubic-bezier(0.215,0.61,0.355,1) infinite;"></div>
         <div style="position:absolute;width:32px;height:32px;background:hsl(233 100% 69% / 0.2);border:1px solid hsl(233 100% 69% / 0.3);border-radius:50%;"></div>
-        <div style="position:absolute;width:16px;height:16px;background:hsl(233 100% 69%);border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(95,114,255,0.4);"></div>
+        <div style="position:absolute;width:16px;height:16px;background:hsl(233,100%,69%);border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(95,114,255,0.4);"></div>
       </div>
     `,
   });
@@ -62,7 +62,7 @@ function createUserIcon() {
 
 function createPopupContent(est: MapEstablishment, visited: boolean) {
   const visitedBadge = visited
-    ? `<span style="display:inline-block;padding:2px 8px;background:#22c55e20;color:#22c55e;border-radius:999px;font-size:11px;font-weight:600;margin-bottom:6px;">✓ Visitado</span>`
+    ? `<span style="display:inline-block;padding:2px 8px;background:hsl(142 71% 45% / 0.12);color:hsl(142,71%,45%);border-radius:999px;font-size:11px;font-weight:600;margin-bottom:6px;">✓ Visitado</span>`
     : "";
   return `
     <div style="min-width:150px;padding:4px;">
@@ -97,7 +97,7 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   const lat = coords?.lat ?? -29.3733;
   const lng = coords?.lng ?? -50.8767;
 
-  // Fetch establishments + visited check-ins
+  // Fetch establishments + visited
   useEffect(() => {
     supabase
       .from("establishments")
@@ -108,25 +108,27 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
         if (data) setEstablishments(data as MapEstablishment[]);
       });
 
-    supabase
-      .from("check_ins")
-      .select("establishment_id")
-      .eq("user_id", DEV_USER_ID)
-      .then(({ data }) => {
-        if (data) {
-          setVisitedIds(new Set(data.map((r) => r.establishment_id)));
-        }
-      });
+    getVisitedEstablishmentIds().then(setVisitedIds);
+  }, []);
+
+  // Listen for check-in events
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.establishmentId) {
+        setVisitedIds((prev) => new Set([...prev, detail.establishmentId]));
+      }
+    };
+    window.addEventListener("checkin", handler);
+    return () => window.removeEventListener("checkin", handler);
   }, []);
 
   // Init map
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
-    const center: L.LatLngExpression = [lat, lng];
-
     const map = L.map(mapRef.current, {
-      center,
+      center: [lat, lng] as L.LatLngExpression,
       zoom: 17,
       zoomControl: false,
       attributionControl: false,
@@ -154,10 +156,7 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
       }
     }, 100);
 
-    map.on("moveend", () => {
-      setShowSearchArea(true);
-    });
-
+    map.on("moveend", () => setShowSearchArea(true));
     mapInstance.current = map;
 
     return () => {
@@ -166,13 +165,12 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
     };
   }, []);
 
-  // Add establishment markers when data loads
+  // Markers
   useEffect(() => {
     if (!mapInstance.current) return;
     const map = mapInstance.current;
 
-    // Clear old markers
-    markersRef.current.forEach(m => m.remove());
+    markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
     establishments.forEach((est) => {
@@ -187,10 +185,7 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
         className: "custom-popup",
       });
 
-      marker.on("click", () => {
-        onEstablishmentClick?.(est as any);
-      });
-
+      marker.on("click", () => onEstablishmentClick?.(est));
       markersRef.current.push(marker);
     });
   }, [establishments, visitedIds]);
@@ -198,7 +193,6 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
   // User marker
   useEffect(() => {
     if (!mapInstance.current || !coords) return;
-
     if (userMarkerRef.current) {
       userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
     } else {
@@ -214,17 +208,13 @@ export default function ExploreMap({ onEstablishmentClick }: ExploreMapProps) {
     mapInstance.current.flyTo([lat, lng], 17, { duration: 0.8 });
   }, [lat, lng]);
 
-  const handleSearchArea = useCallback(() => {
-    setShowSearchArea(false);
-  }, []);
-
   return (
     <div className="relative h-[45vh] min-h-[350px] rounded-xl border border-border shadow-card overflow-hidden">
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
       {showSearchArea && (
         <button
-          onClick={handleSearchArea}
+          onClick={() => setShowSearchArea(false)}
           className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2.5 bg-card border border-border rounded-full shadow-lg text-sm font-medium text-foreground hover:shadow-xl transition-shadow"
         >
           <Search className="w-4 h-4 text-primary" />

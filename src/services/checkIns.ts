@@ -22,3 +22,11 @@ export async function getCheckIns(userId = DEV_USER_ID) {
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 }
+
+export async function getVisitedEstablishmentIds(userId = DEV_USER_ID): Promise<Set<string>> {
+  const { data } = await supabase
+    .from("check_ins")
+    .select("establishment_id")
+    .eq("user_id", userId);
+  return new Set(data?.map((c) => c.establishment_id) ?? []);
+}
