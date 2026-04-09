@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { MapPin, ExternalLink, Loader2, AlertCircle, Car, Bike, Footprints } from "lucide-react";
+import { MapPin, ExternalLink, Loader2, AlertCircle, Car, Bike, Footprints, Zap } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import RouteMap from "./RouteMap";
 import type { RouteResult } from "@/lib/routing";
