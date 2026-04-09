@@ -19,7 +19,7 @@ interface MapSheetProps {
 
 const TRANSPORT_CHIPS = [
   { key: "car", Icon: Car, label: "Carro" },
-  { key: "moto", Icon: Bike, label: "Moto" },
+  { key: "moto", Icon: Zap, label: "Moto" },
   { key: "bike", Icon: Bike, label: "Bike" },
   { key: "walking", Icon: Footprints, label: "A pé" },
 ] as const;
