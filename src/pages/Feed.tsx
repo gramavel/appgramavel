@@ -6,7 +6,7 @@ import { PostCard } from "@/components/feed/PostCard";
 import { ProximityCheckinCard } from "@/components/feed/ProximityCheckinCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPosts } from "@/services/posts";
-import { MOCK_POSTS, type Post } from "@/data/mock";
+import type { Post } from "@/data/mock";
 
 export default function Feed() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -17,7 +17,6 @@ export default function Feed() {
   useEffect(() => {
     getPosts().then(({ data }) => {
       if (data && data.length > 0) {
-        // Map Supabase posts to Post shape
         const mapped: Post[] = data.map((p: any) => ({
           id: p.id,
           image: p.image || "",
@@ -36,18 +35,13 @@ export default function Feed() {
           distance_km: p.establishment?.distance_km || 0,
           is_popular: p.is_popular || p.establishment?.is_popular || false,
           reactions: (p.reactions || []).map((r: any) => ({ emoji: r.emoji, count: r.count || 0 })),
-          recent_users: [
-            { avatar: `https://i.pravatar.cc/40?img=20` },
-            { avatar: `https://i.pravatar.cc/40?img=21` },
-            { avatar: `https://i.pravatar.cc/40?img=22` },
-          ],
+          recent_users: [],
           created_at: p.created_at || new Date().toISOString(),
+          establishment: p.establishment,
         }));
         setPosts(mapped);
-      } else {
-        // Fallback to mock
-        setPosts(MOCK_POSTS);
       }
+      // If no data, posts stays empty — show empty state, never use MOCK_POSTS
       setLoading(false);
     });
   }, []);
