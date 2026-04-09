@@ -1,59 +1,41 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Ticket, Award, MapPin, TrendingUp, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserId } from "@/lib/auth";
 import type { ComponentType } from "react";
 
-interface Notification {
+interface NotificationData {
   id: string;
-  icon: ComponentType<{ className?: string }>;
   title: string;
-  description: string;
-  time: string;
+  body: string | null;
+  type: string;
   read: boolean;
+  image_url: string | null;
+  redirect_url: string | null;
+  redirect_type: string | null;
+  created_at: string | null;
 }
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: "n1",
-    icon: Ticket,
-    title: "Novo cupom disponível!",
-    description: "20% OFF no Bella Gramado Ristorante. Válido até 30/04.",
-    time: "Há 2 horas",
-    read: false,
-  },
-  {
-    id: "n2",
-    icon: Award,
-    title: "Quase lá! 🏆",
-    description: "Falta 1 vinícola para conquistar a badge Sommelier.",
-    time: "Há 5 horas",
-    read: false,
-  },
-  {
-    id: "n3",
-    icon: MapPin,
-    title: "Lugar novo perto de você",
-    description: "Chocolate Lugano está a apenas 800m de distância.",
-    time: "Ontem",
-    read: true,
-  },
-  {
-    id: "n4",
-    icon: TrendingUp,
-    title: "Em alta esta semana",
-    description: "Vinícola Ravanello recebeu 50+ reações nos últimos 7 dias.",
-    time: "Há 2 dias",
-    read: true,
-  },
-  {
-    id: "n5",
-    icon: Bell,
-    title: "Bem-vindo ao Gramável!",
-    description: "Explore os melhores lugares de Gramado e Canela.",
-    time: "Há 3 dias",
-    read: true,
-  },
-];
+const TYPE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  coupon: Ticket,
+  badge: Award,
+  nearby: MapPin,
+  trending: TrendingUp,
+};
+
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `Há ${mins}min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Há ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `Há ${days}d`;
+}
 
 interface NotificationsSheetProps {
   open: boolean;
@@ -61,19 +43,53 @@ interface NotificationsSheetProps {
 }
 
 export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetProps) {
-  const unreadCount = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState<NotificationData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!open) return;
-    const handlePopState = () => {
-      onOpenChange(false);
-    };
+    async function load() {
+      setLoading(true);
+      const userId = await getCurrentUserId();
+      const { data } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(30);
+      setNotifications(data ?? []);
+      setLoading(false);
+    }
+    load();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePopState = () => onOpenChange(false);
     window.history.pushState({ notifications: true }, "");
     window.addEventListener("popstate", handlePopState);
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [open, onOpenChange]);
+
+  const handleClick = async (n: NotificationData) => {
+    // Mark as read
+    if (!n.read) {
+      await supabase.from("notifications").update({ read: true }).eq("id", n.id);
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+    }
+    // Navigate
+    if (n.redirect_url) {
+      onOpenChange(false);
+      if (n.redirect_type === "external") {
+        window.open(n.redirect_url, "_blank");
+      } else {
+        navigate(n.redirect_url);
+      }
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -90,33 +106,54 @@ export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetPro
         </SheetHeader>
 
         <div className="overflow-y-auto max-h-[calc(100vh-80px)]">
-          {MOCK_NOTIFICATIONS.map((notification) => {
-            const Icon = notification.icon;
-            return (
-              <div
-                key={notification.id}
-                className={`flex items-start gap-4 px-4 py-4 border-b border-border/30 transition-colors ${
-                  !notification.read ? "bg-primary/5" : ""
-                }`}
-              >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary/10">
-                  <Icon className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className={`text-sm leading-tight ${!notification.read ? "font-semibold text-foreground" : "font-medium text-foreground"}`}>
-                      {notification.title}
-                    </p>
-                    {!notification.read && (
-                      <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{notification.description}</p>
-                  <p className="text-xs text-muted-foreground/70 mt-1.5">{notification.time}</p>
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-4 px-4 py-4 border-b border-border/30">
+                <Skeleton className="w-10 h-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-16" />
                 </div>
               </div>
-            );
-          })}
+            ))
+          ) : notifications.length === 0 ? (
+            <div className="py-12 text-center">
+              <Bell className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Nenhuma notificação</p>
+            </div>
+          ) : (
+            notifications.map((notification) => {
+              const Icon = TYPE_ICONS[notification.type] || Bell;
+              return (
+                <div
+                  key={notification.id}
+                  className={`flex items-start gap-4 px-4 py-4 border-b border-border/30 transition-colors cursor-pointer hover:bg-muted/50 ${
+                    !notification.read ? "bg-primary/5" : ""
+                  }`}
+                  onClick={() => handleClick(notification)}
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary/10">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`text-sm leading-tight ${!notification.read ? "font-semibold text-foreground" : "font-medium text-foreground"}`}>
+                        {notification.title}
+                      </p>
+                      {!notification.read && (
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                      )}
+                    </div>
+                    {notification.body && (
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{notification.body}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground/70 mt-1.5">{timeAgo(notification.created_at)}</p>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </SheetContent>
     </Sheet>
