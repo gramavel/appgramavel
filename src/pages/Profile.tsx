@@ -196,10 +196,23 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Empty state for timeline */}
+        {/* Empty state for timeline — skeleton placeholder */}
         {!loading && timeline.length === 0 && (
-          <div className="px-4 py-8 text-center">
-            <p className="text-sm text-muted-foreground">Sua linha do tempo está vazia. Explore e faça check-ins!</p>
+          <div className="px-4 space-y-2">
+            <div className="relative pl-6">
+              <div className="absolute left-[9px] top-2 bottom-2 w-[2px] bg-border/40" />
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="relative flex items-center gap-4 p-4 bg-card/40 rounded-xl border border-border/20 mb-2">
+                  <div className="absolute -left-6 w-[18px] h-[18px] rounded-full bg-muted ring-2 ring-background" />
+                  <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-3 w-3/4 rounded" />
+                    <Skeleton className="h-2.5 w-1/3 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground text-center pt-1">Sua linha do tempo está vazia. Explore e faça check-ins!</p>
           </div>
         )}
 
@@ -223,10 +236,15 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Empty state for memories */}
+        {/* Empty state for memories — skeleton grid */}
         {!loading && memories.length === 0 && (
-          <div className="px-4 py-8 text-center">
-            <p className="text-sm text-muted-foreground">Nenhuma memória ainda. Adicione fotos das suas viagens!</p>
+          <div className="px-4 space-y-2">
+            <div className="grid grid-cols-3 gap-1.5">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="aspect-square rounded-lg" />
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground text-center pt-1">Nenhuma memória ainda. Adicione fotos das suas viagens!</p>
           </div>
         )}
 
