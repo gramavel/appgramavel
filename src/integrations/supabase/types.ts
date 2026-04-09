@@ -1165,7 +1165,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      decrement_reaction: {
+        Args: { p_emoji: string; p_post_id: string }
+        Returns: undefined
+      }
+      increment_reaction: {
+        Args: { p_emoji: string; p_post_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
