@@ -386,7 +386,7 @@ export default function EstablishmentPage() {
         aspectRatio="4/5"
         titles={lightboxTitles}
         captions={lightboxCaptions}
-        reactions={allReactions}
+        photoIds={lightboxPhotoIds}
       />
 
       <MapSheet
