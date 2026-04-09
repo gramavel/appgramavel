@@ -5,7 +5,7 @@ import { Search, Locate } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { DEV_USER_ID } from "@/lib/constants";
+const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
 
 interface MapEstablishment {
   id: string;
