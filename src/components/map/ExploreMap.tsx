@@ -20,28 +20,26 @@ interface MapEstablishment {
 }
 
 function createPinIcon(visited: boolean) {
-  const color = visited ? "hsl(142, 71%, 45%)" : "hsl(233, 100%, 69%)";
-  const inner = visited
-    ? `<span style="transform:rotate(45deg);color:white;font-size:12px;font-weight:bold;line-height:1;">✓</span>`
-    : `<div style="transform:rotate(45deg);width:10px;height:10px;background:white;border-radius:50%;"></div>`;
+  const color = visited ? "hsl(var(--success))" : "hsl(var(--primary))";
+  const checkmark = visited
+    ? `<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%) rotate(45deg);color:white;font-size:10px;font-weight:bold;">✓</span>`
+    : "";
   return L.divIcon({
     className: "",
     iconSize: [32, 32],
     iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
-    html: `
+    popupAnchor: [0, -36],
+    html: `<div style="position:relative">
       <div style="
-        width:32px;height:32px;
         background:${color};
-        border:3px solid white;
+        width:32px;height:32px;
         border-radius:50% 50% 50% 0;
         transform:rotate(-45deg);
-        box-shadow:0 4px 12px rgba(0,0,0,0.25);
-        display:flex;align-items:center;justify-content:center;
-      ">
-        ${inner}
-      </div>
-    `,
+        border:3px solid white;
+        box-shadow:0 2px 8px rgba(0,0,0,0.25);
+      "></div>
+      ${checkmark}
+    </div>`,
   });
 }
 
@@ -61,18 +59,25 @@ function createUserIcon() {
 }
 
 function createPopupContent(est: MapEstablishment, visited: boolean) {
+  const img = est.logo_url || est.image_url;
+  const imgHtml = img
+    ? `<img src="${img}" alt="${est.name}" style="width:100%;height:64px;object-fit:cover;border-radius:6px;margin-bottom:6px;" />`
+    : "";
   const visitedBadge = visited
-    ? `<span style="display:inline-block;padding:2px 8px;background:hsl(142 71% 45% / 0.12);color:hsl(142,71%,45%);border-radius:999px;font-size:11px;font-weight:600;margin-bottom:6px;">✓ Visitado</span>`
+    ? `<span style="display:inline-block;padding:2px 8px;background:hsl(var(--success) / 0.12);color:hsl(var(--success));border-radius:999px;font-size:11px;font-weight:600;">✓ Visitado</span>`
     : "";
   return `
-    <div style="min-width:150px;padding:4px;">
-      ${visitedBadge}
-      <h4 style="font-weight:600;font-size:14px;margin:0 0 2px;">${est.name}</h4>
-      <p style="font-size:12px;color:hsl(215 16% 47%);margin:0 0 8px;">${est.category}</p>
+    <div style="min-width:160px;padding:4px;">
+      ${imgHtml}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+        <h4 style="font-weight:600;font-size:14px;margin:0;">${est.name}</h4>
+        ${visitedBadge}
+      </div>
+      <p style="font-size:12px;color:hsl(215 16% 47%);margin:2px 0 8px;">${est.category}</p>
       <a href="/estabelecimento/${est.slug}" style="
         display:block;text-align:center;padding:8px;
-        background:hsl(233 100% 69%);color:white;
-        border-radius:8px;font-size:14px;font-weight:500;
+        background:hsl(var(--primary));color:white;
+        border-radius:999px;font-size:14px;font-weight:500;
         text-decoration:none;
       ">Ver mais</a>
     </div>

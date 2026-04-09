@@ -192,15 +192,21 @@ export default function EstablishmentPage() {
 
         {/* Rating pill centered */}
         <div className="flex items-center justify-center mt-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
-            <span className="text-sm font-semibold text-foreground">{est.rating}</span>
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} className={`h-3 w-3 ${s <= Math.round(est.rating) ? "fill-primary text-primary" : "fill-primary/40 text-primary/40"}`} />
-              ))}
+          {est.total_reviews > 0 ? (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
+              <span className="text-sm font-semibold text-foreground">{est.rating}</span>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} className={`h-3 w-3 ${s <= Math.round(Number(est.rating)) ? "fill-primary text-primary" : "fill-primary/40 text-primary/40"}`} />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">({est.total_reviews} avaliações)</span>
             </div>
-            <span className="text-xs text-muted-foreground">({est.total_reviews} avaliações)</span>
-          </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
+              <span className="text-xs text-muted-foreground">Ainda sem avaliações</span>
+            </div>
+          )}
         </div>
 
         {/* 4 Action buttons */}
@@ -281,24 +287,9 @@ export default function EstablishmentPage() {
                   </div>
                 ))
               ) : (
-                [1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-4 p-4 border rounded-xl">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold">Usuário {i}</span>
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} className={`h-3 w-3 ${s <= 5 - i + 1 ? "fill-rating text-rating" : "text-muted-foreground"}`} />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Lugar incrível! Adorei a experiência. Recomendo muito.</p>
-                    </div>
-                  </div>
-                ))
+                <div className="py-8 text-center">
+                  <p className="text-sm text-muted-foreground">Ainda sem avaliações</p>
+                </div>
               )}
             </TabsContent>
           </Tabs>

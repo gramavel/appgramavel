@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { SaveSheet } from "@/components/SaveSheet";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useReactions } from "@/contexts/ReactionsContext";
+import { useLocation } from "@/contexts/LocationContext";
 import { CANONICAL_REACTIONS } from "@/lib/constants";
 import type { Post } from "@/data/mock";
 
@@ -18,6 +19,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   const navigate = useNavigate();
   const [showReactions, setShowReactions] = useState(false);
   const [showSave, setShowSave] = useState(false);
+  const { getDistance } = useLocation();
 
   const { isPostSaved, toggleSavedPost } = useFavorites();
   const { getReaction, setReaction } = useReactions();
@@ -25,11 +27,30 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   const isSaved = isPostSaved(post.id);
   const userReaction = getReaction(post.id);
 
-  const totalReactions = post.reactions.reduce((sum, r) => sum + r.count, 0);
-  const displayReactions = CANONICAL_REACTIONS.slice(0, 3).map((r) => ({
-    emoji: r.emoji,
-    count: post.reactions.find((pr) => pr.emoji === r.emoji)?.count ?? 0,
-  }));
+  // Rating from establishment, not from post directly
+  const rating = (post as any).establishment?.rating ?? post.rating ?? 0;
+  const totalReviews = (post as any).establishment?.total_reviews ?? post.total_reviews ?? 0;
+  const hasReviews = totalReviews > 0;
+
+  // Real distance from user location
+  const distanceLabel = (() => {
+    const est = (post as any).establishment;
+    const lat = est?.latitude ?? (post as any).latitude;
+    const lng = est?.longitude ?? (post as any).longitude;
+    if (lat && lng) {
+      const real = getDistance(Number(lat), Number(lng));
+      if (real) return real;
+    }
+    const fallback = est?.distance_km ?? post.distance_km;
+    return fallback ? `${Number(fallback).toFixed(1)} km` : null;
+  })();
+
+  // Use ONLY reactions from Supabase data
+  const totalReactions = (post.reactions ?? []).reduce((sum, r) => sum + (r.count ?? 0), 0);
+  const displayReactions = (post.reactions ?? []).filter(r => (r.count ?? 0) > 0).slice(0, 3);
+
+  // Popular badge
+  const isPopular = post.is_popular || (post as any).establishment?.is_popular;
 
   const handleReact = (emoji: string) => {
     setReaction(post.id, emoji);
@@ -57,12 +78,16 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
               <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 {post.establishment_category}
               </Badge>
-              <span className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-rating text-rating" />
-                <span className="text-xs text-muted-foreground">
-                  {post.rating} ({post.total_reviews})
+              {hasReviews ? (
+                <span className="flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-rating text-rating" />
+                  <span className="text-xs text-muted-foreground">
+                    {rating} ({totalReviews})
+                  </span>
                 </span>
-              </span>
+              ) : (
+                <span className="text-xs text-muted-foreground/60">Novo</span>
+              )}
             </div>
           </div>
         </div>
@@ -84,17 +109,19 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
       {/* Tags row */}
       <div className="px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {post.is_popular && (
+          {isPopular && (
             <Badge variant="default" className="text-xs px-2.5 py-0.5 gap-1">
               <TrendingUp className="h-3 w-3" />
               Popular esta semana
             </Badge>
           )}
         </div>
-        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="h-3 w-3" />
-          {post.distance_km.toFixed(1)} km
-        </span>
+        {distanceLabel && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin className="h-3 w-3" />
+            {distanceLabel}
+          </span>
+        )}
       </div>
 
       {/* Image */}
@@ -110,45 +137,43 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         />
       </div>
 
-      {/* Caption */}
-      <div className="p-4 space-y-2">
-        <p className="text-sm">
-          <span className="font-semibold">{post.establishment_name}</span>
-          {" · "}
-          <span className="text-muted-foreground">{post.caption}</span>
-        </p>
-      </div>
+      {/* Caption — only if exists */}
+      {post.caption && (
+        <div className="p-4 space-y-2">
+          <p className="text-sm">
+            <span className="font-semibold">{post.establishment_name}</span>
+            {" · "}
+            <span className="text-muted-foreground">{post.caption}</span>
+          </p>
+        </div>
+      )}
 
-      {/* Reactions */}
-      <div className="flex items-center justify-between px-4 pb-4">
+      {/* Reactions — no recent_users */}
+      <div className="flex items-center px-4 pb-4">
         <button
           className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-colors"
           onClick={() => setShowReactions(true)}
           aria-label="Reagir ao post"
         >
-          {displayReactions.map((r) => (
-            <span
-              key={r.emoji}
-              className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
-            >
-              {r.emoji}
+          {totalReactions > 0 ? (
+            <>
+              {displayReactions.map((r) => (
+                <span
+                  key={r.emoji}
+                  className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
+                >
+                  {r.emoji}
+                </span>
+              ))}
+              <span className="text-xs text-foreground/70 ml-0.5">+{totalReactions}</span>
+            </>
+          ) : (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <SmilePlus className="w-3.5 h-3.5" />
+              Reagir
             </span>
-          ))}
-          <span className="text-xs text-foreground/70 ml-0.5">+{totalReactions}</span>
+          )}
         </button>
-        <div className="flex -space-x-2">
-          {post.recent_users.slice(0, 3).map((u, i) => (
-            <img
-              key={i}
-              src={u.avatar}
-              alt=""
-              className="w-6 h-6 rounded-full border-2 border-card object-cover"
-              width={24}
-              height={24}
-              loading="lazy"
-            />
-          ))}
-        </div>
       </div>
 
       <SaveSheet
@@ -183,7 +208,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
             <div className="flex justify-around">
               {CANONICAL_REACTIONS.map((item) => {
                 const isActive = userReaction === item.emoji;
-                const count = post.reactions.find((r) => r.emoji === item.emoji)?.count ?? 0;
+                const count = (post.reactions ?? []).find((r) => r.emoji === item.emoji)?.count ?? 0;
                 return (
                   <button
                     key={item.emoji}

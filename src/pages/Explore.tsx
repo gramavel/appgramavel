@@ -204,10 +204,14 @@ export default function Explore() {
                         <h4 className="font-semibold text-sm">{place.name}</h4>
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-xs text-muted-foreground">{place.category}</span>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-rating text-rating" />
-                            <span className="text-xs font-medium">{place.rating}</span>
-                          </div>
+                          {(place.total_reviews ?? 0) > 0 ? (
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-rating text-rating" />
+                              <span className="text-xs font-medium">{place.rating}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground/60">Novo</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -230,10 +234,14 @@ export default function Explore() {
                         <h4 className="font-semibold text-sm">{place.name}</h4>
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-xs text-muted-foreground">{place.category}</span>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-rating text-rating" />
-                            <span className="text-xs font-medium">{place.rating}</span>
-                          </div>
+                          {(place.total_reviews ?? 0) > 0 ? (
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-rating text-rating" />
+                              <span className="text-xs font-medium">{place.rating}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground/60">Novo</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -272,10 +280,14 @@ export default function Explore() {
                         <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
                         <p className="text-xs text-muted-foreground truncate">{est.category}</p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-rating text-rating" />
-                            <span>{est.rating}</span>
-                          </div>
+                          {(est.total_reviews ?? 0) > 0 ? (
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-rating text-rating" />
+                              <span>{est.rating}</span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground/60">Novo</span>
+                          )}
                           <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
                             <span>{(est.distance_km ?? 0).toFixed(1)} km</span>
@@ -311,10 +323,14 @@ export default function Explore() {
                       <h4 className="font-semibold text-sm leading-tight truncate">{est.name}</h4>
                       <p className="text-xs text-muted-foreground truncate">{est.category}</p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-rating text-rating" />
-                          <span>{est.rating}</span>
-                        </div>
+                        {(est.total_reviews ?? 0) > 0 ? (
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-rating text-rating" />
+                            <span>{est.rating}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground/60">Novo</span>
+                        )}
                         <div className="flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
                           <span>{(est.distance_km ?? 0).toFixed(1)} km</span>
