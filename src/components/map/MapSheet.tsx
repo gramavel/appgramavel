@@ -80,12 +80,12 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
                 {routeData.distanceKm} km
               </div>
               {/* Time per transport */}
-              {TRANSPORT_CHIPS.map(({ key, icon, label }) => (
+              {TRANSPORT_CHIPS.map(({ key, Icon, label }) => (
                 <div
                   key={key}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-card text-foreground rounded-full border border-border text-xs font-medium shrink-0 shadow-sm"
                 >
-                  <span className="text-sm">{icon}</span>
+                  <Icon className="w-3.5 h-3.5 text-primary" />
                   <span className="text-muted-foreground">{label}</span>
                   <span className="font-semibold">
                     {formatDuration(routeData.durationMin[key as keyof typeof routeData.durationMin])}
