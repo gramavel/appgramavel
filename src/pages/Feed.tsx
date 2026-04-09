@@ -55,7 +55,7 @@ export default function Feed() {
       <GlobalHeader />
       <CategoryBar selected={selectedCategory} onSelect={setSelectedCategory} />
 
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[104px]">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[88px]">
         <div className="space-y-4">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
