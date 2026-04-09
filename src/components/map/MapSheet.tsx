@@ -18,10 +18,10 @@ interface MapSheetProps {
 }
 
 const TRANSPORT_CHIPS = [
-  { key: "car", icon: "🚗", label: "Carro" },
-  { key: "moto", icon: "🏍️", label: "Moto" },
-  { key: "bike", icon: "🚲", label: "Bike" },
-  { key: "walking", icon: "🚶", label: "A pé" },
+  { key: "car", Icon: Car, label: "Carro" },
+  { key: "moto", Icon: Bike, label: "Moto" },
+  { key: "bike", Icon: Bike, label: "Bike" },
+  { key: "walking", Icon: Footprints, label: "A pé" },
 ] as const;
 
 function formatDuration(min: number) {
