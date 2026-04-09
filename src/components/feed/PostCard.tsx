@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus } from "lucide-react";
+import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -8,6 +8,7 @@ import { useFavorites } from "@/contexts/FavoritesContext";
 import { useReactions } from "@/contexts/ReactionsContext";
 import { useLocation } from "@/contexts/LocationContext";
 import { CANONICAL_REACTIONS } from "@/lib/constants";
+import { toast } from "sonner";
 import type { Post } from "@/data/mock";
 
 interface PostCardProps {
@@ -27,12 +28,10 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   const isSaved = isPostSaved(post.id);
   const userReaction = getReaction(post.id);
 
-  // Rating from establishment, not from post directly
   const rating = (post as any).establishment?.rating ?? post.rating ?? 0;
   const totalReviews = (post as any).establishment?.total_reviews ?? post.total_reviews ?? 0;
   const hasReviews = totalReviews > 0;
 
-  // Real distance from user location
   const distanceLabel = (() => {
     const est = (post as any).establishment;
     const lat = est?.latitude ?? (post as any).latitude;
@@ -45,11 +44,9 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
     return fallback ? `${Number(fallback).toFixed(1)} km` : null;
   })();
 
-  // Use ONLY reactions from Supabase data
   const totalReactions = (post.reactions ?? []).reduce((sum, r) => sum + (r.count ?? 0), 0);
   const displayReactions = (post.reactions ?? []).filter(r => (r.count ?? 0) > 0).slice(0, 3);
 
-  // Popular badge
   const isPopular = post.is_popular || (post as any).establishment?.is_popular;
 
   const handleReact = (emoji: string) => {
@@ -57,23 +54,36 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
     setShowReactions(false);
   };
 
+  const handleShare = async () => {
+    const slug = post.establishment_slug ?? (post as any).establishment?.slug;
+    const url = `${window.location.origin}/estabelecimento/${slug}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: post.establishment_name, url });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado!");
+    }
+  };
+
   return (
     <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4">
+      {/* Header — avatar + name/rating only, no bookmark here */}
+      <div className="flex items-center p-4">
         <div
-          className="flex items-center gap-4 cursor-pointer"
+          className="flex items-center gap-4 cursor-pointer flex-1 min-w-0"
           onClick={() => navigate(`/estabelecimento/${post.establishment_slug}`)}
         >
           <img
             src={post.establishment_avatar || post.image || "/placeholder.svg"}
             alt={post.establishment_name}
-            className="w-12 h-12 rounded-full object-cover border-2 border-border"
+            className="w-12 h-12 rounded-full object-cover border-2 border-border shrink-0"
             width={48}
             height={48}
           />
-          <div>
-            <h3 className="text-sm font-semibold leading-tight">{post.establishment_name}</h3>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold leading-tight truncate">{post.establishment_name}</h3>
             <div className="flex items-center gap-2 mt-0.5">
               <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 {post.establishment_category}
@@ -91,17 +101,6 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
             </div>
           </div>
         </div>
-        <button
-          className="p-3 hover:bg-secondary rounded-full transition-colors active:scale-95"
-          onClick={() => isSaved ? toggleSavedPost(post.id) : setShowSave(true)}
-          aria-label="Salvar lugar"
-        >
-          {isSaved ? (
-            <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
-          ) : (
-            <Bookmark className="w-5 h-5" />
-          )}
-        </button>
       </div>
 
       <Separator />
@@ -137,9 +136,9 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         />
       </div>
 
-      {/* Caption — only if exists */}
+      {/* Caption */}
       {post.caption && (
-        <div className="p-4 space-y-2">
+        <div className="p-4 pb-2 space-y-2">
           <p className="text-sm">
             <span className="font-semibold">{post.establishment_name}</span>
             {" · "}
@@ -148,8 +147,8 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         </div>
       )}
 
-      {/* Reactions — no recent_users */}
-      <div className="flex items-center px-4 pb-4">
+      {/* Actions row: reactions left, bookmark + share right */}
+      <div className="flex items-center justify-between px-4 pb-4 pt-1">
         <button
           className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-colors"
           onClick={() => setShowReactions(true)}
@@ -174,6 +173,27 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
             </span>
           )}
         </button>
+
+        <div className="flex items-center gap-1">
+          <button
+            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
+            onClick={() => isSaved ? toggleSavedPost(post.id) : setShowSave(true)}
+            aria-label="Salvar lugar"
+          >
+            {isSaved ? (
+              <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
+            ) : (
+              <Bookmark className="w-5 h-5" />
+            )}
+          </button>
+          <button
+            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
+            onClick={handleShare}
+            aria-label="Compartilhar"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       <SaveSheet
