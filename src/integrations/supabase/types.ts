@@ -20,6 +20,8 @@ export type Database = {
           created_at: string | null
           id: string
           image_url: string | null
+          redirect_type: string | null
+          redirect_url: string | null
           reference_id: string | null
           scheduled_at: string | null
           segment: string | null
@@ -35,6 +37,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          redirect_type?: string | null
+          redirect_url?: string | null
           reference_id?: string | null
           scheduled_at?: string | null
           segment?: string | null
@@ -50,6 +54,8 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          redirect_type?: string | null
+          redirect_url?: string | null
           reference_id?: string | null
           scheduled_at?: string | null
           segment?: string | null
@@ -65,19 +71,31 @@ export type Database = {
       admin_roles: {
         Row: {
           created_at: string | null
+          created_by: string | null
+          email: string | null
           id: string
+          is_active: boolean | null
+          name: string | null
           role: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
+          email?: string | null
           id?: string
+          is_active?: boolean | null
+          name?: string | null
           role?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
+          email?: string | null
           id?: string
+          is_active?: boolean | null
+          name?: string | null
           role?: string | null
           user_id?: string
         }
@@ -142,6 +160,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "check_ins_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "check_ins_establishment_id_fkey"
             columns: ["establishment_id"]
@@ -237,6 +262,13 @@ export type Database = {
             foreignKeyName: "coupons_establishment_id_fkey"
             columns: ["establishment_id"]
             isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupons_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
             referencedRelation: "establishments"
             referencedColumns: ["id"]
           },
@@ -280,6 +312,13 @@ export type Database = {
           width?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "establishment_photos_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "establishment_photos_establishment_id_fkey"
             columns: ["establishment_id"]
@@ -463,8 +502,22 @@ export type Database = {
             foreignKeyName: "feed_events_establishment_id_fkey"
             columns: ["establishment_id"]
             isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_events_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
             referencedRelation: "establishments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_events_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_analytics"
+            referencedColumns: ["post_id"]
           },
           {
             foreignKeyName: "feed_events_post_id_fkey"
@@ -524,6 +577,8 @@ export type Database = {
           id: string
           image_url: string | null
           read: boolean | null
+          redirect_type: string | null
+          redirect_url: string | null
           reference_id: string | null
           title: string
           type: string
@@ -535,6 +590,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           read?: boolean | null
+          redirect_type?: string | null
+          redirect_url?: string | null
           reference_id?: string | null
           title: string
           type: string
@@ -546,12 +603,72 @@ export type Database = {
           id?: string
           image_url?: string | null
           read?: boolean | null
+          redirect_type?: string | null
+          redirect_url?: string | null
           reference_id?: string | null
           title?: string
           type?: string
           user_id?: string
         }
         Relationships: []
+      }
+      photo_reaction_counts: {
+        Row: {
+          count: number | null
+          emoji: string
+          photo_id: string
+        }
+        Insert: {
+          count?: number | null
+          emoji: string
+          photo_id: string
+        }
+        Update: {
+          count?: number | null
+          emoji?: string
+          photo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_reaction_counts_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "establishment_photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photo_reactions: {
+        Row: {
+          created_at: string | null
+          emoji: string
+          id: string
+          photo_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          emoji: string
+          id?: string
+          photo_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          emoji?: string
+          id?: string
+          photo_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_reactions_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "establishment_photos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       posts: {
         Row: {
@@ -583,6 +700,13 @@ export type Database = {
             foreignKeyName: "posts_establishment_id_fkey"
             columns: ["establishment_id"]
             isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
             referencedRelation: "establishments"
             referencedColumns: ["id"]
           },
@@ -608,6 +732,13 @@ export type Database = {
           post_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_analytics"
+            referencedColumns: ["post_id"]
+          },
           {
             foreignKeyName: "reactions_post_id_fkey"
             columns: ["post_id"]
@@ -646,6 +777,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reviews_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reviews_establishment_id_fkey"
             columns: ["establishment_id"]
@@ -691,6 +829,13 @@ export type Database = {
             foreignKeyName: "route_banners_route_id_fkey"
             columns: ["route_id"]
             isOneToOne: false
+            referencedRelation: "route_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_banners_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
             referencedRelation: "routes"
             referencedColumns: ["id"]
           },
@@ -726,7 +871,21 @@ export type Database = {
             foreignKeyName: "route_stops_establishment_id_fkey"
             columns: ["establishment_id"]
             isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
             referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "route_insights"
             referencedColumns: ["id"]
           },
           {
@@ -901,6 +1060,13 @@ export type Database = {
             foreignKeyName: "user_favorites_establishment_id_fkey"
             columns: ["establishment_id"]
             isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_favorites_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
             referencedRelation: "establishments"
             referencedColumns: ["id"]
           },
@@ -936,6 +1102,13 @@ export type Database = {
             foreignKeyName: "user_memories_establishment_id_fkey"
             columns: ["establishment_id"]
             isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_memories_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
             referencedRelation: "establishments"
             referencedColumns: ["id"]
           },
@@ -944,33 +1117,57 @@ export type Database = {
       user_profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          birth_date: string | null
           city: string | null
+          country: string | null
           cover_url: string | null
           created_at: string | null
+          email: string | null
+          gender: string | null
           id: string
+          is_active: boolean | null
+          last_seen_at: string | null
           name: string | null
+          phone: string | null
           state: string | null
           travel_since: string | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          birth_date?: string | null
           city?: string | null
+          country?: string | null
           cover_url?: string | null
           created_at?: string | null
+          email?: string | null
+          gender?: string | null
           id: string
+          is_active?: boolean | null
+          last_seen_at?: string | null
           name?: string | null
+          phone?: string | null
           state?: string | null
           travel_since?: string | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          birth_date?: string | null
           city?: string | null
+          country?: string | null
           cover_url?: string | null
           created_at?: string | null
+          email?: string | null
+          gender?: string | null
           id?: string
+          is_active?: boolean | null
+          last_seen_at?: string | null
           name?: string | null
+          phone?: string | null
           state?: string | null
           travel_since?: string | null
           updated_at?: string | null
@@ -1000,6 +1197,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_analytics"
+            referencedColumns: ["post_id"]
+          },
           {
             foreignKeyName: "user_reactions_post_id_fkey"
             columns: ["post_id"]
@@ -1038,6 +1242,13 @@ export type Database = {
           visited_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "user_route_stops_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_route_stops_establishment_id_fkey"
             columns: ["establishment_id"]
@@ -1114,6 +1325,13 @@ export type Database = {
             foreignKeyName: "user_saved_posts_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "feed_analytics"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "user_saved_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
@@ -1155,6 +1373,13 @@ export type Database = {
             foreignKeyName: "user_timeline_establishment_id_fkey"
             columns: ["establishment_id"]
             isOneToOne: false
+            referencedRelation: "establishment_route_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_timeline_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
             referencedRelation: "establishments"
             referencedColumns: ["id"]
           },
@@ -1162,7 +1387,51 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      establishment_route_insights: {
+        Row: {
+          category: string | null
+          id: string | null
+          name: string | null
+          slug: string | null
+          times_in_suggested_routes: number | null
+          times_in_user_routes: number | null
+          times_visited_in_routes: number | null
+        }
+        Relationships: []
+      }
+      feed_analytics: {
+        Row: {
+          category: string | null
+          checkins: number | null
+          clicks: number | null
+          created_at: string | null
+          ctr_pct: number | null
+          establishment_name: string | null
+          impressions: number | null
+          is_popular: boolean | null
+          post_id: string | null
+          reactions_count: number | null
+          saves: number | null
+          shares: number | null
+          slug: string | null
+          total_reactions: number | null
+        }
+        Relationships: []
+      }
+      route_insights: {
+        Row: {
+          completion_rate_pct: number | null
+          difficulty: string | null
+          duration: string | null
+          id: string | null
+          in_progress: number | null
+          is_featured: boolean | null
+          title: string | null
+          total_completed: number | null
+          total_started: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       decrement_reaction: {
@@ -1171,6 +1440,10 @@ export type Database = {
       }
       increment_reaction: {
         Args: { p_emoji: string; p_post_id: string }
+        Returns: undefined
+      }
+      upsert_photo_reaction: {
+        Args: { p_emoji: string; p_photo_id: string; p_user_id: string }
         Returns: undefined
       }
     }
