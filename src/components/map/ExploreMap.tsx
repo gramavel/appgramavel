@@ -59,18 +59,25 @@ function createUserIcon() {
 }
 
 function createPopupContent(est: MapEstablishment, visited: boolean) {
+  const img = est.logo_url || est.image_url;
+  const imgHtml = img
+    ? `<img src="${img}" alt="${est.name}" style="width:100%;height:64px;object-fit:cover;border-radius:6px;margin-bottom:6px;" />`
+    : "";
   const visitedBadge = visited
-    ? `<span style="display:inline-block;padding:2px 8px;background:hsl(142 71% 45% / 0.12);color:hsl(142,71%,45%);border-radius:999px;font-size:11px;font-weight:600;margin-bottom:6px;">✓ Visitado</span>`
+    ? `<span style="display:inline-block;padding:2px 8px;background:hsl(var(--success) / 0.12);color:hsl(var(--success));border-radius:999px;font-size:11px;font-weight:600;">✓ Visitado</span>`
     : "";
   return `
-    <div style="min-width:150px;padding:4px;">
-      ${visitedBadge}
-      <h4 style="font-weight:600;font-size:14px;margin:0 0 2px;">${est.name}</h4>
-      <p style="font-size:12px;color:hsl(215 16% 47%);margin:0 0 8px;">${est.category}</p>
+    <div style="min-width:160px;padding:4px;">
+      ${imgHtml}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+        <h4 style="font-weight:600;font-size:14px;margin:0;">${est.name}</h4>
+        ${visitedBadge}
+      </div>
+      <p style="font-size:12px;color:hsl(215 16% 47%);margin:2px 0 8px;">${est.category}</p>
       <a href="/estabelecimento/${est.slug}" style="
         display:block;text-align:center;padding:8px;
-        background:hsl(233 100% 69%);color:white;
-        border-radius:8px;font-size:14px;font-weight:500;
+        background:hsl(var(--primary));color:white;
+        border-radius:999px;font-size:14px;font-weight:500;
         text-decoration:none;
       ">Ver mais</a>
     </div>
