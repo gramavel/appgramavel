@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus, Share2 } from "lucide-react";
+import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus, Share } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -177,6 +177,13 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         <div className="flex items-center gap-1">
           <button
             className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
+            onClick={handleShare}
+            aria-label="Compartilhar"
+          >
+            <Share className="w-5 h-5" />
+          </button>
+          <button
+            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
             onClick={() => isSaved ? toggleSavedPost(post.id) : setShowSave(true)}
             aria-label="Salvar lugar"
           >
@@ -185,13 +192,6 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
             ) : (
               <Bookmark className="w-5 h-5" />
             )}
-          </button>
-          <button
-            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
-            onClick={handleShare}
-            aria-label="Compartilhar"
-          >
-            <Share2 className="w-5 h-5" />
           </button>
         </div>
       </div>
