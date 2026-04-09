@@ -1,10 +1,22 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { MapPin, ExternalLink, Loader2, AlertCircle, Car, Bike, Footprints, Zap } from "lucide-react";
+import { MapPin, ExternalLink, Loader2, AlertCircle, Car, Bike, Footprints } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import RouteMap from "./RouteMap";
 import type { RouteResult } from "@/lib/routing";
+
+function MotoIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="5" cy="17" r="3" />
+      <circle cx="19" cy="17" r="3" />
+      <path d="M5 14l4-7h4l3 5h3" />
+      <path d="M9 7l1 3" />
+      <path d="M13 10h3" />
+    </svg>
+  );
+}
 
 interface MapSheetProps {
   open: boolean;
@@ -19,7 +31,7 @@ interface MapSheetProps {
 
 const TRANSPORT_CHIPS = [
   { key: "car", Icon: Car, label: "Carro" },
-  { key: "moto", Icon: Zap, label: "Moto" },
+  { key: "moto", Icon: MotoIcon, label: "Moto" },
   { key: "bike", Icon: Bike, label: "Bike" },
   { key: "walking", Icon: Footprints, label: "A pé" },
 ] as const;
