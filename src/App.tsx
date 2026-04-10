@@ -33,6 +33,7 @@ const Login = lazy(() => import("./pages/auth/Login"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
 const UpdatePassword = lazy(() => import("./pages/auth/UpdatePassword"));
+const EmailConfirmed = lazy(() => import("./pages/auth/EmailConfirmed"));
 
 // Admin
 const AdminApp = lazy(() => import("./admin/AdminApp"));
@@ -80,6 +81,8 @@ const App = () => (
                       <Route path="/auth/register" element={<Register />} />
                       <Route path="/auth/reset-password" element={<ResetPassword />} />
                       <Route path="/auth/update-password" element={<UpdatePassword />} />
+                      <Route path="/auth/confirm" element={<EmailConfirmed />} />
+                      <Route path="/auth/callback" element={<EmailConfirmed />} />
                       {/* Legacy auth route redirect */}
                       <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
 
