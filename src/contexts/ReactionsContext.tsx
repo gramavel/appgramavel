@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useReducer, useMemo, useEffect } from "react";
-import { getUserReactions, upsertReaction, removeReaction } from "@/services/reactions";
+import { getUserReactions } from "@/services/reactions";
+import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserId } from "@/lib/auth";
 
 type State = {
   reactions: Record<string, string[]>;
@@ -8,7 +10,8 @@ type State = {
 
 type Action =
   | { type: "INIT"; reactions: Record<string, string[]> }
-  | { type: "SET_REACTION"; postId: string; emoji: string };
+  | { type: "SET_REACTION"; postId: string; emoji: string }
+  | { type: "REMOVE_REACTION"; postId: string };
 
 function reactionsReducer(state: State, action: Action): State {
   switch (action.type) {
@@ -27,6 +30,10 @@ function reactionsReducer(state: State, action: Action): State {
           [action.postId]: [action.emoji],
         },
       };
+    }
+    case "REMOVE_REACTION": {
+      const { [action.postId]: _, ...rest } = state.reactions;
+      return { ...state, reactions: rest };
     }
     default:
       return state;
@@ -61,23 +68,30 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => ({
     setReaction: async (postId: string, emoji: string) => {
       const current = state.reactions[postId]?.[0];
+      // Optimistic update
       dispatch({ type: "SET_REACTION", postId, emoji });
 
-      if (current === emoji) {
-        const result = await removeReaction(postId);
-        if (result.error) {
-          dispatch({ type: "SET_REACTION", postId, emoji }); // revert
-          console.error("Failed to remove reaction", result.error);
+      const userId = await getCurrentUserId();
+      const { data, error } = await supabase.rpc("upsert_post_reaction", {
+        p_post_id: postId,
+        p_user_id: userId,
+        p_emoji: emoji,
+      });
+
+      if (error) {
+        // Revert optimistic update
+        if (current) {
+          dispatch({ type: "SET_REACTION", postId, emoji: current });
+        } else {
+          dispatch({ type: "REMOVE_REACTION", postId });
         }
-      } else {
-        const result = await upsertReaction(postId, emoji);
-        if (result.error) {
-          // revert
-          if (current) {
-            dispatch({ type: "SET_REACTION", postId, emoji: current });
-          }
-          console.error("Failed to sync reaction", result.error);
-        }
+        console.error("Reaction error:", error);
+        return;
+      }
+
+      // If action was 'removed', ensure context reflects removal
+      if ((data as any)?.action === "removed") {
+        dispatch({ type: "REMOVE_REACTION", postId });
       }
     },
     getReaction: (postId: string): string | null =>

@@ -1444,7 +1444,11 @@ export type Database = {
       }
       upsert_photo_reaction: {
         Args: { p_emoji: string; p_photo_id: string; p_user_id: string }
-        Returns: undefined
+        Returns: Json
+      }
+      upsert_post_reaction: {
+        Args: { p_emoji: string; p_post_id: string; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {
