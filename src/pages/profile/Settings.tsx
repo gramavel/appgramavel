@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Camera, Save, LogOut, Bell } from "lucide-react";
+import { Camera, Save, LogOut, Bell, ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -8,11 +9,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+
+const ESTADOS_BR = [
+  { uf: "AC", nome: "Acre" }, { uf: "AL", nome: "Alagoas" },
+  { uf: "AM", nome: "Amazonas" }, { uf: "AP", nome: "Amapá" },
+  { uf: "BA", nome: "Bahia" }, { uf: "CE", nome: "Ceará" },
+  { uf: "DF", nome: "Distrito Federal" }, { uf: "ES", nome: "Espírito Santo" },
+  { uf: "GO", nome: "Goiás" }, { uf: "MA", nome: "Maranhão" },
+  { uf: "MG", nome: "Minas Gerais" }, { uf: "MS", nome: "Mato Grosso do Sul" },
+  { uf: "MT", nome: "Mato Grosso" }, { uf: "PA", nome: "Pará" },
+  { uf: "PB", nome: "Paraíba" }, { uf: "PE", nome: "Pernambuco" },
+  { uf: "PI", nome: "Piauí" }, { uf: "PR", nome: "Paraná" },
+  { uf: "RJ", nome: "Rio de Janeiro" }, { uf: "RN", nome: "Rio Grande do Norte" },
+  { uf: "RO", nome: "Rondônia" }, { uf: "RR", nome: "Roraima" },
+  { uf: "RS", nome: "Rio Grande do Sul" }, { uf: "SC", nome: "Santa Catarina" },
+  { uf: "SE", nome: "Sergipe" }, { uf: "SP", nome: "São Paulo" },
+  { uf: "TO", nome: "Tocantins" },
+];
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -24,6 +42,7 @@ export default function Settings() {
 
   const [form, setForm] = useState({
     name: "",
+    email: "",
     city: "",
     state: "",
     bio: "",
@@ -32,9 +51,10 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    if (profile) {
+    if (profile && user) {
       setForm({
         name: profile.name ?? "",
+        email: user.email ?? "",
         city: profile.city ?? "",
         state: profile.state ?? "",
         bio: profile.bio ?? "",
@@ -42,7 +62,7 @@ export default function Settings() {
         phone: profile.phone ?? "",
       });
     }
-  }, [profile]);
+  }, [profile, user]);
 
   const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
 
@@ -84,26 +104,48 @@ export default function Settings() {
   async function handleSave() {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase
+
+    // 1. Update profile data
+    const { error: profileError } = await supabase
       .from("user_profiles")
       .update({
         name: form.name,
         city: form.city,
         state: form.state,
-        bio: form.bio,
+        bio: form.bio || null,
         birth_date: form.birth_date || null,
         phone: form.phone || null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
 
-    if (!error) {
-      await refreshProfile();
-      toast.success("Perfil atualizado!");
-    } else {
-      toast.error("Erro ao salvar");
+    if (profileError) {
+      toast.error("Erro ao salvar perfil");
+      setSaving(false);
+      return;
     }
+
+    // 2. Update email separately if changed
+    if (form.email !== user.email) {
+      const { error: emailError } = await supabase.auth.updateUser({
+        email: form.email,
+      });
+
+      if (emailError) {
+        toast.error("Erro ao atualizar e-mail: " + emailError.message);
+      } else {
+        toast.success(
+          "Perfil salvo! Um e-mail de confirmação foi enviado para " + form.email,
+          { duration: 5000 }
+        );
+      }
+    } else {
+      toast.success("Perfil atualizado com sucesso!");
+    }
+
+    await refreshProfile();
     setSaving(false);
+    navigate(-1);
   }
 
   const handleLogout = async () => {
@@ -114,7 +156,7 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-background">
-      <GlobalHeader showBack title="Configurações" />
+      <GlobalHeader showBack title="Editar perfil" />
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-20 space-y-6">
         {/* Avatar */}
         <div className="flex flex-col items-center">
@@ -146,11 +188,29 @@ export default function Settings() {
           <Input value={form.name} onChange={(e) => set("name", e.target.value)} className="h-10 text-sm" />
         </div>
 
+        {/* Email */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">E-mail</Label>
+          <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="h-10 text-sm" />
+          {form.email !== (user?.email ?? "") && (
+            <p className="text-xs text-warning">
+              ⚠️ Ao salvar, um e-mail de confirmação será enviado para o novo endereço.
+              Seu e-mail atual continuará sendo usado até a confirmação.
+            </p>
+          )}
+        </div>
+
         {/* Bio */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Bio</Label>
           <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3} maxLength={100} className="text-sm resize-none" placeholder="Conte um pouco sobre você..." />
           <p className="text-xs text-muted-foreground text-right">{form.bio.length}/100</p>
+        </div>
+
+        {/* Birth date */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Data de nascimento</Label>
+          <Input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} className="h-10 text-sm" />
         </div>
 
         {/* City & State */}
@@ -161,7 +221,16 @@ export default function Settings() {
           </div>
           <div className="space-y-2">
             <Label className="text-sm font-medium">Estado</Label>
-            <Input value={form.state} onChange={(e) => set("state", e.target.value)} className="h-10 text-sm" />
+            <Select value={form.state} onValueChange={(v) => set("state", v)}>
+              <SelectTrigger className="h-10 text-sm">
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                {ESTADOS_BR.map((e) => (
+                  <SelectItem key={e.uf} value={e.uf}>{e.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -169,12 +238,6 @@ export default function Settings() {
         <div className="space-y-2">
           <Label className="text-sm font-medium">Telefone</Label>
           <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="h-10 text-sm" placeholder="(00) 00000-0000" />
-        </div>
-
-        {/* Birth date */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Data de nascimento</Label>
-          <Input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} className="h-10 text-sm" />
         </div>
 
         {/* Notifications */}
