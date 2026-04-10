@@ -90,7 +90,7 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
       }
 
       // If action was 'removed', ensure context reflects removal
-      if (data?.action === "removed") {
+      if ((data as any)?.action === "removed") {
         dispatch({ type: "REMOVE_REACTION", postId });
       }
     },
