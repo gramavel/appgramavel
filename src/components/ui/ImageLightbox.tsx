@@ -64,12 +64,27 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
   const handleReact = async (emoji: string) => {
     if (!currentPhotoId) return;
     const userId = await getCurrentUserId();
-    await supabase.rpc("upsert_photo_reaction", { p_photo_id: currentPhotoId, p_user_id: userId, p_emoji: emoji });
-    // Reload
-    const { data: counts } = await supabase.from("photo_reaction_counts").select("emoji, count").eq("photo_id", currentPhotoId);
-    setReactions(counts?.filter(r => (r.count ?? 0) > 0) ?? []);
-    const { data: ur } = await supabase.from("photo_reactions").select("emoji").eq("photo_id", currentPhotoId).eq("user_id", userId).maybeSingle();
-    setUserEmoji(ur?.emoji ?? null);
+    
+    // Optimistic update
+    const previousEmoji = userEmoji;
+    if (previousEmoji === emoji) {
+      setUserEmoji(null);
+    } else {
+      setUserEmoji(emoji);
+    }
+    
+    try {
+      await supabase.rpc("upsert_photo_reaction", { p_photo_id: currentPhotoId, p_user_id: userId, p_emoji: emoji });
+      // Reload
+      const { data: counts } = await supabase.from("photo_reaction_counts").select("emoji, count").eq("photo_id", currentPhotoId);
+      setReactions(counts?.filter(r => (r.count ?? 0) > 0) ?? []);
+      const { data: ur } = await supabase.from("photo_reactions").select("emoji").eq("photo_id", currentPhotoId).eq("user_id", userId).maybeSingle();
+      setUserEmoji(ur?.emoji ?? null);
+    } catch (error) {
+      // Revert optimistic update on error
+      setUserEmoji(previousEmoji);
+      console.error("Reaction failed:", error);
+    }
     setShowReactionPicker(false);
   };
 
@@ -125,7 +140,7 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
                 <button
                   key={r.emoji}
                   onClick={() => handleReact(r.emoji)}
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs text-white transition-colors ${userEmoji === r.emoji ? "bg-primary/50" : "bg-white/15 hover:bg-white/25"}`}
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs text-white transition-all active:scale-75 ${userEmoji === r.emoji ? "bg-primary/50 scale-110 animate-pulse" : "bg-white/15 hover:bg-white/25 hover:scale-110"}`}
                 >
                   {r.emoji} <span className="font-medium">{r.count}</span>
                 </button>
@@ -143,7 +158,7 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
           {showReactionPicker && currentPhotoId && (
             <div className="flex justify-center gap-3 pt-1">
               {CANONICAL_REACTIONS.map((r) => (
-                <button key={r.emoji} onClick={() => handleReact(r.emoji)} className="text-xl hover:scale-125 transition-transform">
+                <button key={r.emoji} onClick={() => handleReact(r.emoji)} className="text-xl hover:scale-125 transition-all active:scale-75 active:rotate-12">
                   {r.emoji}
                 </button>
               ))}

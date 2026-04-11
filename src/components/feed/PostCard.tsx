@@ -51,7 +51,8 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
 
   const handleReact = (emoji: string) => {
     setReaction(post.id, emoji);
-    setShowReactions(false);
+    // Small delay to show animation before closing
+    setTimeout(() => setShowReactions(false), 100);
   };
 
   const handleShare = async () => {
@@ -150,7 +151,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
       {/* Actions row: reactions left, bookmark + share right */}
       <div className="flex items-center justify-between px-4 pb-4 pt-1">
         <button
-          className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-all active:scale-95"
           onClick={() => setShowReactions(true)}
           aria-label="Reagir ao post"
         >
@@ -233,8 +234,8 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
                   <button
                     key={item.emoji}
                     onClick={() => handleReact(item.emoji)}
-                    className={`flex flex-col items-center gap-1 p-4 rounded-lg transition-all min-w-[48px] min-h-[48px] ${
-                      isActive ? "bg-primary/10 scale-110" : "hover:bg-secondary"
+                    className={`flex flex-col items-center gap-1 p-4 rounded-lg transition-all min-w-[48px] min-h-[48px] active:scale-75 ${
+                      isActive ? "bg-primary/10 scale-110 animate-pulse" : "hover:bg-secondary hover:scale-110"
                     }`}
                     aria-label={`Reagir com ${item.label}`}
                   >

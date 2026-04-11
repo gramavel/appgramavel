@@ -101,8 +101,19 @@ export default function Profile() {
       .from("user-avatars")
       .getPublicUrl(path);
 
-    await supabase.from("user_profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
+    const { error: updateError } = await supabase.from("user_profiles").update({ 
+      avatar_url: publicUrl,
+      updated_at: new Date().toISOString()
+    }).eq("id", user.id);
+
+    if (updateError) {
+      toast.error("Erro ao salvar referência da foto");
+      setAvatarPreview(null);
+      return;
+    }
+
     await refreshProfile();
+    setAvatarPreview(null); // Clear preview only after successful refresh
     toast.success("Foto atualizada!");
   }
 
