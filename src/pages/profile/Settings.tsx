@@ -105,16 +105,6 @@ export default function Settings() {
     setSaving(true);
 
     try {
-      const updateData: Record<string, string | null> = {
-        name: form.name.trim() || null,
-        city: form.city.trim() || null,
-        state: form.state || null,
-        phone: form.phone.trim() || null,
-        bio: form.bio.trim() || null,
-        birth_date: form.birth_date || null,
-        updated_at: new Date().toISOString(),
-      };
-
       const { error: profileError } = await supabase
         .from("user_profiles")
         .update(updateData)
