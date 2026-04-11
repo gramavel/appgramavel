@@ -13,25 +13,30 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState<"not_admin" | "invalid_credentials" | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setLoginError(null);
     try {
       const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (error) {
+        setLoginError("invalid_credentials");
+        setLoading(false);
+        return;
+      }
 
-      // Check admin role
       const { data: role } = await supabase
         .from("admin_roles")
         .select("id, role, is_active")
         .eq("user_id", authData.user.id)
         .eq("is_active", true)
-        .single();
+        .maybeSingle();
 
       if (!role) {
         await supabase.auth.signOut();
-        toast.error("Acesso não autorizado");
+        setLoginError("not_admin");
         setLoading(false);
         return;
       }
