@@ -147,7 +147,7 @@ export default function Profile() {
   };
 
   const displayName = profile?.name ?? user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "Usuário";
-  const avatarUrl = avatarPreview || profile?.avatar_url || "";
+  const avatarUrl = avatarPreview || (profile?.avatar_url ? `${profile.avatar_url}?t=${profile.updated_at ?? Date.now()}` : "");
   const city = profile?.city || "";
   const state = profile?.state || "";
   const initials = displayName.slice(0, 2).toUpperCase();

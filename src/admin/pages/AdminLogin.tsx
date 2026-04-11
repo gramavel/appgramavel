@@ -13,25 +13,30 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState<"not_admin" | "invalid_credentials" | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setLoginError(null);
     try {
       const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (error) {
+        setLoginError("invalid_credentials");
+        setLoading(false);
+        return;
+      }
 
-      // Check admin role
       const { data: role } = await supabase
         .from("admin_roles")
         .select("id, role, is_active")
         .eq("user_id", authData.user.id)
         .eq("is_active", true)
-        .single();
+        .maybeSingle();
 
       if (!role) {
         await supabase.auth.signOut();
-        toast.error("Acesso não autorizado");
+        setLoginError("not_admin");
         setLoading(false);
         return;
       }
@@ -53,6 +58,15 @@ export default function AdminLogin() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
+            {loginError && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-destructive font-medium">
+                  {loginError === "not_admin"
+                    ? "Este e-mail não tem acesso ao painel admin."
+                    : "E-mail ou senha incorretos."}
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required />

@@ -19,6 +19,7 @@ interface UserProfile {
   is_active: boolean | null;
   last_seen_at: string | null;
   created_at: string | null;
+  updated_at: string | null;
 }
 
 interface SignUpData {
