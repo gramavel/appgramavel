@@ -20,8 +20,21 @@ export default function Login() {
     setLoading(true);
     try {
       await signIn(email, password);
+      
+      // Check if user is admin to redirect correctly
+      const { data: role } = await supabase
+        .from("admin_roles")
+        .select("role")
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
       toast.success("Bem-vindo de volta!");
-      navigate("/");
+      if (role) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       toast.error(err.message || "Erro ao entrar");
     }
