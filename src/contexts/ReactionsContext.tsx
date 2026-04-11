@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useReducer, useMemo, useEffect, useRef, useCallback } from "react";
 import { getUserReactions } from "@/services/reactions";
 import { supabase } from "@/integrations/supabase/client";
 import { getCurrentUserId } from "@/lib/auth";
@@ -18,11 +18,6 @@ function reactionsReducer(state: State, action: Action): State {
     case "INIT":
       return { reactions: action.reactions, loaded: true };
     case "SET_REACTION": {
-      const current = state.reactions[action.postId]?.[0];
-      if (current === action.emoji) {
-        const { [action.postId]: _, ...rest } = state.reactions;
-        return { ...state, reactions: rest };
-      }
       return {
         ...state,
         reactions: {
@@ -53,6 +48,8 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
     loaded: false,
   });
 
+  const pendingRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     async function load() {
       const { data } = await getUserReactions();
@@ -65,38 +62,59 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
     load();
   }, []);
 
-  const value = useMemo(() => ({
-    setReaction: async (postId: string, emoji: string) => {
-      const current = state.reactions[postId]?.[0];
-      // Optimistic update
-      dispatch({ type: "SET_REACTION", postId, emoji });
+  const getReaction = useCallback(
+    (postId: string): string | null => state.reactions[postId]?.[0] ?? null,
+    [state.reactions]
+  );
 
-      const userId = await getCurrentUserId();
-      const { data, error } = await supabase.rpc("upsert_post_reaction", {
-        p_post_id: postId,
-        p_user_id: userId,
-        p_emoji: emoji,
-      });
+  const setReaction = useCallback(
+    async (postId: string, emoji: string) => {
+      if (pendingRef.current.has(postId)) return;
+      pendingRef.current.add(postId);
 
-      if (error) {
-        // Revert optimistic update
-        if (current) {
-          dispatch({ type: "SET_REACTION", postId, emoji: current });
-        } else {
+      const previousEmoji = state.reactions[postId]?.[0] ?? null;
+
+      // Optimistic update — immediate UI feedback
+      if (previousEmoji === emoji) {
+        dispatch({ type: "REMOVE_REACTION", postId });
+      } else {
+        dispatch({ type: "SET_REACTION", postId, emoji });
+      }
+
+      try {
+        const userId = await getCurrentUserId();
+        const { data, error } = await supabase.rpc("upsert_post_reaction", {
+          p_post_id: postId,
+          p_user_id: userId,
+          p_emoji: emoji,
+        });
+
+        if (error) {
+          // Revert optimistic update
+          console.error("Reaction failed, reverting:", error);
+          if (previousEmoji) {
+            dispatch({ type: "SET_REACTION", postId, emoji: previousEmoji });
+          } else {
+            dispatch({ type: "REMOVE_REACTION", postId });
+          }
+          return;
+        }
+
+        // If action was 'removed', ensure context reflects removal
+        if ((data as any)?.action === "removed") {
           dispatch({ type: "REMOVE_REACTION", postId });
         }
-        console.error("Reaction error:", error);
-        return;
-      }
-
-      // If action was 'removed', ensure context reflects removal
-      if ((data as any)?.action === "removed") {
-        dispatch({ type: "REMOVE_REACTION", postId });
+      } finally {
+        pendingRef.current.delete(postId);
       }
     },
-    getReaction: (postId: string): string | null =>
-      state.reactions[postId]?.[0] ?? null,
-  }), [state]);
+    [state.reactions]
+  );
+
+  const value = useMemo(() => ({
+    setReaction,
+    getReaction,
+  }), [setReaction, getReaction]);
 
   return (
     <ReactionsContext.Provider value={value}>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Camera, Save, LogOut, Bell, ChevronLeft } from "lucide-react";
+import { Camera, Save, LogOut, Bell, Pencil, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import ImageUploadCrop from "@/admin/components/ImageUploadCrop";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -35,10 +36,9 @@ const ESTADOS_BR = [
 export default function Settings() {
   const navigate = useNavigate();
   const { profile, user, refreshProfile, signOut } = useAuth();
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [notifications, setNotifications] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -50,7 +50,28 @@ export default function Settings() {
     phone: "",
   });
 
+  // Populate form with real data when profile loads
   useEffect(() => {
+    if (!profile || !user) return;
+    setForm({
+      name: profile.name ?? "",
+      email: user.email ?? "",
+      city: profile.city ?? "",
+      state: profile.state ?? "",
+      bio: profile.bio ?? "",
+      birth_date: profile.birth_date ?? "",
+      phone: profile.phone ?? "",
+    });
+  }, [profile?.id, user?.id]);
+
+  const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
+
+  const displayName = profile?.name ?? user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "Usuário";
+  const avatarUrl = profile?.avatar_url || "";
+  const initials = displayName.slice(0, 2).toUpperCase();
+
+  function handleCancel() {
+    setIsEditing(false);
     if (profile && user) {
       setForm({
         name: profile.name ?? "",
@@ -62,90 +83,67 @@ export default function Settings() {
         phone: profile.phone ?? "",
       });
     }
-  }, [profile, user]);
+  }
 
-  const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
-
-  const displayName = profile?.name || user?.email?.split("@")[0] || "Usuário";
-  const avatarUrl = avatarPreview || profile?.avatar_url || "";
-  const initials = displayName.slice(0, 2).toUpperCase();
-
-  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    const preview = URL.createObjectURL(file);
-    setAvatarPreview(preview);
-
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from("user-avatars")
-      .upload(path, file, { upsert: true });
-
-    if (uploadError) {
-      toast.error("Erro ao enviar foto");
-      setAvatarPreview(null);
-      return;
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from("user-avatars")
-      .getPublicUrl(path);
-
-    await supabase
+  async function handleAvatarSave(publicUrl: string) {
+    if (!user) return;
+    const { error } = await supabase
       .from("user_profiles")
-      .update({ avatar_url: publicUrl })
+      .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
       .eq("id", user.id);
 
+    if (error) {
+      toast.error("Erro ao salvar foto de perfil");
+      return;
+    }
     await refreshProfile();
-    toast.success("Foto atualizada!");
+    toast.success("Foto de perfil atualizada!");
   }
 
   async function handleSave() {
-    if (!user) return;
+    if (!user || !profile) return;
     setSaving(true);
 
-    // 1. Update profile data
-    const { error: profileError } = await supabase
-      .from("user_profiles")
-      .update({
-        name: form.name,
-        city: form.city,
-        state: form.state,
-        bio: form.bio || null,
+    try {
+      const updateData: Record<string, string | null> = {
+        name: form.name.trim() || null,
+        city: form.city.trim() || null,
+        state: form.state || null,
+        phone: form.phone.trim() || null,
+        bio: form.bio.trim() || null,
         birth_date: form.birth_date || null,
-        phone: form.phone || null,
         updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
+      };
 
-    if (profileError) {
-      toast.error("Erro ao salvar perfil");
-      setSaving(false);
-      return;
-    }
+      const { error: profileError } = await supabase
+        .from("user_profiles")
+        .update(updateData)
+        .eq("id", user.id);
 
-    // 2. Update email separately if changed
-    if (form.email !== user.email) {
-      const { error: emailError } = await supabase.auth.updateUser({
-        email: form.email,
-      });
-
-      if (emailError) {
-        toast.error("Erro ao atualizar e-mail: " + emailError.message);
-      } else {
-        toast.success(
-          "Perfil salvo! Um e-mail de confirmação foi enviado para " + form.email,
-          { duration: 5000 }
-        );
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        toast.error(`Erro ao salvar: ${profileError.message}`);
+        return;
       }
-    } else {
-      toast.success("Perfil atualizado com sucesso!");
-    }
 
-    await refreshProfile();
-    setSaving(false);
-    navigate(-1);
+      if (form.email.trim() !== user.email) {
+        const { error: emailError } = await supabase.auth.updateUser({
+          email: form.email.trim(),
+        });
+        if (emailError) {
+          toast.error("Perfil salvo, mas erro ao atualizar e-mail: " + emailError.message);
+        } else {
+          toast.success("Perfil salvo! Confirme o novo e-mail na sua caixa de entrada.", { duration: 6000 });
+        }
+      } else {
+        toast.success("Perfil atualizado com sucesso!");
+      }
+
+      await refreshProfile();
+      setIsEditing(false);
+    } finally {
+      setSaving(false);
+    }
   }
 
   const handleLogout = async () => {
@@ -156,43 +154,70 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-background">
-      <GlobalHeader showBack title="Editar perfil" />
+      <GlobalHeader showBack title="Meu perfil" />
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-20 space-y-6">
-        {/* Avatar */}
+        {/* Avatar with crop */}
         <div className="flex flex-col items-center">
-          <div className="relative cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
-            <Avatar className="w-24 h-24 border-4 border-border">
-              {avatarUrl && <AvatarImage src={avatarUrl} />}
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-              <Camera className="w-5 h-5 text-white" />
-            </div>
-            <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg">
-              <Camera className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">Toque para alterar a foto</p>
-          <input
-            ref={avatarInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-            className="hidden"
-            onChange={handleAvatarChange}
+          <ImageUploadCrop
+            value={avatarUrl || null}
+            onChange={handleAvatarSave}
+            aspect={1}
+            bucket="user-avatars"
+            storagePath={`${user?.id ?? "unknown"}/avatar_`}
+            label="Foto de perfil"
+            renderTrigger={() => (
+              <div className="relative">
+                <Avatar className="w-24 h-24 border-4 border-border">
+                  {avatarUrl ? (
+                    <AvatarImage src={avatarUrl} className="object-cover" />
+                  ) : (
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  )}
+                </Avatar>
+                <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                  <Camera className="w-5 h-5 text-white" />
+                </div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg">
+                  <Camera className="w-4 h-4" />
+                </div>
+              </div>
+            )}
           />
+          <p className="text-xs text-muted-foreground mt-2">Toque para alterar a foto</p>
+        </div>
+
+        {/* Edit / Cancel+Save buttons */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">Dados pessoais</h2>
+          {!isEditing ? (
+            <Button variant="outline" size="sm" className="rounded-full gap-1.5 h-8 text-xs" onClick={() => setIsEditing(true)}>
+              <Pencil className="w-3 h-3" />
+              Editar
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" className="rounded-full h-8 text-xs" onClick={handleCancel}>
+                Cancelar
+              </Button>
+              <Button size="sm" className="rounded-full h-8 text-xs gap-1" onClick={handleSave} disabled={saving}>
+                <Save className="w-3 h-3" />
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Name */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Nome</Label>
-          <Input value={form.name} onChange={(e) => set("name", e.target.value)} className="h-10 text-sm" />
+          <Input value={form.name} onChange={(e) => set("name", e.target.value)} disabled={!isEditing} className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`} />
         </div>
 
         {/* Email */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">E-mail</Label>
-          <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="h-10 text-sm" />
-          {form.email !== (user?.email ?? "") && (
+          <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} disabled={!isEditing} className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`} />
+          {isEditing && form.email !== (user?.email ?? "") && (
             <p className="text-xs text-warning">
               ⚠️ Ao salvar, um e-mail de confirmação será enviado para o novo endereço.
               Seu e-mail atual continuará sendo usado até a confirmação.
@@ -203,26 +228,26 @@ export default function Settings() {
         {/* Bio */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Bio</Label>
-          <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3} maxLength={100} className="text-sm resize-none" placeholder="Conte um pouco sobre você..." />
+          <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3} maxLength={100} disabled={!isEditing} className={`text-sm resize-none ${!isEditing ? "opacity-70 cursor-default" : ""}`} placeholder="Conte um pouco sobre você..." />
           <p className="text-xs text-muted-foreground text-right">{form.bio.length}/100</p>
         </div>
 
         {/* Birth date */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Data de nascimento</Label>
-          <Input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} className="h-10 text-sm" />
+          <Input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} disabled={!isEditing} className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`} />
         </div>
 
         {/* City & State */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label className="text-sm font-medium">Cidade</Label>
-            <Input value={form.city} onChange={(e) => set("city", e.target.value)} className="h-10 text-sm" />
+            <Input value={form.city} onChange={(e) => set("city", e.target.value)} disabled={!isEditing} className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`} />
           </div>
           <div className="space-y-2">
             <Label className="text-sm font-medium">Estado</Label>
-            <Select value={form.state} onValueChange={(v) => set("state", v)}>
-              <SelectTrigger className="h-10 text-sm">
+            <Select value={form.state} onValueChange={(v) => set("state", v)} disabled={!isEditing}>
+              <SelectTrigger className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`}>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
@@ -237,7 +262,7 @@ export default function Settings() {
         {/* Phone */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Telefone</Label>
-          <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="h-10 text-sm" placeholder="(00) 00000-0000" />
+          <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} disabled={!isEditing} className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`} placeholder="(00) 00000-0000" />
         </div>
 
         {/* Notifications */}
@@ -251,12 +276,6 @@ export default function Settings() {
           </div>
           <Switch checked={notifications} onCheckedChange={setNotifications} />
         </div>
-
-        {/* Save button */}
-        <Button className="w-full gap-2 rounded-full" onClick={handleSave} disabled={saving}>
-          <Save className="w-4 h-4" />
-          {saving ? "Salvando..." : "Salvar alterações"}
-        </Button>
 
         {/* Logout link */}
         <div className="flex justify-center mt-6">

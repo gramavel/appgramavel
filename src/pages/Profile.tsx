@@ -86,7 +86,7 @@ export default function Profile() {
     setAvatarPreview(preview);
 
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
+    const path = `${user.id}/avatar_${Date.now()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("user-avatars")
       .upload(path, file, { upsert: true });
@@ -146,7 +146,7 @@ export default function Profile() {
     setLightboxOpen(true);
   };
 
-  const displayName = profile?.name || user?.email?.split("@")[0] || "Usuário";
+  const displayName = profile?.name ?? user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "Usuário";
   const avatarUrl = avatarPreview || profile?.avatar_url || "";
   const city = profile?.city || "";
   const state = profile?.state || "";
@@ -171,7 +171,7 @@ export default function Profile() {
           <div className="flex flex-col items-center -mt-11 relative z-10 px-4">
             <div className="p-[3px] rounded-full bg-gradient-to-tr from-primary to-primary/60 shadow-lg relative cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
               <Avatar className="w-[88px] h-[88px] border-[3px] border-background">
-                {avatarUrl && <AvatarImage src={avatarUrl} />}
+                {avatarUrl && <AvatarImage src={avatarUrl} className="object-cover" />}
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
