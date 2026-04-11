@@ -58,6 +58,15 @@ export default function AdminLogin() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
+            {loginError && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-destructive font-medium">
+                  {loginError === "not_admin"
+                    ? "Este e-mail não tem acesso ao painel admin."
+                    : "E-mail ou senha incorretos."}
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
