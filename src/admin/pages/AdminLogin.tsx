@@ -34,7 +34,7 @@ export default function AdminLogin() {
         .eq("is_active", true)
         .maybeSingle();
 
-      console.log("Admin check result:", role);
+
 
       if (!role) {
         await supabase.auth.signOut();
