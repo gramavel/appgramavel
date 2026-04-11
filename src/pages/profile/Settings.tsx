@@ -48,6 +48,7 @@ export default function Settings() {
     bio: "",
     birth_date: "",
     phone: "",
+    avatar_url: "",
   });
 
   // Populate form with real data when profile loads
@@ -61,13 +62,14 @@ export default function Settings() {
       bio: profile.bio ?? "",
       birth_date: profile.birth_date ?? "",
       phone: profile.phone ?? "",
+      avatar_url: profile.avatar_url ?? "",
     });
   }, [profile?.id, user?.id]);
 
   const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
 
   const displayName = profile?.name ?? user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "Usuário";
-  const avatarUrl = profile?.avatar_url || "";
+  const avatarUrl = form.avatar_url || profile?.avatar_url || "";
   const initials = displayName.slice(0, 2).toUpperCase();
 
   function handleCancel() {
@@ -87,15 +89,26 @@ export default function Settings() {
 
   async function handleAvatarSave(publicUrl: string) {
     if (!user) return;
+    
+    // Optimistic update to UI
+    setForm(prev => ({ ...prev, avatar_url: publicUrl }));
+
     const { error } = await supabase
       .from("user_profiles")
-      .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+      .update({ 
+        avatar_url: publicUrl, 
+        updated_at: new Date().toISOString() 
+      })
       .eq("id", user.id);
 
     if (error) {
+      console.error("Error saving avatar:", error);
       toast.error("Erro ao salvar foto de perfil");
+      // Revert if error
+      if (profile) setForm(prev => ({ ...prev, avatar_url: profile.avatar_url }));
       return;
     }
+    
     await refreshProfile();
     toast.success("Foto de perfil atualizada!");
   }
