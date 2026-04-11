@@ -86,6 +86,13 @@ const App = () => (
                       {/* Legacy auth route redirect */}
                       <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
 
+                      {/* Admin Routes - Priority */}
+                      <Route path="/admin/login" element={<AdminLogin />} />
+                      <Route path="/admin" element={<AdminApp />}>
+                        <Route index element={<AdminRouter />} />
+                        <Route path="*" element={<AdminRouter />} />
+                      </Route>
+
                       {/* Protected app routes */}
                       <Route path="/" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
                       <Route path="/map" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
@@ -101,13 +108,6 @@ const App = () => (
                       <Route path="/perfil/roteiros" element={<ProtectedRoute><RoutesPage /></ProtectedRoute>} />
                       <Route path="/perfil/configuracoes" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                       <Route path="/perfil/cupons" element={<ProtectedRoute><UserCoupons /></ProtectedRoute>} />
-
-                      {/* Admin */}
-                      <Route path="/admin/login" element={<AdminLogin />} />
-                      <Route path="/admin" element={<AdminApp />}>
-                        <Route path="*" element={<AdminRouter />} />
-                        <Route index element={<AdminRouter />} />
-                      </Route>
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>

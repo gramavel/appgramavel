@@ -7,18 +7,29 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function check() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) { setStatus("unauthorized"); return; }
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user) {
+        console.log("AdminAuthGuard: No session found", sessionError);
+        setStatus("unauthorized");
+        return;
+      }
 
-      const { data, error } = await supabase
+      const { data: adminRole, error: roleError } = await supabase
         .from("admin_roles")
         .select("id, role, is_active")
         .eq("user_id", session.user.id)
         .eq("is_active", true)
         .maybeSingle();
 
-      console.log("AdminAuthGuard Check:", { userId: session.user.id, data, error });
-      setStatus(data ? "authorized" : "unauthorized");
+      console.log("AdminAuthGuard Check:", { userId: session.user.id, adminRole, roleError });
+      
+      if (adminRole) {
+        setStatus("authorized");
+      } else {
+        console.log("AdminAuthGuard: User is not an active admin");
+        setStatus("unauthorized");
+      }
     }
 
     check();
