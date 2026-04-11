@@ -10,13 +10,14 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) { setStatus("unauthorized"); return; }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("admin_roles")
         .select("id, role, is_active")
         .eq("user_id", session.user.id)
         .eq("is_active", true)
         .maybeSingle();
 
+      console.log("AdminAuthGuard Check:", { userId: session.user.id, data, error });
       setStatus(data ? "authorized" : "unauthorized");
     }
 
