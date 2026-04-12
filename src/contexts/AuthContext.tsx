@@ -27,6 +27,7 @@ interface SignUpData {
   email: string;
   password: string;
   birthDate?: string;
+  gender?: string;
   city?: string;
   state?: string;
 }
