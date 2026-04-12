@@ -499,9 +499,22 @@ export default function UsersPage() {
               <Input type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} />
               <p className="text-xs text-muted-foreground mt-1">O usuário poderá trocar a senha depois.</p>
             </div>
-            <div>
-              <Label>Data de nascimento</Label>
-              <Input type="date" value={newUser.birth_date} onChange={e => setNewUser({ ...newUser, birth_date: e.target.value })} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Idade</Label>
+                <Input type="number" min={13} max={99} placeholder="Ex: 25" value={newUser.age} onChange={e => setNewUser({ ...newUser, age: e.target.value })} />
+              </div>
+              <div>
+                <Label>Sexo</Label>
+                <Select value={newUser.gender} onValueChange={v => setNewUser({ ...newUser, gender: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {genderOptions.map(g => (
+                      <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
