@@ -8,11 +8,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { AgeScrollPicker } from "@/components/ui/AgeScrollPicker";
 
 const BRAZILIAN_STATES = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
   "PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
 ];
+
+const GENDER_OPTIONS = [
+  { value: "male", label: "Masculino" },
+  { value: "female", label: "Feminino" },
+  { value: "other", label: "Outro" },
+  { value: "prefer_not_to_say", label: "Prefiro não informar" },
+];
+
+function ageToBirthDate(age: number): string {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - age);
+  return d.toISOString().split("T")[0];
+}
 
 export default function Register() {
   const navigate = useNavigate();
@@ -20,7 +34,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", password: "", confirmPassword: "",
-    birthDate: "", city: "", state: "RS",
+    age: null as number | null, gender: "", city: "", state: "RS",
   });
 
   const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
@@ -35,7 +49,8 @@ export default function Register() {
         name: form.name,
         email: form.email,
         password: form.password,
-        birthDate: form.birthDate || undefined,
+        birthDate: form.age ? ageToBirthDate(form.age) : undefined,
+        gender: form.gender || undefined,
         city: form.city || undefined,
         state: form.state || undefined,
       });
@@ -73,8 +88,22 @@ export default function Register() {
               <Input type="password" value={form.confirmPassword} onChange={e => set("confirmPassword", e.target.value)} required placeholder="••••••••" />
             </div>
             <div className="space-y-1.5">
-              <Label>Data de nascimento</Label>
-              <Input type="date" value={form.birthDate} onChange={e => set("birthDate", e.target.value)} />
+              <Label>Idade</Label>
+              <AgeScrollPicker
+                value={form.age}
+                onChange={(age) => setForm(f => ({ ...f, age }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Sexo</Label>
+              <Select value={form.gender} onValueChange={v => set("gender", v)}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {GENDER_OPTIONS.map(g => (
+                    <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">

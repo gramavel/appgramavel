@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Camera, Save, LogOut, Bell, Pencil, X } from "lucide-react";
+import { AgeScrollPicker } from "@/components/ui/AgeScrollPicker";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -46,10 +47,23 @@ export default function Settings() {
     city: "",
     state: "",
     bio: "",
-    birth_date: "",
+    age: null as number | null,
+    gender: "",
     phone: "",
     avatar_url: "",
   });
+
+  function birthDateToAge(bd: string | null): number | null {
+    if (!bd) return null;
+    const diff = Date.now() - new Date(bd).getTime();
+    return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+  }
+
+  function ageToBirthDate(age: number): string {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - age);
+    return d.toISOString().split("T")[0];
+  }
 
   // Populate form with real data when profile loads
   useEffect(() => {
@@ -60,7 +74,8 @@ export default function Settings() {
       city: profile.city ?? "",
       state: profile.state ?? "",
       bio: profile.bio ?? "",
-      birth_date: profile.birth_date ?? "",
+      age: birthDateToAge(profile.birth_date),
+      gender: (profile as any).gender ?? "",
       phone: profile.phone ?? "",
       avatar_url: profile.avatar_url ?? "",
     });
@@ -81,7 +96,8 @@ export default function Settings() {
         city: profile.city ?? "",
         state: profile.state ?? "",
         bio: profile.bio ?? "",
-        birth_date: profile.birth_date ?? "",
+        age: birthDateToAge(profile.birth_date),
+        gender: (profile as any).gender ?? "",
         phone: profile.phone ?? "",
         avatar_url: profile.avatar_url ?? "",
       });
@@ -127,7 +143,8 @@ export default function Settings() {
           state: form.state || null,
           phone: form.phone.trim() || null,
           bio: form.bio.trim() || null,
-          birth_date: form.birth_date || null,
+          birth_date: form.age ? ageToBirthDate(form.age) : null,
+          gender: form.gender || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
@@ -245,10 +262,30 @@ export default function Settings() {
           <p className="text-xs text-muted-foreground text-right">{form.bio.length}/100</p>
         </div>
 
-        {/* Birth date */}
+        {/* Age */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Data de nascimento</Label>
-          <Input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} disabled={!isEditing} className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`} />
+          <Label className="text-sm font-medium">Idade</Label>
+          {isEditing ? (
+            <AgeScrollPicker value={form.age} onChange={(age) => setForm(f => ({ ...f, age }))} />
+          ) : (
+            <Input value={form.age ? `${form.age} anos` : ""} disabled className="h-10 text-sm opacity-70 cursor-default" />
+          )}
+        </div>
+
+        {/* Gender */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Sexo</Label>
+          <Select value={form.gender} onValueChange={(v) => set("gender", v)} disabled={!isEditing}>
+            <SelectTrigger className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="male">Masculino</SelectItem>
+              <SelectItem value="female">Feminino</SelectItem>
+              <SelectItem value="other">Outro</SelectItem>
+              <SelectItem value="prefer_not_to_say">Prefiro não informar</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* City & State */}

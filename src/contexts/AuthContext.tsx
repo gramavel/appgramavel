@@ -27,6 +27,7 @@ interface SignUpData {
   email: string;
   password: string;
   birthDate?: string;
+  gender?: string;
   city?: string;
   state?: string;
 }
@@ -104,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (authData.user) {
       await supabase.from("user_profiles").update({
         birth_date: data.birthDate || null,
+        gender: data.gender || null,
         city: data.city || null,
         state: data.state || null,
       }).eq("id", authData.user.id);

@@ -93,7 +93,7 @@ export default function UsersPage() {
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", birth_date: "", city: "", state: "" });
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", age: "", gender: "", city: "", state: "" });
 
   const [currentAdminId, setCurrentAdminId] = useState<string | null>(null);
 
@@ -159,6 +159,12 @@ export default function UsersPage() {
       return;
     }
     setCreating(true);
+    const ageToBirthDate = (age: string) => {
+      if (!age) return undefined;
+      const d = new Date();
+      d.setFullYear(d.getFullYear() - parseInt(age));
+      return d.toISOString().split("T")[0];
+    };
     const { error } = await supabase.auth.signUp({
       email: newUser.email,
       password: newUser.password,
@@ -167,7 +173,8 @@ export default function UsersPage() {
           full_name: newUser.name,
           city: newUser.city,
           state: newUser.state,
-          birth_date: newUser.birth_date,
+          birth_date: ageToBirthDate(newUser.age),
+          gender: newUser.gender || undefined,
         },
         emailRedirectTo: `${window.location.origin}/auth/confirm`,
       },
@@ -179,7 +186,7 @@ export default function UsersPage() {
     }
     toast.success(`Usuário criado! E-mail de confirmação enviado para ${newUser.email}`, { duration: 6000 });
     setCreateDialogOpen(false);
-    setNewUser({ name: "", email: "", password: "", birth_date: "", city: "", state: "" });
+    setNewUser({ name: "", email: "", password: "", age: "", gender: "", city: "", state: "" });
     await loadUsers();
     setCreating(false);
   }
@@ -389,7 +396,6 @@ export default function UsersPage() {
                 <h4 className="text-sm font-semibold text-muted-foreground mb-3">Dados pessoais</h4>
                 {[
                   { label: "Telefone", value: selectedUser.phone || "Não informado" },
-                  { label: "Data de nasc.", value: selectedUser.birth_date ? new Date(selectedUser.birth_date).toLocaleDateString("pt-BR") : "Não informado" },
                   { label: "Idade", value: selectedUser.age ? `${selectedUser.age} anos` : "Não informado" },
                   { label: "Sexo", value: selectedUser.gender_label || "Não informado" },
                   { label: "Cidade", value: selectedUser.city || "Não informado" },
@@ -493,9 +499,22 @@ export default function UsersPage() {
               <Input type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} />
               <p className="text-xs text-muted-foreground mt-1">O usuário poderá trocar a senha depois.</p>
             </div>
-            <div>
-              <Label>Data de nascimento</Label>
-              <Input type="date" value={newUser.birth_date} onChange={e => setNewUser({ ...newUser, birth_date: e.target.value })} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Idade</Label>
+                <Input type="number" min={13} max={99} placeholder="Ex: 25" value={newUser.age} onChange={e => setNewUser({ ...newUser, age: e.target.value })} />
+              </div>
+              <div>
+                <Label>Sexo</Label>
+                <Select value={newUser.gender} onValueChange={v => setNewUser({ ...newUser, gender: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {genderOptions.map(g => (
+                      <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
