@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, MapPin, Bookmark, BookmarkCheck, Search, X, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useLocation } from "@/contexts/LocationContext";
 import { getEstablishments } from "@/services/establishments";
@@ -66,13 +68,13 @@ export default function SavedPlaces() {
         {/* Results */}
         {filtered.length === 0 && places.length === 0 ? (
           <div className="space-y-6">
-            <div className="py-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                <Bookmark className="w-7 h-7 text-muted-foreground" />
-              </div>
-              <p className="text-sm font-semibold text-foreground">Nenhum lugar salvo ainda</p>
-              <p className="text-xs text-muted-foreground mt-1">Salve seus lugares favoritos para vê-los aqui</p>
-            </div>
+            <EmptyState
+              icon={Bookmark}
+              title="Nenhum lugar salvo ainda"
+              description="Salve seus lugares favoritos para planejar seu roteiro perfeito por Gramado e Canela."
+              actionLabel="Explorar lugares"
+              onAction={() => navigate("/explorar")}
+            />
 
             {/* Popular suggestions */}
             <div>
@@ -85,7 +87,7 @@ export default function SavedPlaces() {
                   <div
                     key={est.id}
                     onClick={() => navigate(`/estabelecimento/${est.slug}`)}
-                    className="flex gap-4 p-4 bg-card rounded-xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer animate-fade-in-up"
+                    className="flex gap-4 p-4 bg-card rounded-2xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer animate-fade-in-up"
                     style={{ animationDelay: `${i * 80}ms` }}
                   >
                     <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
@@ -127,7 +129,7 @@ export default function SavedPlaces() {
             <div
               key={est.id}
               onClick={() => navigate(`/estabelecimento/${est.slug}`)}
-              className="flex gap-4 p-4 bg-card rounded-xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer animate-fade-in-up"
+              className="flex gap-4 p-4 bg-card rounded-2xl border border-border/50 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer animate-fade-in-up"
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">

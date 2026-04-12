@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Ticket, Tag, CheckCircle2 } from "lucide-react";
+import { Ticket, Tag, CheckCircle2, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +10,7 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { MOCK_COUPONS, type Coupon } from "@/data/mock";
 import { useCoupons } from "@/contexts/CouponsContext";
 
@@ -33,7 +35,7 @@ function CouponItem({ coupon, used, onUse }: { coupon: Coupon; used?: boolean; o
 
   return (
     <div
-      className={`flex gap-4 p-4 rounded-xl border transition-all ${used ? "border-border/30 opacity-60" : "border-border bg-card shadow-card hover:shadow-card-hover active:scale-[0.98]"}`}
+      className={`flex gap-4 p-4 rounded-2xl border transition-all ${used ? "border-border/30 opacity-60" : "border-border bg-card shadow-card hover:shadow-card-hover active:scale-[0.98]"}`}
     >
       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
         <img src={coupon.image} alt={coupon.title} className="w-full h-full object-cover" />
@@ -107,13 +109,13 @@ export default function UserCoupons() {
 
           <TabsContent value="salvos" className="space-y-4">
             {activeCoupons.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                  <Ticket className="w-7 h-7 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">Nenhum cupom salvo ainda</p>
-                <p className="text-xs text-muted-foreground mt-1">Salve cupons para usá-los depois</p>
-              </div>
+              <EmptyState
+                icon={Ticket}
+                title="Nenhum cupom salvo ainda"
+                description="Explore os melhores estabelecimentos de Gramado e Canela para garantir seus descontos exclusivos."
+                actionLabel="Buscar cupons"
+                onAction={() => navigate("/explorar")}
+              />
             ) : (
               activeCoupons.map((c) => (
                 <CouponItem
@@ -127,13 +129,11 @@ export default function UserCoupons() {
 
           <TabsContent value="usados" className="space-y-4">
             {usedList.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle2 className="w-7 h-7 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">Nenhum cupom utilizado ainda</p>
-                <p className="text-xs text-muted-foreground mt-1">Seus cupons usados aparecerão aqui</p>
-              </div>
+              <EmptyState
+                icon={CheckCircle2}
+                title="Nenhum cupom utilizado"
+                description="Quando você utilizar seus cupons nos estabelecimentos parceiros, eles aparecerão aqui para seu histórico."
+              />
             ) : (
               usedList.map((c) => <CouponItem key={c.id} coupon={c} used />)
             )}

@@ -19,8 +19,15 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) toast.error(error.message);
-    else { toast.success("Bem-vindo de volta!"); navigate("/"); }
+    if (error) {
+      const message = error.message === "Invalid login credentials" 
+        ? "E-mail ou senha incorretos. Tente novamente." 
+        : "Ops! Tivemos um problema ao entrar. Verifique sua conexão.";
+      toast.error(message);
+    } else { 
+      toast.success("Que bom ver você de novo!"); 
+      navigate("/"); 
+    }
     setLoading(false);
   };
 
@@ -32,8 +39,14 @@ export default function Auth() {
       password,
       options: { data: { display_name: name }, emailRedirectTo: window.location.origin },
     });
-    if (error) toast.error(error.message);
-    else toast.success("Conta criada! Verifique seu email.");
+    if (error) {
+      const message = error.message === "User already registered"
+        ? "Este e-mail já está cadastrado. Tente fazer login."
+        : "Ops! Não conseguimos criar sua conta agora. Tente novamente em instantes.";
+      toast.error(message);
+    } else {
+      toast.success("Quase lá! Enviamos um link de confirmação para o seu e-mail.");
+    }
     setLoading(false);
   };
 

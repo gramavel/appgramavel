@@ -93,10 +93,29 @@ export default function EstablishmentPage() {
     return (
       <div className="min-h-screen bg-background">
         <GlobalHeader showBack />
-        <main className="max-w-2xl mx-auto px-4 pb-20 pt-20 space-y-4">
-          <Skeleton className="w-full aspect-[2/1] rounded-lg" />
-          <Skeleton className="h-6 w-48 mx-auto" />
-          <Skeleton className="h-4 w-32 mx-auto" />
+        <main className="max-w-2xl mx-auto px-4 pb-20 pt-24 space-y-6">
+          <Skeleton className="w-full aspect-[2/1] rounded-2xl" />
+          <div className="text-center space-y-3">
+            <Skeleton className="h-8 w-64 mx-auto rounded-full" />
+            <Skeleton className="h-5 w-32 mx-auto rounded-full" />
+            <Skeleton className="h-4 w-full max-w-sm mx-auto rounded-full" />
+          </div>
+          <div className="flex justify-center gap-8 py-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center gap-2">
+                <Skeleton className="w-12 h-12 rounded-full" />
+                <Skeleton className="h-3 w-12 rounded-full" />
+              </div>
+            ))}
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full rounded-full" />
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="aspect-[4/5] rounded-2xl" />
+              ))}
+            </div>
+          </div>
         </main>
         <BottomNav />
       </div>
@@ -172,7 +191,7 @@ export default function EstablishmentPage() {
 
       <main className="max-w-2xl mx-auto px-4 pb-20 space-y-4 pt-20">
         {/* Banner */}
-        <div className="relative aspect-[2/1] rounded-lg overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
+        <div className="relative aspect-[2/1] rounded-2xl overflow-hidden cursor-pointer" onClick={() => openLightbox(0)}>
           <img src={est.image_url} alt={est.name} className="w-full h-full object-cover" />
         </div>
 
@@ -239,7 +258,7 @@ export default function EstablishmentPage() {
                   {displayPhotos.map((photo, i) => (
                     <div
                       key={photo.id}
-                      className="aspect-[4/5] rounded-lg overflow-hidden group cursor-pointer relative"
+                      className="aspect-[4/5] rounded-2xl overflow-hidden group cursor-pointer relative"
                       onClick={() => openLightbox(i + 1)}
                     >
                       <img src={photo.url} alt={photo.caption || `Foto ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
@@ -262,7 +281,7 @@ export default function EstablishmentPage() {
               </Button>
               {reviews.length > 0 ? (
                 reviews.map((rev) => (
-                  <div key={rev.id} className="flex gap-4 p-4 border rounded-xl">
+                  <div key={rev.id} className="flex gap-4 p-4 border rounded-2xl">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
                     </Avatar>

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ChevronRight, Clock, MapPin, CheckCircle2, Play } from "lucide-react";
+import { ChevronRight, Clock, MapPin, CheckCircle2, Play, Map } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { MOCK_ROUTES } from "@/data/mock";
 import { Progress } from "@/components/ui/progress";
 
@@ -50,7 +51,7 @@ function RouteCard({ route }: { route: UserRoute }) {
 
   return (
     <div
-      className="rounded-xl bg-card border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer"
+      className="rounded-2xl bg-card border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer"
       onClick={() => navigate("/roteiros")}
     >
       {/* Cover */}
@@ -153,13 +154,13 @@ export default function RoutesPage() {
 
           <TabsContent value="in_progress" className="mt-4 space-y-4">
             {IN_PROGRESS_ROUTES.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                  <Play className="w-7 h-7 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">Nenhum roteiro em andamento</p>
-                <p className="text-xs text-muted-foreground mt-1">Inicie um roteiro na aba Roteiros</p>
-              </div>
+              <EmptyState
+                icon={Map}
+                title="Nenhum roteiro em andamento"
+                description="Descubra roteiros prontos e personalizados para aproveitar o melhor de Gramado e Canela."
+                actionLabel="Ver roteiros"
+                onAction={() => navigate("/roteiros")}
+              />
             ) : (
               IN_PROGRESS_ROUTES.map((route, i) => (
                 <div
@@ -175,13 +176,11 @@ export default function RoutesPage() {
 
           <TabsContent value="completed" className="mt-4 space-y-4">
             {COMPLETED_ROUTES.length === 0 ? (
-              <div className="py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle2 className="w-7 h-7 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">Nenhum roteiro concluído</p>
-                <p className="text-xs text-muted-foreground mt-1">Complete um roteiro para vê-lo aqui</p>
-              </div>
+              <EmptyState
+                icon={CheckCircle2}
+                title="Nenhum roteiro concluído"
+                description="Seus roteiros finalizados aparecerão aqui para você lembrar de cada momento da sua viagem."
+              />
             ) : (
               COMPLETED_ROUTES.map((route, i) => (
                 <div

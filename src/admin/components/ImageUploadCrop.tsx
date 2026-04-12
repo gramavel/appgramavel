@@ -88,8 +88,8 @@ export default function ImageUploadCrop({
         .from(bucket)
         .upload(path, blob, { contentType: "image/jpeg", upsert: true });
 
-      if (uploadError) {
-        toast.error("Erro no upload: " + uploadError.message);
+        if (uploadError) {
+        toast.error("Ops! Tivemos um problema ao enviar a imagem.");
         setUploading(false);
         return;
       }
@@ -108,9 +108,9 @@ export default function ImageUploadCrop({
       });
 
       setDialogOpen(false);
-      toast.success("Imagem enviada");
+      toast.success("Imagem enviada com sucesso!");
     } catch {
-      toast.error("Erro ao processar imagem");
+      toast.error("Ops! Tivemos um problema ao processar a imagem.");
     }
     setUploading(false);
   }, [completedCrop, bucket, storagePath, aspect, onChange]);

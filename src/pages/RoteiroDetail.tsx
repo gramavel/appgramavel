@@ -1,18 +1,54 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronRight, Clock, MapPin, Star, Mountain, Navigation, Edit3 } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MOCK_ROUTES, MOCK_ESTABLISHMENTS, type RouteItem } from "@/data/mock";
 import { toast } from "sonner";
 
 export default function RoteiroDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  // Find route from mock data (in real app, also check user routes from a store/context)
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, [id]);
+
   const route = MOCK_ROUTES.find(r => r.id === id);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <GlobalHeader showBack />
+        <main className="max-w-2xl mx-auto pb-20 pt-20">
+          <Skeleton className="w-full aspect-[2/1] rounded-b-3xl" />
+          <div className="px-4 pt-6 space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-3/4 rounded-full" />
+              <div className="flex gap-2">
+                <Skeleton className="h-5 w-20 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+            </div>
+            <Skeleton className="h-20 w-full rounded-2xl" />
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-40 rounded-full" />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+              ))}
+            </div>
+          </div>
+        </main>
+        <BottomNav />
+      </div>
+    );
+  }
 
   if (!route) {
     return (
@@ -67,7 +103,7 @@ export default function RoteiroDetail() {
                 {route.stops.map((stop, i) => (
                   <div
                     key={i}
-                    className="relative flex items-center gap-3 p-4 bg-card rounded-xl border border-border/50 animate-fade-in-up"
+                    className="relative flex items-center gap-3 p-4 bg-card rounded-2xl border border-border/50 animate-fade-in-up"
                     style={{ animationDelay: `${i * 80}ms` }}
                   >
                     <div className="absolute -left-8 w-[30px] h-[30px] rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold z-10">
