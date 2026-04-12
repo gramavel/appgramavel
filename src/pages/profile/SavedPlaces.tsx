@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, MapPin, Bookmark, BookmarkCheck, Search, X, TrendingUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";

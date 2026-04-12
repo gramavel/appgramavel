@@ -83,6 +83,7 @@ export default function Settings() {
         bio: profile.bio ?? "",
         birth_date: profile.birth_date ?? "",
         phone: profile.phone ?? "",
+        avatar_url: profile.avatar_url ?? "",
       });
     }
   }
