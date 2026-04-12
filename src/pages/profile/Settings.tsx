@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Camera, Save, LogOut, Bell, Pencil, X } from "lucide-react";
+import { AgeScrollPicker } from "@/components/ui/AgeScrollPicker";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -46,10 +47,23 @@ export default function Settings() {
     city: "",
     state: "",
     bio: "",
-    birth_date: "",
+    age: null as number | null,
+    gender: "",
     phone: "",
     avatar_url: "",
   });
+
+  function birthDateToAge(bd: string | null): number | null {
+    if (!bd) return null;
+    const diff = Date.now() - new Date(bd).getTime();
+    return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+  }
+
+  function ageToBirthDate(age: number): string {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - age);
+    return d.toISOString().split("T")[0];
+  }
 
   // Populate form with real data when profile loads
   useEffect(() => {
@@ -60,7 +74,8 @@ export default function Settings() {
       city: profile.city ?? "",
       state: profile.state ?? "",
       bio: profile.bio ?? "",
-      birth_date: profile.birth_date ?? "",
+      age: birthDateToAge(profile.birth_date),
+      gender: (profile as any).gender ?? "",
       phone: profile.phone ?? "",
       avatar_url: profile.avatar_url ?? "",
     });
@@ -81,7 +96,8 @@ export default function Settings() {
         city: profile.city ?? "",
         state: profile.state ?? "",
         bio: profile.bio ?? "",
-        birth_date: profile.birth_date ?? "",
+        age: birthDateToAge(profile.birth_date),
+        gender: (profile as any).gender ?? "",
         phone: profile.phone ?? "",
         avatar_url: profile.avatar_url ?? "",
       });
