@@ -93,7 +93,7 @@ export default function UsersPage() {
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", birth_date: "", city: "", state: "" });
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", age: "", gender: "", city: "", state: "" });
 
   const [currentAdminId, setCurrentAdminId] = useState<string | null>(null);
 
@@ -159,6 +159,12 @@ export default function UsersPage() {
       return;
     }
     setCreating(true);
+    const ageToBirthDate = (age: string) => {
+      if (!age) return undefined;
+      const d = new Date();
+      d.setFullYear(d.getFullYear() - parseInt(age));
+      return d.toISOString().split("T")[0];
+    };
     const { error } = await supabase.auth.signUp({
       email: newUser.email,
       password: newUser.password,
@@ -167,7 +173,8 @@ export default function UsersPage() {
           full_name: newUser.name,
           city: newUser.city,
           state: newUser.state,
-          birth_date: newUser.birth_date,
+          birth_date: ageToBirthDate(newUser.age),
+          gender: newUser.gender || undefined,
         },
         emailRedirectTo: `${window.location.origin}/auth/confirm`,
       },
@@ -179,7 +186,7 @@ export default function UsersPage() {
     }
     toast.success(`Usuário criado! E-mail de confirmação enviado para ${newUser.email}`, { duration: 6000 });
     setCreateDialogOpen(false);
-    setNewUser({ name: "", email: "", password: "", birth_date: "", city: "", state: "" });
+    setNewUser({ name: "", email: "", password: "", age: "", gender: "", city: "", state: "" });
     await loadUsers();
     setCreating(false);
   }
@@ -389,7 +396,6 @@ export default function UsersPage() {
                 <h4 className="text-sm font-semibold text-muted-foreground mb-3">Dados pessoais</h4>
                 {[
                   { label: "Telefone", value: selectedUser.phone || "Não informado" },
-                  { label: "Data de nasc.", value: selectedUser.birth_date ? new Date(selectedUser.birth_date).toLocaleDateString("pt-BR") : "Não informado" },
                   { label: "Idade", value: selectedUser.age ? `${selectedUser.age} anos` : "Não informado" },
                   { label: "Sexo", value: selectedUser.gender_label || "Não informado" },
                   { label: "Cidade", value: selectedUser.city || "Não informado" },
