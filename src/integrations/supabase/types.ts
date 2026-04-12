@@ -1387,6 +1387,110 @@ export type Database = {
       }
     }
     Views: {
+      admin_user_stats: {
+        Row: {
+          active_this_week: number | null
+          active_users: number | null
+          female_count: number | null
+          gender_unknown: number | null
+          male_count: number | null
+          new_this_month: number | null
+          new_this_week: number | null
+          online_today: number | null
+          total_users: number | null
+        }
+        Relationships: []
+      }
+      admin_users_view: {
+        Row: {
+          activity_status: string | null
+          age: number | null
+          age_group: string | null
+          avatar_url: string | null
+          badges_earned: number | null
+          bio: string | null
+          birth_date: string | null
+          checkins: number | null
+          city: string | null
+          country: string | null
+          coupons: number | null
+          created_at: string | null
+          email: string | null
+          gender: string | null
+          gender_label: string | null
+          id: string | null
+          is_active: boolean | null
+          last_seen_at: string | null
+          memories: number | null
+          name: string | null
+          phone: string | null
+          reactions: number | null
+          reviews_count: number | null
+          routes: number | null
+          saved_places: number | null
+          state: string | null
+          travel_since: string | null
+        }
+        Insert: {
+          activity_status?: never
+          age?: never
+          age_group?: never
+          avatar_url?: string | null
+          badges_earned?: never
+          bio?: string | null
+          birth_date?: string | null
+          checkins?: never
+          city?: string | null
+          country?: string | null
+          coupons?: never
+          created_at?: string | null
+          email?: string | null
+          gender?: string | null
+          gender_label?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_seen_at?: string | null
+          memories?: never
+          name?: string | null
+          phone?: string | null
+          reactions?: never
+          reviews_count?: never
+          routes?: never
+          saved_places?: never
+          state?: string | null
+          travel_since?: string | null
+        }
+        Update: {
+          activity_status?: never
+          age?: never
+          age_group?: never
+          avatar_url?: string | null
+          badges_earned?: never
+          bio?: string | null
+          birth_date?: string | null
+          checkins?: never
+          city?: string | null
+          country?: string | null
+          coupons?: never
+          created_at?: string | null
+          email?: string | null
+          gender?: string | null
+          gender_label?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_seen_at?: string | null
+          memories?: never
+          name?: string | null
+          phone?: string | null
+          reactions?: never
+          reviews_count?: never
+          routes?: never
+          saved_places?: never
+          state?: string | null
+          travel_since?: string | null
+        }
+        Relationships: []
+      }
       establishment_route_insights: {
         Row: {
           category: string | null
@@ -1434,6 +1538,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_delete_user: { Args: { p_user_id: string }; Returns: Json }
       decrement_reaction: {
         Args: { p_emoji: string; p_post_id: string }
         Returns: undefined
@@ -1442,6 +1547,7 @@ export type Database = {
         Args: { p_emoji: string; p_post_id: string }
         Returns: undefined
       }
+      is_admin: { Args: never; Returns: boolean }
       upsert_photo_reaction: {
         Args: { p_emoji: string; p_photo_id: string; p_user_id: string }
         Returns: Json

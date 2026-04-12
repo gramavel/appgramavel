@@ -78,6 +78,7 @@ function CouponItem({ coupon, used, onUse }: { coupon: Coupon; used?: boolean; o
 }
 
 export default function UserCoupons() {
+  const navigate = useNavigate();
   const { savedCoupons, usedCoupons, useCoupon, isCouponUsed } = useCoupons();
   const [confirmCoupon, setConfirmCoupon] = useState<Coupon | null>(null);
 
