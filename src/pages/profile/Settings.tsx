@@ -143,7 +143,8 @@ export default function Settings() {
           state: form.state || null,
           phone: form.phone.trim() || null,
           bio: form.bio.trim() || null,
-          birth_date: form.birth_date || null,
+          birth_date: form.age ? ageToBirthDate(form.age) : null,
+          gender: form.gender || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
@@ -261,10 +262,30 @@ export default function Settings() {
           <p className="text-xs text-muted-foreground text-right">{form.bio.length}/100</p>
         </div>
 
-        {/* Birth date */}
+        {/* Age */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Data de nascimento</Label>
-          <Input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)} disabled={!isEditing} className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`} />
+          <Label className="text-sm font-medium">Idade</Label>
+          {isEditing ? (
+            <AgeScrollPicker value={form.age} onChange={(age) => setForm(f => ({ ...f, age }))} />
+          ) : (
+            <Input value={form.age ? `${form.age} anos` : ""} disabled className="h-10 text-sm opacity-70 cursor-default" />
+          )}
+        </div>
+
+        {/* Gender */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Sexo</Label>
+          <Select value={form.gender} onValueChange={(v) => set("gender", v)} disabled={!isEditing}>
+            <SelectTrigger className={`h-10 text-sm ${!isEditing ? "opacity-70 cursor-default" : ""}`}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="male">Masculino</SelectItem>
+              <SelectItem value="female">Feminino</SelectItem>
+              <SelectItem value="other">Outro</SelectItem>
+              <SelectItem value="prefer_not_to_say">Prefiro não informar</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* City & State */}
