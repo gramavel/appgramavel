@@ -23,7 +23,7 @@ export default function FeedPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Feed Analytics</h2>
+      <h2 className="text-2xl font-bold">Análise do Feed</h2>
 
       <div className="grid grid-cols-4 gap-4">
         <StatCard title="Impressões" value={kpis.impressions} icon={Eye} />
@@ -42,7 +42,7 @@ export default function FeedPage() {
                 <XAxis dataKey="date" tickFormatter={v => v.slice(5)} />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="impressions" stroke="hsl(233, 100%, 69%)" strokeWidth={2} />
+                <Line type="monotone" dataKey="impressions" stroke="hsl(var(--primary))" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -56,10 +56,10 @@ export default function FeedPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Post ID</TableHead>
+                  <TableHead>ID do Post</TableHead>
                   <TableHead>Impressões</TableHead>
                   <TableHead>Cliques</TableHead>
-                  <TableHead>CTR</TableHead>
+                  <TableHead>Taxa de Clique (CTR)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -84,10 +84,10 @@ export default function FeedPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Post ID</TableHead>
+                  <TableHead>ID do Post</TableHead>
                   <TableHead>Impressões</TableHead>
                   <TableHead>Cliques</TableHead>
-                  <TableHead>CTR</TableHead>
+                  <TableHead>Taxa de Clique (CTR)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

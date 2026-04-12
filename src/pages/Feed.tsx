@@ -59,7 +59,7 @@ export default function Feed() {
         <div className="space-y-4">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
+              <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden">
                 <div className="flex items-center gap-4 p-4">
                   <Skeleton className="w-12 h-12 rounded-full" />
                   <div className="space-y-2 flex-1">

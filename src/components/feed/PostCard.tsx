@@ -69,7 +69,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
       {/* Header — avatar + name/rating only, no bookmark here */}
       <div className="flex items-center p-4">
         <div

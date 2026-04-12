@@ -198,11 +198,13 @@ export default function Settings() {
         </div>
 
         {/* Edit / Cancel+Save buttons */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">Dados pessoais</h2>
+        <div className="flex items-center justify-between bg-secondary/30 p-4 rounded-2xl">
+          <div className="flex items-center gap-2">
+            <Pencil className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground">Dados pessoais</h2>
+          </div>
           {!isEditing ? (
-            <Button variant="outline" size="sm" className="rounded-full gap-1.5 h-8 text-xs" onClick={() => setIsEditing(true)}>
-              <Pencil className="w-3 h-3" />
+            <Button variant="outline" size="sm" className="rounded-full gap-1.5 h-8 text-xs bg-background" onClick={() => setIsEditing(true)}>
               Editar
             </Button>
           ) : (
@@ -211,7 +213,6 @@ export default function Settings() {
                 Cancelar
               </Button>
               <Button size="sm" className="rounded-full h-8 text-xs gap-1" onClick={handleSave} disabled={saving}>
-                <Save className="w-3 h-3" />
                 {saving ? "Salvando..." : "Salvar"}
               </Button>
             </div>
@@ -277,7 +278,7 @@ export default function Settings() {
         </div>
 
         {/* Notifications */}
-        <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border shadow-card">
+        <div className="flex items-center justify-between p-4 bg-card rounded-2xl border border-border shadow-card">
           <div className="flex items-center gap-4">
             <Bell className="w-5 h-5 text-muted-foreground" />
             <div>

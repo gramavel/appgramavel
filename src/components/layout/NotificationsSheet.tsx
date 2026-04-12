@@ -128,12 +128,12 @@ export function NotificationsSheet({ open, onOpenChange }: NotificationsSheetPro
               return (
                 <div
                   key={notification.id}
-                  className={`flex items-start gap-4 px-4 py-4 border-b border-border/30 transition-colors cursor-pointer hover:bg-muted/50 ${
-                    !notification.read ? "bg-primary/5" : ""
+                  className={`flex items-start gap-4 px-4 py-4 transition-all cursor-pointer hover:bg-muted/50 border-l-4 ${
+                    !notification.read ? "bg-primary/5 border-l-primary" : "border-l-transparent"
                   }`}
                   onClick={() => handleClick(notification)}
                 >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary/10">
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 bg-primary/10 shadow-sm shadow-primary/5">
                     <Icon className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
