@@ -136,6 +136,7 @@ function RouteCard({ route }: { route: UserRoute }) {
 }
 
 export default function RoutesPage() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState("in_progress");
 
   return (
