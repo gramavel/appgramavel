@@ -41,6 +41,7 @@ export default function Feed() {
         }));
         setPosts(mapped);
       }
+      // If no data, posts stays empty — show empty state, never use MOCK_POSTS
       setLoading(false);
     });
   }, []);
@@ -50,34 +51,26 @@ export default function Feed() {
     : posts;
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalHeader title="Feed" />
+    <div className="min-h-screen bg-background pt-14">
+      <GlobalHeader />
       <CategoryBar selected={selectedCategory} onSelect={setSelectedCategory} />
 
-      <main className="max-w-2xl mx-auto pb-24 pt-[104px]">
-        {/* Feed Header */}
-        <div className="px-4 pt-6 pb-4">
-          <h1 className="text-2xl font-black tracking-tight text-foreground">
-            Para <span className="text-primary">Você</span>
-          </h1>
-          <p className="text-sm text-muted-foreground">As melhores experiências em Gramado agora.</p>
-        </div>
-
-        <div className="space-y-6 px-4">
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-[88px]">
+        <div className="space-y-4">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-card rounded-3xl border border-border/50 overflow-hidden p-4 space-y-4">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="w-10 h-10 rounded-full" />
+              <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden">
+                <div className="flex items-center gap-4 p-4">
+                  <Skeleton className="w-12 h-12 rounded-full" />
                   <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-32 rounded-full" />
-                    <Skeleton className="h-3 w-20 rounded-full" />
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-20" />
                   </div>
                 </div>
-                <Skeleton className="w-full aspect-square rounded-2xl" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full rounded-full" />
-                  <Skeleton className="h-4 w-2/3 rounded-full" />
+                <Skeleton className="w-full aspect-[4/5]" />
+                <div className="p-4 space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
                 </div>
               </div>
             ))
@@ -87,12 +80,12 @@ export default function Feed() {
                 <PostCard key={post.id} post={post} isFirst={index === 0} />
               ))}
               {filteredPosts.length === 0 && (
-                <div className="py-20 text-center bg-card rounded-3xl border border-dashed border-border/60">
-                  <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-muted-foreground/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                <div className="py-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                   </div>
-                  <h3 className="text-lg font-black">Nenhum post encontrado</h3>
-                  <p className="text-sm text-muted-foreground mt-2 px-12 leading-relaxed">Tente selecionar outra categoria para ver mais conteúdos.</p>
+                  <p className="text-sm font-semibold text-foreground">Nenhum post encontrado</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tente outra categoria</p>
                 </div>
               )}
             </>
@@ -101,13 +94,11 @@ export default function Feed() {
       </main>
 
       {showCheckin && (
-        <div className="fixed bottom-24 left-4 right-4 z-40">
-          <ProximityCheckinCard
-            name="Bella Gramado Ristorante"
-            distance={150}
-            onCheckin={() => setShowCheckin(false)}
-          />
-        </div>
+        <ProximityCheckinCard
+          name="Bella Gramado Ristorante"
+          distance={150}
+          onCheckin={() => setShowCheckin(false)}
+        />
       )}
 
       <BottomNav />
