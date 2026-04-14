@@ -4,31 +4,76 @@ import { supabase } from "@/integrations/supabase/client";
 import { getCurrentUserId } from "@/lib/auth";
 
 type State = {
-  reactions: Record<string, string[]>;
+  userReactions: Record<string, string>; // postId -> emoji
+  postReactionCounts: Record<string, Array<{ emoji: string, count: number }>>;
   loaded: boolean;
 };
 
 type Action =
-  | { type: "INIT"; reactions: Record<string, string[]> }
-  | { type: "SET_REACTION"; postId: string; emoji: string }
-  | { type: "REMOVE_REACTION"; postId: string };
+  | { type: "INIT"; userReactions: Record<string, string> }
+  | { type: "SET_COUNTS"; postId: string; counts: Array<{ emoji: string, count: number }> }
+  | { type: "OPTIMISTIC_REACT"; postId: string; emoji: string; previousEmoji: string | null }
+  | { type: "REVERT_REACT"; postId: string; previousEmoji: string | null; previousCounts: Array<{ emoji: string, count: number }> };
 
 function reactionsReducer(state: State, action: Action): State {
   switch (action.type) {
     case "INIT":
-      return { reactions: action.reactions, loaded: true };
-    case "SET_REACTION": {
+      return { ...state, userReactions: action.userReactions, loaded: true };
+    case "SET_COUNTS":
       return {
         ...state,
-        reactions: {
-          ...state.reactions,
-          [action.postId]: [action.emoji],
-        },
+        postReactionCounts: { ...state.postReactionCounts, [action.postId]: action.counts }
+      };
+    case "OPTIMISTIC_REACT": {
+      const { postId, emoji, previousEmoji } = action;
+      const isRemoving = previousEmoji === emoji;
+      
+      const newCounts = [...(state.postReactionCounts[postId] || [])];
+      
+      // Decrement old
+      if (previousEmoji) {
+        const oldIdx = newCounts.findIndex(r => r.emoji === previousEmoji);
+        if (oldIdx > -1) {
+          newCounts[oldIdx] = { ...newCounts[oldIdx], count: Math.max(0, newCounts[oldIdx].count - 1) };
+        }
+      }
+      
+      // Increment new
+      if (!isRemoving) {
+        const newIdx = newCounts.findIndex(r => r.emoji === emoji);
+        if (newIdx > -1) {
+          newCounts[newIdx] = { ...newCounts[newIdx], count: newCounts[newIdx].count + 1 };
+        } else {
+          newCounts.push({ emoji, count: 1 });
+        }
+      }
+      
+      const filteredCounts = newCounts.filter(r => r.count > 0);
+      const newUserReactions = { ...state.userReactions };
+      if (isRemoving) {
+        delete newUserReactions[postId];
+      } else {
+        newUserReactions[postId] = emoji;
+      }
+
+      return {
+        ...state,
+        userReactions: newUserReactions,
+        postReactionCounts: { ...state.postReactionCounts, [postId]: filteredCounts }
       };
     }
-    case "REMOVE_REACTION": {
-      const { [action.postId]: _, ...rest } = state.reactions;
-      return { ...state, reactions: rest };
+    case "REVERT_REACT": {
+      const newUserReactions = { ...state.userReactions };
+      if (action.previousEmoji) {
+        newUserReactions[action.postId] = action.previousEmoji;
+      } else {
+        delete newUserReactions[action.postId];
+      }
+      return {
+        ...state,
+        userReactions: newUserReactions,
+        postReactionCounts: { ...state.postReactionCounts, [action.postId]: action.previousCounts }
+      };
     }
     default:
       return state;
@@ -36,15 +81,18 @@ function reactionsReducer(state: State, action: Action): State {
 }
 
 interface ReactionsContextType {
-  setReaction: (postId: string, emoji: string) => void;
+  setReaction: (postId: string, emoji: string) => Promise<void>;
   getReaction: (postId: string) => string | null;
+  getCounts: (postId: string) => Array<{ emoji: string, count: number }>;
+  setInitialCounts: (postId: string, counts: Array<{ emoji: string, count: number }>) => void;
 }
 
 const ReactionsContext = createContext<ReactionsContextType | null>(null);
 
 export function ReactionsProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reactionsReducer, {
-    reactions: {},
+    userReactions: {},
+    postReactionCounts: {},
     loaded: false,
   });
 
@@ -53,33 +101,34 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function load() {
       const { data } = await getUserReactions();
-      const reactions: Record<string, string[]> = {};
+      const reactions: Record<string, string> = {};
       data?.forEach((r) => {
-        reactions[r.post_id] = [r.emoji];
+        reactions[r.post_id] = r.emoji;
       });
-      dispatch({ type: "INIT", reactions });
+      dispatch({ type: "INIT", userReactions: reactions });
     }
     load();
   }, []);
 
-  const getReaction = useCallback(
-    (postId: string): string | null => state.reactions[postId]?.[0] ?? null,
-    [state.reactions]
-  );
+  const getReaction = useCallback((postId: string) => state.userReactions[postId] ?? null, [state.userReactions]);
+  const getCounts = useCallback((postId: string) => state.postReactionCounts[postId] ?? [], [state.postReactionCounts]);
+  
+  const setInitialCounts = useCallback((postId: string, counts: Array<{ emoji: string, count: number }>) => {
+    if (!state.postReactionCounts[postId]) {
+      dispatch({ type: "SET_COUNTS", postId, counts });
+    }
+  }, [state.postReactionCounts]);
 
   const setReaction = useCallback(
     async (postId: string, emoji: string) => {
       if (pendingRef.current.has(postId)) return;
       pendingRef.current.add(postId);
 
-      const previousEmoji = state.reactions[postId]?.[0] ?? null;
+      const previousEmoji = state.userReactions[postId] ?? null;
+      const previousCounts = state.postReactionCounts[postId] ?? [];
 
-      // Optimistic update — immediate UI feedback
-      if (previousEmoji === emoji) {
-        dispatch({ type: "REMOVE_REACTION", postId });
-      } else {
-        dispatch({ type: "SET_REACTION", postId, emoji });
-      }
+      // Optimistic update
+      dispatch({ type: "OPTIMISTIC_REACT", postId, emoji, previousEmoji });
 
       try {
         const userId = await getCurrentUserId();
@@ -89,32 +138,27 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
           p_emoji: emoji,
         });
 
-        if (error) {
-          // Revert optimistic update
-          console.error("Reaction failed, reverting:", error);
-          if (previousEmoji) {
-            dispatch({ type: "SET_REACTION", postId, emoji: previousEmoji });
-          } else {
-            dispatch({ type: "REMOVE_REACTION", postId });
-          }
-          return;
-        }
+        if (error) throw error;
 
-        // If action was 'removed', ensure context reflects removal
         if ((data as any)?.action === "removed") {
-          dispatch({ type: "REMOVE_REACTION", postId });
+          // Double check if we need to sync further
         }
+      } catch (err) {
+        console.error("Reaction failed, reverting:", err);
+        dispatch({ type: "REVERT_REACT", postId, previousEmoji, previousCounts });
       } finally {
         pendingRef.current.delete(postId);
       }
     },
-    [state.reactions]
+    [state.userReactions, state.postReactionCounts]
   );
 
   const value = useMemo(() => ({
     setReaction,
     getReaction,
-  }), [setReaction, getReaction]);
+    getCounts,
+    setInitialCounts
+  }), [setReaction, getReaction, getCounts, setInitialCounts]);
 
   return (
     <ReactionsContext.Provider value={value}>

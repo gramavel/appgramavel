@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus, Share } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +23,21 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   const { getDistance } = useLocation();
 
   const { isPostSaved, toggleSavedPost } = useFavorites();
-  const { getReaction, setReaction } = useReactions();
+  const { getReaction, setReaction, getCounts, setInitialCounts } = useReactions();
 
   const isSaved = isPostSaved(post.id);
   const userReaction = getReaction(post.id);
+  
+  // Sync initial counts from post data to context
+  useEffect(() => {
+    if (post.reactions) {
+      setInitialCounts(post.id, post.reactions as Array<{ emoji: string, count: number }>);
+    }
+  }, [post.id, post.reactions, setInitialCounts]);
+
+  const currentCounts = getCounts(post.id);
+  const totalReactions = currentCounts.reduce((sum, r) => sum + (r.count ?? 0), 0);
+  const displayReactions = currentCounts.filter(r => (r.count ?? 0) > 0).slice(0, 3);
 
   const rating = (post as any).establishment?.rating ?? post.rating ?? 0;
   const totalReviews = (post as any).establishment?.total_reviews ?? post.total_reviews ?? 0;
@@ -43,9 +54,6 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
     const fallback = est?.distance_km ?? post.distance_km;
     return fallback ? `${Number(fallback).toFixed(1)} km` : null;
   })();
-
-  const totalReactions = (post.reactions ?? []).reduce((sum, r) => sum + (r.count ?? 0), 0);
-  const displayReactions = (post.reactions ?? []).filter(r => (r.count ?? 0) > 0).slice(0, 3);
 
   const isPopular = post.is_popular || (post as any).establishment?.is_popular;
 
@@ -157,14 +165,16 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         >
           {totalReactions > 0 ? (
             <>
-              {displayReactions.map((r) => (
-                <span
-                  key={r.emoji}
-                  className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
-                >
-                  {r.emoji}
-                </span>
-              ))}
+              <div className="flex -space-x-1">
+                {displayReactions.map((r) => (
+                  <span
+                    key={r.emoji}
+                    className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
+                  >
+                    {r.emoji}
+                  </span>
+                ))}
+              </div>
               <span className="text-xs text-foreground/70 ml-0.5">+{totalReactions}</span>
             </>
           ) : (
@@ -229,7 +239,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
             <div className="flex justify-around">
               {CANONICAL_REACTIONS.map((item) => {
                 const isActive = userReaction === item.emoji;
-                const count = (post.reactions ?? []).find((r) => r.emoji === item.emoji)?.count ?? 0;
+                const count = currentCounts.find((r) => r.emoji === item.emoji)?.count ?? 0;
                 return (
                   <button
                     key={item.emoji}

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useMemo, useEffect, useState } from "react";
+import React, { createContext, useContext, useReducer, useMemo, useEffect, useCallback } from "react";
 import { getFavorites, addFavorite, removeFavorite, getSavedPosts, addSavedPost, removeSavedPost } from "@/services/favorites";
 
 type State = { savedPlaces: string[]; savedPosts: string[]; loaded: boolean };
@@ -72,31 +72,38 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     load();
   }, []);
 
+  const toggleSavedPlace = useCallback(async (id: string) => {
+    const wasSaved = savedPlacesSet.has(id);
+    dispatch({ type: "TOGGLE_PLACE", id });
+    const result = wasSaved ? await removeFavorite(id) : await addFavorite(id);
+    if (result.error) {
+      dispatch({ type: "TOGGLE_PLACE", id }); // revert
+      console.error("Failed to sync favorite", result.error);
+    }
+  }, [savedPlacesSet]);
+
+  const toggleSavedPost = useCallback(async (id: string) => {
+    const wasSaved = savedPostsSet.has(id);
+    dispatch({ type: "TOGGLE_POST", id });
+    const result = wasSaved ? await removeSavedPost(id) : await addSavedPost(id);
+    if (result.error) {
+      dispatch({ type: "TOGGLE_POST", id }); // revert
+      console.error("Failed to sync saved post", result.error);
+    }
+  }, [savedPostsSet]);
+
+  const isPlaceSaved = useCallback((id: string) => savedPlacesSet.has(id), [savedPlacesSet]);
+  const isPostSaved = useCallback((id: string) => savedPostsSet.has(id), [savedPostsSet]);
+
   const value = useMemo(() => ({
     savedPlaces: state.savedPlaces,
     savedPosts: state.savedPosts,
     loaded: state.loaded,
-    toggleSavedPlace: async (id: string) => {
-      const wasSaved = savedPlacesSet.has(id);
-      dispatch({ type: "TOGGLE_PLACE", id });
-      const result = wasSaved ? await removeFavorite(id) : await addFavorite(id);
-      if (result.error) {
-        dispatch({ type: "TOGGLE_PLACE", id }); // revert
-        console.error("Failed to sync favorite", result.error);
-      }
-    },
-    toggleSavedPost: async (id: string) => {
-      const wasSaved = savedPostsSet.has(id);
-      dispatch({ type: "TOGGLE_POST", id });
-      const result = wasSaved ? await removeSavedPost(id) : await addSavedPost(id);
-      if (result.error) {
-        dispatch({ type: "TOGGLE_POST", id }); // revert
-        console.error("Failed to sync saved post", result.error);
-      }
-    },
-    isPlaceSaved: (id: string) => savedPlacesSet.has(id),
-    isPostSaved: (id: string) => savedPostsSet.has(id),
-  }), [state, savedPlacesSet, savedPostsSet]);
+    toggleSavedPlace,
+    toggleSavedPost,
+    isPlaceSaved,
+    isPostSaved,
+  }), [state.savedPlaces, state.savedPosts, state.loaded, toggleSavedPlace, toggleSavedPost, isPlaceSaved, isPostSaved]);
 
   return (
     <FavoritesContext.Provider value={value}>

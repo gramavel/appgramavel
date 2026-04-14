@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -49,38 +49,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const profileFetchedRef = useRef<string | null>(null);
 
   const loadProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    if (profileFetchedRef.current === userId && profile) return;
+    
+    const { data, error } = await supabase
       .from("user_profiles")
       .select("*")
       .eq("id", userId)
       .single();
-    if (data) setProfile(data as UserProfile);
-  }, []);
+    
+    if (data) {
+      setProfile(data as UserProfile);
+      profileFetchedRef.current = userId;
+    }
+  }, [profile]);
 
   const refreshProfile = useCallback(async () => {
-    if (user?.id) await loadProfile(user.id);
+    if (user?.id) {
+      profileFetchedRef.current = null; // force reload
+      await loadProfile(user.id);
+    }
   }, [user?.id, loadProfile]);
 
   useEffect(() => {
+    // 1. Initial Session Check
+    const initSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        await loadProfile(currentUser.id);
+      }
+      setLoading(false);
+    };
+
+    initSession();
+
+    // 2. Auth State Listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          // defer to avoid deadlock
-          setTimeout(() => loadProfile(session.user.id), 0);
-        } else {
+      async (event, session) => {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        
+        if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          if (currentUser) await loadProfile(currentUser.id);
+        } else if (event === 'SIGNED_OUT') {
           setProfile(null);
+          profileFetchedRef.current = null;
         }
       }
     );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) loadProfile(session.user.id);
-      setLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, [loadProfile]);
@@ -101,7 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (error) throw error;
 
-    // Update profile with extra fields the trigger doesn't set
     if (authData.user) {
       await supabase.from("user_profiles").update({
         birth_date: data.birthDate || null,
@@ -116,6 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
+    profileFetchedRef.current = null;
   };
 
   const signInWithGoogle = async () => {
@@ -126,8 +146,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   };
 
+  const value = useMemo(() => ({
+    user,
+    profile,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    signInWithGoogle,
+    refreshProfile
+  }), [user, profile, loading, refreshProfile]);
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, signInWithGoogle, refreshProfile }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
