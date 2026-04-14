@@ -27,39 +27,55 @@ export function GlobalHeader({ showBack, title = "Gramável", onBack }: GlobalHe
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Left */}
-          <div className="w-24 flex items-center">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/40 transition-all duration-300">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between h-16">
+          {/* Left: Back or Location */}
+          <div className="flex-1 flex items-center">
             {showBack ? (
               <button
                 onClick={() => onBack ? onBack() : navigate(-1)}
-                className="p-3 -ml-2 rounded-full hover:bg-secondary transition-colors active:scale-95 min-w-[48px] min-h-[48px] flex items-center justify-center"
+                className="p-2 -ml-2 rounded-full hover:bg-secondary/80 transition-all active:scale-90 flex items-center justify-center group"
                 aria-label="Voltar"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
               </button>
             ) : (
-              <Badge variant="secondary" className="gap-1 px-2 py-0.5 text-xs font-medium">
-                <MapPin className="w-3 h-3" />
-                {city}
-              </Badge>
+              <button 
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50 hover:bg-secondary transition-colors active:scale-95 border border-border/20 shadow-sm"
+                onClick={() => navigate("/map")}
+              >
+                <MapPin className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[11px] font-bold text-foreground tracking-tight">{city}</span>
+              </button>
             )}
           </div>
 
-          {/* Center */}
-          <img src={logoSrc} alt="Gramável" className="h-[18px]" width={120} height={18} />
+          {/* Center: Logo or Title */}
+          <div className="flex-[2] flex justify-center">
+            {title && title !== "Gramável" ? (
+              <h1 className="text-sm font-bold text-foreground tracking-tight truncate max-w-[150px]">
+                {title}
+              </h1>
+            ) : (
+              <img 
+                src={logoSrc} 
+                alt="Gramável" 
+                className="h-5 w-auto object-contain active:scale-95 transition-transform cursor-pointer" 
+                onClick={() => navigate("/")}
+              />
+            )}
+          </div>
 
-          {/* Right */}
-          <div className="w-24 flex justify-end">
+          {/* Right: Notifications */}
+          <div className="flex-1 flex justify-end">
             <button
               onClick={() => setNotificationsOpen(true)}
-              className="relative p-3 rounded-full hover:bg-secondary transition-colors active:scale-95 min-w-[48px] min-h-[48px] flex items-center justify-center"
+              className="relative p-2 rounded-full hover:bg-secondary/80 transition-all active:scale-90 flex items-center justify-center group"
               aria-label="Notificações"
             >
-              <Bell className="w-5 h-5 text-muted-foreground" />
+              <Bell className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
               {unreadCount > 0 && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-background animate-pulse shadow-sm" />
               )}
             </button>
           </div>

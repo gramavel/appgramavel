@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus, Share } from "lucide-react";
+import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus, Share, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -10,6 +10,7 @@ import { useLocation } from "@/contexts/LocationContext";
 import { CANONICAL_REACTIONS } from "@/lib/constants";
 import { toast } from "sonner";
 import type { Post } from "@/data/mock";
+import { cn } from "@/lib/utils";
 
 interface PostCardProps {
   post: Post;
@@ -51,8 +52,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
 
   const handleReact = (emoji: string) => {
     setReaction(post.id, emoji);
-    // Small delay to show animation before closing
-    setTimeout(() => setShowReactions(false), 100);
+    setTimeout(() => setShowReactions(false), 150);
   };
 
   const handleShare = async () => {
@@ -69,131 +69,124 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   };
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
-      {/* Header — avatar + name/rating only, no bookmark here */}
-      <div className="flex items-center p-4">
+    <div className="bg-card rounded-3xl border border-border/50 shadow-sm overflow-hidden transition-all hover:shadow-md">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
         <div
-          className="flex items-center gap-4 cursor-pointer flex-1 min-w-0"
+          className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => navigate(`/estabelecimento/${post.establishment_slug}`)}
         >
-          <img
-            src={post.establishment_avatar || post.image || "/placeholder.svg"}
-            alt={post.establishment_name}
-            className="w-12 h-12 rounded-full object-cover border-2 border-border shrink-0"
-            width={48}
-            height={48}
-          />
+          <div className="relative">
+            <img
+              src={post.establishment_avatar || post.image || "/placeholder.svg"}
+              alt={post.establishment_name}
+              className="w-10 h-10 rounded-full object-cover border border-border shrink-0"
+            />
+            {isPopular && (
+              <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground p-0.5 rounded-full border border-background">
+                <TrendingUp className="w-2.5 h-2.5" />
+              </div>
+            )}
+          </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold leading-tight truncate">{post.establishment_name}</h3>
+            <h3 className="text-sm font-black leading-tight truncate text-foreground">
+              {post.establishment_name}
+            </h3>
             <div className="flex items-center gap-2 mt-0.5">
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary">
                 {post.establishment_category}
-              </Badge>
-              {hasReviews ? (
+              </span>
+              {hasReviews && (
                 <span className="flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-rating text-rating" />
-                  <span className="text-xs text-muted-foreground">
-                    {rating} ({totalReviews})
+                  <Star className="w-2.5 h-2.5 fill-rating text-rating" />
+                  <span className="text-[10px] font-bold text-muted-foreground">
+                    {rating}
                   </span>
                 </span>
-              ) : (
-                <span className="text-xs text-muted-foreground/60">Novo</span>
               )}
             </div>
           </div>
         </div>
+        <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+          <MoreHorizontal className="w-5 h-5" />
+        </button>
       </div>
 
-      <Separator />
-
-      {/* Tags row */}
-      <div className="px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {isPopular && (
-            <Badge variant="default" className="text-xs px-2.5 py-0.5 gap-1">
-              <TrendingUp className="h-3 w-3" />
-              Popular esta semana
-            </Badge>
-          )}
-        </div>
-        {distanceLabel && (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3" />
-            {distanceLabel}
-          </span>
-        )}
-      </div>
-
-      {/* Image */}
-      <div className="w-full aspect-[4/5] overflow-hidden">
+      {/* Image Container */}
+      <div 
+        className="relative w-full aspect-square overflow-hidden cursor-pointer group"
+        onClick={() => navigate(`/estabelecimento/${post.establishment_slug}`)}
+      >
         <img
           src={post.image}
           alt={post.establishment_name}
-          className="w-full h-full object-cover"
-          width={800}
-          height={1000}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           loading={isFirst ? "eager" : "lazy"}
-          {...(isFirst ? { fetchPriority: "high" as const } : {})}
         />
+        
+        {/* Distance Badge Overlay */}
+        {distanceLabel && (
+          <div className="absolute top-4 left-4">
+            <Badge variant="secondary" className="bg-black/40 backdrop-blur-md text-white border-white/20 text-[10px] font-black px-2 py-1 gap-1">
+              <MapPin className="h-3 w-3" />
+              {distanceLabel}
+            </Badge>
+          </div>
+        )}
       </div>
 
-      {/* Caption */}
-      {post.caption && (
-        <div className="p-4 pb-2 space-y-2">
-          <p className="text-sm">
-            <span className="font-semibold">{post.establishment_name}</span>
-            {" · "}
+      {/* Caption & Actions */}
+      <div className="p-4 space-y-4">
+        {post.caption && (
+          <p className="text-sm leading-relaxed">
+            <span className="font-black text-foreground mr-1.5">{post.establishment_name}</span>
             <span className="text-muted-foreground">{post.caption}</span>
           </p>
-        </div>
-      )}
+        )}
 
-      {/* Actions row: reactions left, bookmark + share right */}
-      <div className="flex items-center justify-between px-4 pb-4 pt-1">
-        <button
-          className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-all active:scale-95"
-          onClick={() => setShowReactions(true)}
-          aria-label="Reagir ao post"
-        >
-          {totalReactions > 0 ? (
-            <>
-              {displayReactions.map((r) => (
-                <span
-                  key={r.emoji}
-                  className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
-                >
-                  {r.emoji}
-                </span>
-              ))}
-              <span className="text-xs text-foreground/70 ml-0.5">+{totalReactions}</span>
-            </>
-          ) : (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <SmilePlus className="w-3.5 h-3.5" />
-              Reagir
-            </span>
-          )}
-        </button>
-
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between pt-1">
           <button
-            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
-            onClick={handleShare}
-            aria-label="Compartilhar"
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all active:scale-90",
+              totalReactions > 0 ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+            )}
+            onClick={() => setShowReactions(true)}
           >
-            <Share className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
-            onClick={() => isSaved ? toggleSavedPost(post.id) : setShowSave(true)}
-            aria-label="Salvar lugar"
-          >
-            {isSaved ? (
-              <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
+            {totalReactions > 0 ? (
+              <>
+                <div className="flex -space-x-1">
+                  {displayReactions.map((r) => (
+                    <span key={r.emoji} className="text-sm">{r.emoji}</span>
+                  ))}
+                </div>
+                <span className="text-xs font-black">+{totalReactions}</span>
+              </>
             ) : (
-              <Bookmark className="w-5 h-5" />
+              <>
+                <SmilePlus className="w-4 h-4" />
+                <span className="text-xs font-black">Reagir</span>
+              </>
             )}
           </button>
+
+          <div className="flex items-center gap-1">
+            <button
+              className="p-2.5 hover:bg-secondary rounded-full transition-all active:scale-90"
+              onClick={handleShare}
+            >
+              <Share className="w-5 h-5 text-foreground" />
+            </button>
+            <button
+              className="p-2.5 hover:bg-secondary rounded-full transition-all active:scale-90"
+              onClick={() => isSaved ? toggleSavedPost(post.id) : setShowSave(true)}
+            >
+              {isSaved ? (
+                <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
+              ) : (
+                <Bookmark className="w-5 h-5 text-foreground" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -207,26 +200,24 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
       {/* Reaction Modal */}
       {showReactions && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={() => setShowReactions(false)}
-          role="dialog"
-          aria-label="Escolher reação"
         >
           <div
-            className="w-full max-w-md bg-card rounded-t-2xl border-t border-border p-4 pb-24 animate-in slide-in-from-bottom duration-200"
+            className="w-full max-w-md bg-card rounded-3xl border border-border shadow-2xl p-6 pb-12 animate-in slide-in-from-bottom duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-foreground">Reagir</h4>
+            <div className="w-12 h-1.5 bg-border/50 rounded-full mx-auto mb-6" />
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-lg font-black tracking-tight">O que achou?</h4>
               <button
                 onClick={() => setShowReactions(false)}
-                className="p-2 rounded-full hover:bg-secondary"
-                aria-label="Fechar"
+                className="p-2 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
               >
-                <X className="w-4 h-4 text-muted-foreground" />
+                <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex justify-around">
+            <div className="grid grid-cols-4 gap-4">
               {CANONICAL_REACTIONS.map((item) => {
                 const isActive = userReaction === item.emoji;
                 const count = (post.reactions ?? []).find((r) => r.emoji === item.emoji)?.count ?? 0;
@@ -234,14 +225,14 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
                   <button
                     key={item.emoji}
                     onClick={() => handleReact(item.emoji)}
-                    className={`flex flex-col items-center gap-1 p-4 rounded-lg transition-all min-w-[48px] min-h-[48px] active:scale-75 ${
-                      isActive ? "bg-primary/10 scale-110 animate-pulse" : "hover:bg-secondary hover:scale-110"
-                    }`}
-                    aria-label={`Reagir com ${item.label}`}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-3 rounded-2xl transition-all active:scale-75",
+                      isActive ? "bg-primary/10 ring-2 ring-primary/20 scale-110" : "hover:bg-secondary"
+                    )}
                   >
-                    <span className="text-2xl">{item.emoji}</span>
-                    <span className="text-xs font-medium text-foreground">{item.label}</span>
-                    <span className="text-xs text-muted-foreground">{count}</span>
+                    <span className="text-3xl animate-in zoom-in duration-300">{item.emoji}</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{item.label}</span>
+                    {count > 0 && <span className="text-[10px] font-bold text-primary">{count}</span>}
                   </button>
                 );
               })}
