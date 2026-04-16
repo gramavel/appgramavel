@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SectionTitle } from "@/components/ui/SectionTitle";
 import { ChevronRight, Clock, MapPin, Star, Plus, X, Search, MoreVertical, Trash2, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
@@ -118,7 +119,7 @@ export default function Roteiros() {
 
         {/* SECTION 1: Roteiros Sugeridos */}
         <div className="space-y-3">
-          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase">Roteiros sugeridos</p>
+          <SectionTitle>Roteiros sugeridos</SectionTitle>
 
           {/* Featured Route */}
           {filteredSuggested.length > 0 && (
@@ -188,7 +189,7 @@ export default function Roteiros() {
 
         {/* SECTION 2: Meus Roteiros */}
         <div className="space-y-3">
-          <p className="text-[11px] font-bold tracking-widest text-muted-foreground uppercase">Meus roteiros</p>
+          <SectionTitle>Meus roteiros</SectionTitle>
 
           {filteredUser.length > 0 ? (
             <div className="space-y-2">

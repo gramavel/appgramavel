@@ -394,7 +394,7 @@ export default function EstablishmentPage() {
         open={showSave}
         onOpenChange={setShowSave}
         itemName={est.name}
-        onSaved={() => toggleSavedPlace(est.id)}
+        establishmentId={est.id}
       />
 
       <ImageLightbox

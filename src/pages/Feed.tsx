@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CategoryBar } from "@/components/layout/CategoryBar";
@@ -6,13 +6,33 @@ import { PostCard } from "@/components/feed/PostCard";
 import { ProximityCheckinCard } from "@/components/feed/ProximityCheckinCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPosts } from "@/services/posts";
+import { useLocation } from "@/contexts/LocationContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { createCheckIn } from "@/services/checkIns";
+import { toast } from "sonner";
 import type { Post } from "@/data/mock";
+
+function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 export default function Feed() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showCheckin, setShowCheckin] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dismissedCheckin, setDismissedCheckin] = useState<string | null>(null);
+  const [routeEstablishments, setRouteEstablishments] = useState<any[]>([]);
+  const { coords } = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     getPosts().then(({ data }) => {
@@ -41,10 +61,62 @@ export default function Feed() {
         }));
         setPosts(mapped);
       }
-      // If no data, posts stays empty — show empty state, never use MOCK_POSTS
       setLoading(false);
     });
   }, []);
+
+  // Load establishments from user's active routes
+  useEffect(() => {
+    if (!user) return;
+    async function loadRouteEstablishments() {
+      const { data: routes } = await supabase
+        .from("user_routes")
+        .select("id")
+        .eq("user_id", user!.id)
+        .in("status", ["saved", "in_progress"]);
+      if (!routes || routes.length === 0) { setRouteEstablishments([]); return; }
+      const routeIds = routes.map(r => r.id);
+      const { data: stops } = await supabase
+        .from("user_route_stops")
+        .select("establishment_id, visited")
+        .in("user_route_id", routeIds)
+        .eq("visited", false);
+      if (!stops || stops.length === 0) { setRouteEstablishments([]); return; }
+      const estIds = [...new Set(stops.map(s => s.establishment_id))];
+      const { data: ests } = await supabase
+        .from("establishments")
+        .select("id, name, latitude, longitude, slug")
+        .in("id", estIds);
+      setRouteEstablishments(ests ?? []);
+    }
+    loadRouteEstablishments();
+  }, [user]);
+
+  // Find nearest route establishment within 300m
+  const nearbyCheckin = useMemo(() => {
+    if (!coords || routeEstablishments.length === 0 || dismissedCheckin) return null;
+    let nearest: { est: any; distance: number } | null = null;
+    for (const est of routeEstablishments) {
+      if (!est.latitude || !est.longitude) continue;
+      const d = haversineMeters(coords.lat, coords.lng, Number(est.latitude), Number(est.longitude));
+      if (d <= 300 && (!nearest || d < nearest.distance)) {
+        nearest = { est, distance: d };
+      }
+    }
+    return nearest;
+  }, [coords, routeEstablishments, dismissedCheckin]);
+
+  const handleCheckin = async () => {
+    if (!nearbyCheckin || !user) return;
+    try {
+      await createCheckIn(nearbyCheckin.est.id, coords ? { lat: coords.lat, lng: coords.lng } : undefined, user.id);
+      toast.success(`Check-in em ${nearbyCheckin.est.name} realizado!`);
+      setDismissedCheckin(nearbyCheckin.est.id);
+      window.dispatchEvent(new CustomEvent("checkin"));
+    } catch {
+      toast.error("Erro ao fazer check-in");
+    }
+  };
 
   const filteredPosts = selectedCategory
     ? posts.filter((p) => p.establishment_category === selectedCategory)
@@ -93,11 +165,11 @@ export default function Feed() {
         </div>
       </main>
 
-      {showCheckin && (
+      {nearbyCheckin && (
         <ProximityCheckinCard
-          name="Bella Gramado Ristorante"
-          distance={150}
-          onCheckin={() => setShowCheckin(false)}
+          name={nearbyCheckin.est.name}
+          distance={Math.round(nearbyCheckin.distance)}
+          onCheckin={handleCheckin}
         />
       )}
 

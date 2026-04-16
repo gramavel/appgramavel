@@ -1,241 +1,254 @@
 import { useState, useEffect } from "react";
-import { Heart, Route as RouteIcon, CheckCircle, FolderPlus, Folder as FolderIcon, Plus, ChevronRight } from "lucide-react";
+import { Heart, Route as RouteIcon, FolderPlus, Folder } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { MOCK_ROUTES } from "@/data/mock";
-import { toast } from "sonner";
-import { useFavorites } from "@/contexts/FavoritesContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { MOCK_ROUTES } from "@/data/mock";
+import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserId } from "@/lib/auth";
+import { toast } from "sonner";
+
+interface FavoriteFolder {
+  id: string;
+  name: string;
+}
 
 interface SaveSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   itemName: string;
-  establishmentId?: string; // Important for real persistence
+  establishmentId?: string;
   onSaved?: () => void;
 }
 
 export function SaveSheet({ open, onOpenChange, itemName, establishmentId, onSaved }: SaveSheetProps) {
-  const [view, setView] = useState<"main" | "routes" | "folders" | "new_folder">("main");
+  const [showRouteSelect, setShowRouteSelect] = useState(false);
+  const [showFolderSelect, setShowFolderSelect] = useState(false);
+  const [folders, setFolders] = useState<FavoriteFolder[]>([]);
   const [newFolderName, setNewFolderName] = useState("");
-  const { folders, saveToFolder, isPlaceSaved, toggleSavedPlace } = useFavorites();
+  const [showNewFolder, setShowNewFolder] = useState(false);
 
-  // Reset view when opening
   useEffect(() => {
-    if (open) setView("main");
-  }, [open]);
+    if (showFolderSelect) {
+      loadFolders();
+    }
+  }, [showFolderSelect]);
 
-  const handleQuickSave = async () => {
-    if (establishmentId) {
-      await toggleSavedPlace(establishmentId);
-      onOpenChange(false);
+  async function loadFolders() {
+    try {
+      const userId = await getCurrentUserId();
+      const { data } = await (supabase as any)
+        .from("favorite_folders")
+        .select("id, name")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+      setFolders((data as FavoriteFolder[]) ?? []);
+    } catch {
+      setFolders([]);
+    }
+  }
+
+  async function persistFavorite(folderId: string | null, folderName?: string) {
+    if (!establishmentId) return { ok: true };
+    try {
+      const userId = await getCurrentUserId();
+      const { data, error } = await (supabase as any).rpc("save_favorite_to_folder", {
+        p_user_id: userId,
+        p_establishment_id: establishmentId,
+        p_folder_id: folderId,
+        p_new_folder_name: folderName ?? null,
+      });
+      if (error) throw error;
+      if (data && data.success === false) throw new Error(data.error);
+      // Notify FavoritesContext to reload
+      window.dispatchEvent(new CustomEvent("favorites:changed"));
+      return { ok: true };
+    } catch (e: any) {
+      console.error("save_favorite_to_folder error", e);
+      return { ok: false, error: e?.message ?? "Erro desconhecido" };
+    }
+  }
+
+  const handleSaveWithoutFolder = async () => {
+    const res = await persistFavorite(null);
+    setShowFolderSelect(false);
+    onOpenChange(false);
+    if (res.ok) {
       onSaved?.();
-      toast.success(`"${itemName}" salvo nos seus favoritos!`);
+      toast.success(`"${itemName}" salvo nos favoritos!`);
     } else {
-      onOpenChange(false);
-      onSaved?.();
-      toast.success(`"${itemName}" salvo na sua wishlist!`);
+      toast.error("Erro ao salvar favorito");
     }
   };
 
-  const handleVisited = () => {
+  const handleSaveToFolder = async (folderId: string) => {
+    const folder = folders.find(f => f.id === folderId);
+    const res = await persistFavorite(folderId);
+    setShowFolderSelect(false);
     onOpenChange(false);
-    onSaved?.();
-    toast.success(`"${itemName}" marcado como visitado!`);
-  };
-
-  const handleAddToRoute = (routeId: string) => {
-    const route = MOCK_ROUTES.find((r) => r.id === routeId);
-    onOpenChange(false);
-    onSaved?.();
-    toast.success(`Adicionado ao roteiro "${route?.title}"`);
-  };
-
-  const handleSaveToFolder = async (folderId: string | null, name?: string) => {
-    if (establishmentId) {
-      await saveToFolder(establishmentId, folderId, name);
-      onOpenChange(false);
+    if (res.ok) {
       onSaved?.();
-      toast.success(`"${itemName}" salvo em "${name || "Favoritos"}"`);
+      toast.success(`"${itemName}" salvo em "${folder?.name}"`);
+    } else {
+      toast.error("Erro ao salvar favorito");
     }
   };
 
   const handleCreateFolder = async () => {
-    if (!newFolderName.trim() || !establishmentId) return;
-    await handleSaveToFolder(null, newFolderName);
+    if (!newFolderName.trim()) return;
+    const name = newFolderName.trim();
+    const res = await persistFavorite(null, name);
+    if (!res.ok) {
+      toast.error("Erro ao criar pasta");
+      return;
+    }
     setNewFolderName("");
+    setShowNewFolder(false);
+    setShowFolderSelect(false);
+    onOpenChange(false);
+    onSaved?.();
+    toast.success(`"${itemName}" salvo em "${name}"`);
+  };
+
+  const handleAddToRoute = (routeId: string) => {
+    const route = MOCK_ROUTES.find((r) => r.id === routeId);
+    setShowRouteSelect(false);
+    onSaved?.();
+    toast.success(`Adicionado ao roteiro "${route?.title}"`);
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-[32px] p-0 overflow-hidden border-none bg-background max-h-[85vh]">
-        <div className="w-12 h-1.5 bg-muted/30 rounded-full mx-auto mt-3 mb-1" />
-        
-        <div className="px-6 py-4">
-          {view === "main" && (
-            <div className="space-y-3 pb-8">
-              <div className="mb-6">
-                <h3 className="text-xl font-black text-foreground">Salvar lugar</h3>
-                <p className="text-sm text-muted-foreground truncate">{itemName}</p>
+    <>
+      {/* Main options */}
+      <Sheet open={open && !showRouteSelect && !showFolderSelect} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <div className="space-y-2 pb-4 pt-2">
+            <button
+              onClick={() => { onOpenChange(false); setShowRouteSelect(true); }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <RouteIcon className="w-5 h-5 text-primary" />
               </div>
-
-              <button
-                onClick={() => setView("folders")}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Heart className="w-6 h-6 text-primary" />
-                </div>
-                <div className="text-left flex-1 min-w-0">
-                  <p className="text-base font-bold text-foreground">Favoritos</p>
-                  <p className="text-xs text-muted-foreground truncate">Salvar em uma pasta ou na lista geral</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
-              </button>
-
-              <button
-                onClick={() => setView("routes")}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
-              >
-                <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
-                  <RouteIcon className="w-6 h-6 text-secondary-foreground" />
-                </div>
-                <div className="text-left flex-1 min-w-0">
-                  <p className="text-base font-bold text-foreground">Roteiro</p>
-                  <p className="text-xs text-muted-foreground truncate">Incluir em um roteiro de viagem</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
-              </button>
-
-              <button
-                onClick={handleVisited}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
-              >
-                <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                  <CheckCircle className="w-6 h-6 text-green-500" />
-                </div>
-                <div className="text-left flex-1 min-w-0">
-                  <p className="text-base font-bold text-foreground">Já visitei</p>
-                  <p className="text-xs text-muted-foreground truncate">Marcar como lugar já visitado</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
-              </button>
-            </div>
-          )}
-
-          {view === "folders" && (
-            <div className="space-y-4 pb-8">
-              <div className="flex items-center gap-4 mb-2">
-                <button onClick={() => setView("main")} className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors">
-                  <ChevronRight className="w-6 h-6 rotate-180" />
-                </button>
-                <h3 className="text-xl font-black text-foreground">Minhas Pastas</h3>
+              <div className="text-left flex-1">
+                <p className="text-sm font-semibold text-foreground">Adicionar ao roteiro</p>
+                <p className="text-xs text-muted-foreground">Incluir num roteiro de viagem</p>
               </div>
+            </button>
+            <button
+              onClick={() => { onOpenChange(false); setShowFolderSelect(true); }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Heart className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left flex-1">
+                <p className="text-sm font-semibold text-foreground">Salvar como favorito</p>
+                <p className="text-xs text-muted-foreground">Guardar nos seus lugares favoritos</p>
+              </div>
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
-              <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1 scrollbar-hide">
+      {/* Route selection */}
+      <Sheet open={showRouteSelect} onOpenChange={setShowRouteSelect}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-bold text-foreground">Escolher roteiro</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-2 pb-4">
+            {MOCK_ROUTES.map((route) => {
+              const Icon = route.icon;
+              return (
                 <button
-                  onClick={() => handleSaveToFolder(null, "Favoritos")}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
+                  key={route.id}
+                  onClick={() => handleAddToRoute(route.id)}
+                  className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Heart className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-primary" />
                   </div>
-                  <span className="font-bold text-sm flex-1">Lista Geral</span>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{route.title}</p>
+                    <p className="text-xs text-muted-foreground">{route.stops.length} paradas · {route.duration}</p>
+                  </div>
                 </button>
-                
-                <Separator className="my-1 opacity-50" />
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
 
-                {folders.map(folder => (
-                  <button
-                    key={folder.id}
-                    onClick={() => handleSaveToFolder(folder.id, folder.name)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center shrink-0">
-                      <FolderIcon className="w-5 h-5 text-secondary-foreground" />
-                    </div>
-                    <span className="font-bold text-sm flex-1">{folder.name}</span>
-                  </button>
-                ))}
+      {/* Folder selection */}
+      <Sheet open={showFolderSelect} onOpenChange={(v) => { setShowFolderSelect(v); if (!v) setShowNewFolder(false); }}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] overflow-y-auto">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-lg font-bold text-foreground">Salvar favorito</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-2 pb-4">
+            {/* Save without folder */}
+            <button
+              onClick={handleSaveWithoutFolder}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Heart className="w-5 h-5 text-primary" />
               </div>
+              <div className="text-left flex-1">
+                <p className="text-sm font-semibold text-foreground">Salvar sem pasta</p>
+                <p className="text-xs text-muted-foreground">Adicionar direto aos favoritos</p>
+              </div>
+            </button>
 
+            {/* Existing folders */}
+            {folders.map((folder) => (
               <button
-                onClick={() => setView("new_folder")}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                key={folder.id}
+                onClick={() => handleSaveToFolder(folder.id)}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card shadow-card hover:shadow-card-hover transition-all active:scale-[0.98]"
               >
-                <div className="w-10 h-10 rounded-full bg-muted group-hover:bg-primary/10 flex items-center justify-center shrink-0">
-                  <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Folder className="w-5 h-5 text-primary" />
                 </div>
-                <span className="font-bold text-sm text-muted-foreground group-hover:text-primary">Criar nova pasta</span>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-semibold text-foreground">{folder.name}</p>
+                </div>
               </button>
-            </div>
-          )}
+            ))}
 
-          {view === "new_folder" && (
-            <div className="space-y-6 pb-8">
-              <div className="flex items-center gap-4 mb-2">
-                <button onClick={() => setView("folders")} className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors">
-                  <ChevronRight className="w-6 h-6 rotate-180" />
-                </button>
-                <h3 className="text-xl font-black text-foreground">Nova Pasta</h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-muted-foreground uppercase ml-4">Nome da Pasta</label>
-                  <Input 
-                    placeholder="Ex: Restaurantes Românticos" 
-                    value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
-                    className="h-12 rounded-2xl bg-muted/50 border-none focus-visible:ring-primary"
-                    autoFocus
-                  />
-                </div>
-                <Button 
-                  className="w-full h-12 rounded-2xl font-bold text-base"
-                  disabled={!newFolderName.trim()}
-                  onClick={handleCreateFolder}
-                >
-                  Criar e Salvar
+            {/* Create new folder */}
+            {showNewFolder ? (
+              <div className="flex items-center gap-2 p-4 rounded-xl border border-border bg-card">
+                <Input
+                  placeholder="Nome da pasta..."
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  className="flex-1 h-9"
+                  autoFocus
+                  onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
+                />
+                <Button size="sm" onClick={handleCreateFolder} disabled={!newFolderName.trim()}>
+                  Criar
                 </Button>
               </div>
-            </div>
-          )}
-
-          {view === "routes" && (
-            <div className="space-y-4 pb-8">
-              <div className="flex items-center gap-4 mb-2">
-                <button onClick={() => setView("main")} className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors">
-                  <ChevronRight className="w-6 h-6 rotate-180" />
-                </button>
-                <h3 className="text-xl font-black text-foreground">Escolher Roteiro</h3>
-              </div>
-
-              <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1 scrollbar-hide">
-                {MOCK_ROUTES.map((route) => {
-                  const Icon = route.icon;
-                  return (
-                    <button
-                      key={route.id}
-                      onClick={() => handleAddToRoute(route.id)}
-                      className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card hover:bg-muted transition-all text-left"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground truncate">{route.title}</p>
-                        <p className="text-xs text-muted-foreground">{route.stops.length} paradas · {route.duration}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
+            ) : (
+              <button
+                onClick={() => setShowNewFolder(true)}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-dashed border-border bg-card/50 hover:bg-card transition-all active:scale-[0.98]"
+              >
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                  <FolderPlus className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-semibold text-foreground">Criar nova pasta</p>
+                  <p className="text-xs text-muted-foreground">Organize seus favoritos</p>
+                </div>
+              </button>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

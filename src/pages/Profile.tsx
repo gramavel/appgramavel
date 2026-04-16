@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MapPin, Ticket, Map, Award, Camera, CheckCircle2, Star, Pencil, TrendingUp, Heart, Loader2 } from "lucide-react";
+import { MapPin, Ticket, Map, CheckCircle2, Camera, Star, Pencil, TrendingUp, Heart, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getTimeline } from "@/services/timeline";
 import { getMemories } from "@/services/memories";
-import { getUserBadges } from "@/services/badges";
+import { getCheckIns } from "@/services/checkIns";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useCoupons } from "@/contexts/CouponsContext";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ export default function Profile() {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [memories, setMemories] = useState<{ src: string; caption: string }[]>([]);
-  const [badgeCount, setBadgeCount] = useState(0);
+  const [checkInCount, setCheckInCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [uploadingMemories, setUploadingMemories] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -59,8 +59,8 @@ export default function Profile() {
     Promise.all([
       getTimeline(),
       getMemories(),
-      getUserBadges(),
-    ]).then(([timelineRes, memoriesRes, badgesRes]) => {
+      getCheckIns(),
+    ]).then(([timelineRes, memoriesRes, checkInsRes]) => {
       if (timelineRes.data && timelineRes.data.length > 0) {
         setTimeline(timelineRes.data.map((t: any) => ({
           id: t.id, type: t.type, action: t.action,
@@ -72,9 +72,7 @@ export default function Profile() {
       if (memoriesRes.data && memoriesRes.data.length > 0) {
         setMemories(memoriesRes.data.map((m: any) => ({ src: m.image_url, caption: m.caption || "" })));
       }
-      if (badgesRes.data) {
-        setBadgeCount(badgesRes.data.filter((b: any) => b.earned).length);
-      }
+      setCheckInCount(checkInsRes.data?.length ?? 0);
       setLoading(false);
     });
   }, []);
@@ -113,7 +111,7 @@ export default function Profile() {
     }
 
     await refreshProfile();
-    setAvatarPreview(null); // Clear preview only after successful refresh
+    setAvatarPreview(null);
     toast.success("Foto atualizada!");
   }
 
@@ -146,10 +144,10 @@ export default function Profile() {
   }
 
   const STATS = [
-    { label: "Lugares", value: String(savedPlaces.length), icon: MapPin, to: "/perfil/lugares" },
+    { label: "Favoritos", value: String(savedPlaces.length), icon: Heart, to: "/perfil/favoritos" },
     { label: "Cupons", value: String(savedCoupons.length), icon: Ticket, to: "/perfil/cupons" },
     { label: "Roteiros", value: "0", icon: Map, to: "/perfil/roteiros" },
-    { label: "Badges", value: String(badgeCount), icon: Award, to: "/perfil/badges" },
+    { label: "Check-ins", value: String(checkInCount), icon: CheckCircle2, to: "/perfil/checkins" },
   ];
 
   const openLightbox = (index: number) => {

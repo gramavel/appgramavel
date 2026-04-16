@@ -23,7 +23,7 @@ const RoteiroDetail = lazy(() => import("./pages/RoteiroDetail"));
 const RoteiroNavigation = lazy(() => import("./pages/RoteiroNavigation"));
 const Establishment = lazy(() => import("./pages/Establishment"));
 const SavedPlaces = lazy(() => import("./pages/profile/SavedPlaces"));
-const BadgesPage = lazy(() => import("./pages/profile/Badges"));
+const CheckInsPage = lazy(() => import("./pages/profile/CheckIns"));
 const RoutesPage = lazy(() => import("./pages/profile/Routes"));
 const Settings = lazy(() => import("./pages/profile/Settings"));
 const UserCoupons = lazy(() => import("./pages/profile/UserCoupons"));
@@ -103,11 +103,14 @@ const App = () => (
                       <Route path="/roteiros/:id/navegar" element={<ProtectedRoute><RoteiroNavigation /></ProtectedRoute>} />
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                       <Route path="/estabelecimento/:slug" element={<ProtectedRoute><Establishment /></ProtectedRoute>} />
-                      <Route path="/perfil/lugares" element={<ProtectedRoute><SavedPlaces /></ProtectedRoute>} />
-                      <Route path="/perfil/badges" element={<ProtectedRoute><BadgesPage /></ProtectedRoute>} />
+                      <Route path="/perfil/favoritos" element={<ProtectedRoute><SavedPlaces /></ProtectedRoute>} />
+                      <Route path="/perfil/lugares" element={<Navigate to="/perfil/favoritos" replace />} />
+                      <Route path="/perfil/checkins" element={<ProtectedRoute><CheckInsPage /></ProtectedRoute>} />
                       <Route path="/perfil/roteiros" element={<ProtectedRoute><RoutesPage /></ProtectedRoute>} />
                       <Route path="/perfil/configuracoes" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                       <Route path="/perfil/cupons" element={<ProtectedRoute><UserCoupons /></ProtectedRoute>} />
+                      {/* Legacy badges redirect to checkins */}
+                      <Route path="/perfil/badges" element={<Navigate to="/perfil/checkins" replace />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>

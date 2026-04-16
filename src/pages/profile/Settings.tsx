@@ -255,12 +255,6 @@ export default function Settings() {
           )}
         </div>
 
-        {/* Bio */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Bio</Label>
-          <Textarea value={form.bio} onChange={(e) => set("bio", e.target.value)} rows={3} maxLength={100} disabled={!isEditing} className={`text-sm resize-none ${!isEditing ? "opacity-70 cursor-default" : ""}`} placeholder="Conte um pouco sobre você..." />
-          <p className="text-xs text-muted-foreground text-right">{form.bio.length}/100</p>
-        </div>
 
         {/* Age */}
         <div className="space-y-2">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus, Share } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -23,23 +23,10 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   const { getDistance } = useLocation();
 
   const { isPlaceSaved, toggleSavedPlace } = useFavorites();
-  const { getReaction, setReaction, getCounts, setInitialCounts } = useReactions();
+  const { getReaction, setReaction, getCountDelta } = useReactions();
 
-  // Use establishment_id from post for favorites
-  const establishmentId = (post as any).establishment_id || (post as any).establishment?.id;
-  const isSaved = establishmentId ? isPlaceSaved(establishmentId) : false;
+  const isSaved = isPlaceSaved(post.establishment_id);
   const userReaction = getReaction(post.id);
-  
-  // Sync initial counts from post data to context
-  useEffect(() => {
-    if (post.reactions) {
-      setInitialCounts(post.id, post.reactions as Array<{ emoji: string, count: number }>);
-    }
-  }, [post.id, post.reactions, setInitialCounts]);
-
-  const currentCounts = getCounts(post.id);
-  const totalReactions = currentCounts.reduce((sum, r) => sum + (r.count ?? 0), 0);
-  const displayReactions = currentCounts.filter(r => (r.count ?? 0) > 0).slice(0, 3);
 
   const rating = (post as any).establishment?.rating ?? post.rating ?? 0;
   const totalReviews = (post as any).establishment?.total_reviews ?? post.total_reviews ?? 0;
@@ -57,12 +44,31 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
     return fallback ? `${Number(fallback).toFixed(1)} km` : null;
   })();
 
+  // Apply count deltas for real-time updates
+  const adjustedReactions = (post.reactions ?? []).map(r => ({
+    ...r,
+    count: Math.max(0, (r.count ?? 0) + getCountDelta(post.id, r.emoji)),
+  }));
+
+  // If user reacted with an emoji not in the list, add it
+  if (userReaction && !adjustedReactions.find(r => r.emoji === userReaction)) {
+    adjustedReactions.push({ emoji: userReaction, count: Math.max(0, getCountDelta(post.id, userReaction)) });
+  }
+
+  const totalReactions = adjustedReactions.reduce((sum, r) => sum + (r.count ?? 0), 0);
+  const displayReactions = adjustedReactions.filter(r => (r.count ?? 0) > 0).slice(0, 3);
+
   const isPopular = post.is_popular || (post as any).establishment?.is_popular;
+
+  const [animatingEmoji, setAnimatingEmoji] = useState<string | null>(null);
 
   const handleReact = (emoji: string) => {
     setReaction(post.id, emoji);
-    // Small delay to show animation before closing
-    setTimeout(() => setShowReactions(false), 100);
+    setAnimatingEmoji(emoji);
+    setTimeout(() => {
+      setAnimatingEmoji(null);
+      setShowReactions(false);
+    }, 400);
   };
 
   const handleShare = async () => {
@@ -78,19 +84,9 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
     }
   };
 
-  const handleToggleSave = async () => {
-    if (!establishmentId) return;
-    if (isSaved) {
-      await toggleSavedPlace(establishmentId);
-      toast.success("Removido dos favoritos");
-    } else {
-      setShowSave(true);
-    }
-  };
-
   return (
     <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
-      {/* Header — avatar + name/rating only, no bookmark here */}
+      {/* Header */}
       <div className="flex items-center p-4">
         <div
           className="flex items-center gap-4 cursor-pointer flex-1 min-w-0"
@@ -145,7 +141,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
       </div>
 
       {/* Image */}
-      <div className="w-full aspect-[4/5] overflow-hidden">
+      <div className="relative w-full aspect-[4/5] overflow-hidden">
         <img
           src={post.image}
           alt={post.establishment_name}
@@ -155,6 +151,11 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
           loading={isFirst ? "eager" : "lazy"}
           {...(isFirst ? { fetchPriority: "high" as const } : {})}
         />
+        {animatingEmoji && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="text-7xl animate-[fadeInScale_0.4s_ease-out]">{animatingEmoji}</span>
+          </div>
+        )}
       </div>
 
       {/* Caption */}
@@ -168,7 +169,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         </div>
       )}
 
-      {/* Actions row: reactions left, bookmark + share right */}
+      {/* Actions row */}
       <div className="flex items-center justify-between px-4 pb-4 pt-1">
         <button
           className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary rounded-full hover:bg-secondary/80 transition-all active:scale-95"
@@ -177,16 +178,14 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         >
           {totalReactions > 0 ? (
             <>
-              <div className="flex -space-x-1">
-                {displayReactions.map((r) => (
-                  <span
-                    key={r.emoji}
-                    className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
-                  >
-                    {r.emoji}
-                  </span>
-                ))}
-              </div>
+              {displayReactions.map((r) => (
+                <span
+                  key={r.emoji}
+                  className={`text-sm ${userReaction === r.emoji ? "scale-110" : ""} transition-transform`}
+                >
+                  {r.emoji}
+                </span>
+              ))}
               <span className="text-xs text-foreground/70 ml-0.5">+{totalReactions}</span>
             </>
           ) : (
@@ -207,8 +206,8 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
           </button>
           <button
             className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
-            onClick={handleToggleSave}
-            aria-label="Salvar lugar"
+            onClick={() => isSaved ? toggleSavedPlace(post.establishment_id) : setShowSave(true)}
+            aria-label="Salvar favorito"
           >
             {isSaved ? (
               <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
@@ -223,7 +222,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         open={showSave}
         onOpenChange={setShowSave}
         itemName={post.establishment_name}
-        establishmentId={establishmentId}
+        establishmentId={post.establishment_id}
       />
 
       {/* Reaction Modal */}
@@ -251,7 +250,8 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
             <div className="flex justify-around">
               {CANONICAL_REACTIONS.map((item) => {
                 const isActive = userReaction === item.emoji;
-                const count = currentCounts.find((r) => r.emoji === item.emoji)?.count ?? 0;
+                const baseCount = (post.reactions ?? []).find((r) => r.emoji === item.emoji)?.count ?? 0;
+                const count = Math.max(0, baseCount + getCountDelta(post.id, item.emoji));
                 return (
                   <button
                     key={item.emoji}

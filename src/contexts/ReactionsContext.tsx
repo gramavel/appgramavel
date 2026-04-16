@@ -4,76 +4,52 @@ import { supabase } from "@/integrations/supabase/client";
 import { getCurrentUserId } from "@/lib/auth";
 
 type State = {
-  userReactions: Record<string, string>; // postId -> emoji
-  postReactionCounts: Record<string, Array<{ emoji: string, count: number }>>;
+  reactions: Record<string, string[]>;
+  // Track count deltas per post per emoji for real-time UI updates
+  countDeltas: Record<string, Record<string, number>>;
   loaded: boolean;
 };
 
 type Action =
-  | { type: "INIT"; userReactions: Record<string, string> }
-  | { type: "SET_COUNTS"; postId: string; counts: Array<{ emoji: string, count: number }> }
-  | { type: "OPTIMISTIC_REACT"; postId: string; emoji: string; previousEmoji: string | null }
-  | { type: "REVERT_REACT"; postId: string; previousEmoji: string | null; previousCounts: Array<{ emoji: string, count: number }> };
+  | { type: "INIT"; reactions: Record<string, string[]> }
+  | { type: "SET_REACTION"; postId: string; emoji: string; previousEmoji: string | null }
+  | { type: "REMOVE_REACTION"; postId: string; emoji: string };
 
 function reactionsReducer(state: State, action: Action): State {
   switch (action.type) {
     case "INIT":
-      return { ...state, userReactions: action.userReactions, loaded: true };
-    case "SET_COUNTS":
-      return {
-        ...state,
-        postReactionCounts: { ...state.postReactionCounts, [action.postId]: action.counts }
-      };
-    case "OPTIMISTIC_REACT": {
-      const { postId, emoji, previousEmoji } = action;
-      const isRemoving = previousEmoji === emoji;
-      
-      const newCounts = [...(state.postReactionCounts[postId] || [])];
-      
-      // Decrement old
-      if (previousEmoji) {
-        const oldIdx = newCounts.findIndex(r => r.emoji === previousEmoji);
-        if (oldIdx > -1) {
-          newCounts[oldIdx] = { ...newCounts[oldIdx], count: Math.max(0, newCounts[oldIdx].count - 1) };
-        }
+      return { reactions: action.reactions, countDeltas: {}, loaded: true };
+    case "SET_REACTION": {
+      const deltas = { ...state.countDeltas };
+      const postDeltas = { ...(deltas[action.postId] || {}) };
+
+      // Increment the new emoji
+      postDeltas[action.emoji] = (postDeltas[action.emoji] || 0) + 1;
+
+      // Decrement the previous emoji if changing
+      if (action.previousEmoji && action.previousEmoji !== action.emoji) {
+        postDeltas[action.previousEmoji] = (postDeltas[action.previousEmoji] || 0) - 1;
       }
-      
-      // Increment new
-      if (!isRemoving) {
-        const newIdx = newCounts.findIndex(r => r.emoji === emoji);
-        if (newIdx > -1) {
-          newCounts[newIdx] = { ...newCounts[newIdx], count: newCounts[newIdx].count + 1 };
-        } else {
-          newCounts.push({ emoji, count: 1 });
-        }
-      }
-      
-      const filteredCounts = newCounts.filter(r => r.count > 0);
-      const newUserReactions = { ...state.userReactions };
-      if (isRemoving) {
-        delete newUserReactions[postId];
-      } else {
-        newUserReactions[postId] = emoji;
-      }
+
+      deltas[action.postId] = postDeltas;
 
       return {
         ...state,
-        userReactions: newUserReactions,
-        postReactionCounts: { ...state.postReactionCounts, [postId]: filteredCounts }
+        reactions: {
+          ...state.reactions,
+          [action.postId]: [action.emoji],
+        },
+        countDeltas: deltas,
       };
     }
-    case "REVERT_REACT": {
-      const newUserReactions = { ...state.userReactions };
-      if (action.previousEmoji) {
-        newUserReactions[action.postId] = action.previousEmoji;
-      } else {
-        delete newUserReactions[action.postId];
-      }
-      return {
-        ...state,
-        userReactions: newUserReactions,
-        postReactionCounts: { ...state.postReactionCounts, [action.postId]: action.previousCounts }
-      };
+    case "REMOVE_REACTION": {
+      const { [action.postId]: _, ...rest } = state.reactions;
+      const deltas = { ...state.countDeltas };
+      const postDeltas = { ...(deltas[action.postId] || {}) };
+      postDeltas[action.emoji] = (postDeltas[action.emoji] || 0) - 1;
+      deltas[action.postId] = postDeltas;
+
+      return { ...state, reactions: rest, countDeltas: deltas };
     }
     default:
       return state;
@@ -81,18 +57,17 @@ function reactionsReducer(state: State, action: Action): State {
 }
 
 interface ReactionsContextType {
-  setReaction: (postId: string, emoji: string) => Promise<void>;
+  setReaction: (postId: string, emoji: string) => void;
   getReaction: (postId: string) => string | null;
-  getCounts: (postId: string) => Array<{ emoji: string, count: number }>;
-  setInitialCounts: (postId: string, counts: Array<{ emoji: string, count: number }>) => void;
+  getCountDelta: (postId: string, emoji: string) => number;
 }
 
 const ReactionsContext = createContext<ReactionsContextType | null>(null);
 
 export function ReactionsProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reactionsReducer, {
-    userReactions: {},
-    postReactionCounts: {},
+    reactions: {},
+    countDeltas: {},
     loaded: false,
   });
 
@@ -101,34 +76,38 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function load() {
       const { data } = await getUserReactions();
-      const reactions: Record<string, string> = {};
+      const reactions: Record<string, string[]> = {};
       data?.forEach((r) => {
-        reactions[r.post_id] = r.emoji;
+        reactions[r.post_id] = [r.emoji];
       });
-      dispatch({ type: "INIT", userReactions: reactions });
+      dispatch({ type: "INIT", reactions });
     }
     load();
   }, []);
 
-  const getReaction = useCallback((postId: string) => state.userReactions[postId] ?? null, [state.userReactions]);
-  const getCounts = useCallback((postId: string) => state.postReactionCounts[postId] ?? [], [state.postReactionCounts]);
-  
-  const setInitialCounts = useCallback((postId: string, counts: Array<{ emoji: string, count: number }>) => {
-    if (!state.postReactionCounts[postId]) {
-      dispatch({ type: "SET_COUNTS", postId, counts });
-    }
-  }, [state.postReactionCounts]);
+  const getReaction = useCallback(
+    (postId: string): string | null => state.reactions[postId]?.[0] ?? null,
+    [state.reactions]
+  );
+
+  const getCountDelta = useCallback(
+    (postId: string, emoji: string): number => state.countDeltas[postId]?.[emoji] ?? 0,
+    [state.countDeltas]
+  );
 
   const setReaction = useCallback(
     async (postId: string, emoji: string) => {
       if (pendingRef.current.has(postId)) return;
       pendingRef.current.add(postId);
 
-      const previousEmoji = state.userReactions[postId] ?? null;
-      const previousCounts = state.postReactionCounts[postId] ?? [];
+      const previousEmoji = state.reactions[postId]?.[0] ?? null;
 
-      // Optimistic update
-      dispatch({ type: "OPTIMISTIC_REACT", postId, emoji, previousEmoji });
+      // Optimistic update with count deltas
+      if (previousEmoji === emoji) {
+        dispatch({ type: "REMOVE_REACTION", postId, emoji });
+      } else {
+        dispatch({ type: "SET_REACTION", postId, emoji, previousEmoji });
+      }
 
       try {
         const userId = await getCurrentUserId();
@@ -138,27 +117,29 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
           p_emoji: emoji,
         });
 
-        if (error) throw error;
-
-        if ((data as any)?.action === "removed") {
-          // Double check if we need to sync further
+        if (error) {
+          console.error("Reaction failed, reverting:", error);
+          // Revert: undo the delta
+          if (previousEmoji === emoji) {
+            dispatch({ type: "SET_REACTION", postId, emoji, previousEmoji: null });
+          } else if (previousEmoji) {
+            dispatch({ type: "SET_REACTION", postId, emoji: previousEmoji, previousEmoji: emoji });
+          } else {
+            dispatch({ type: "REMOVE_REACTION", postId, emoji });
+          }
         }
-      } catch (err) {
-        console.error("Reaction failed, reverting:", err);
-        dispatch({ type: "REVERT_REACT", postId, previousEmoji, previousCounts });
       } finally {
         pendingRef.current.delete(postId);
       }
     },
-    [state.userReactions, state.postReactionCounts]
+    [state.reactions]
   );
 
   const value = useMemo(() => ({
     setReaction,
     getReaction,
-    getCounts,
-    setInitialCounts
-  }), [setReaction, getReaction, getCounts, setInitialCounts]);
+    getCountDelta,
+  }), [setReaction, getReaction, getCountDelta]);
 
   return (
     <ReactionsContext.Provider value={value}>

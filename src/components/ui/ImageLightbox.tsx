@@ -33,20 +33,19 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
 
   const currentPhotoId = photoIds?.[currentIndex] ?? null;
 
-  const loadReactions = useCallback(async () => {
-    if (!open || !currentPhotoId) { setReactions([]); setUserEmoji(null); return; }
-    const [{ data: counts }, userId] = await Promise.all([
-      supabase.from("photo_reaction_counts").select("emoji, count").eq("photo_id", currentPhotoId!),
-      getCurrentUserId(),
-    ]);
-    setReactions(counts?.filter(r => (r.count ?? 0) > 0) ?? []);
-    const { data: ur } = await supabase.from("photo_reactions").select("emoji").eq("photo_id", currentPhotoId!).eq("user_id", userId).maybeSingle();
-    setUserEmoji(ur?.emoji ?? null);
-  }, [open, currentPhotoId]);
-
   useEffect(() => {
-    loadReactions();
-  }, [loadReactions]);
+    if (!open || !currentPhotoId) { setReactions([]); setUserEmoji(null); return; }
+    async function load() {
+      const [{ data: counts }, userId] = await Promise.all([
+        supabase.from("photo_reaction_counts").select("emoji, count").eq("photo_id", currentPhotoId!),
+        getCurrentUserId(),
+      ]);
+      setReactions(counts?.filter(r => (r.count ?? 0) > 0) ?? []);
+      const { data: ur } = await supabase.from("photo_reactions").select("emoji").eq("photo_id", currentPhotoId!).eq("user_id", userId).maybeSingle();
+      setUserEmoji(ur?.emoji ?? null);
+    }
+    load();
+  }, [open, currentPhotoId]);
 
   useEffect(() => {
     if (!open) return;
@@ -66,47 +65,46 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
     if (!currentPhotoId) return;
     const userId = await getCurrentUserId();
     
-    // Optimistic update
+    // Optimistic update — immediate count change
     const previousEmoji = userEmoji;
     const previousReactions = [...reactions];
-    
-    setReactions(prev => {
-      const next = [...prev];
-      // If removing or changing, decrement old
-      if (previousEmoji) {
-        const oldIdx = next.findIndex(r => r.emoji === previousEmoji);
-        if (oldIdx > -1) {
-          next[oldIdx] = { ...next[oldIdx], count: Math.max(0, next[oldIdx].count - 1) };
+
+    if (previousEmoji === emoji) {
+      // Toggle off
+      setUserEmoji(null);
+      setReactions(prev => prev.map(r => 
+        r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1) } : r
+      ).filter(r => r.count > 0));
+    } else {
+      setUserEmoji(emoji);
+      setReactions(prev => {
+        let updated = prev.map(r => {
+          if (r.emoji === emoji) return { ...r, count: r.count + 1 };
+          if (r.emoji === previousEmoji) return { ...r, count: Math.max(0, r.count - 1) };
+          return r;
+        });
+        // If emoji not in list, add it
+        if (!updated.find(r => r.emoji === emoji)) {
+          updated.push({ emoji, count: 1 });
         }
-      }
-      // If adding new, increment new
-      if (previousEmoji !== emoji) {
-        const newIdx = next.findIndex(r => r.emoji === emoji);
-        if (newIdx > -1) {
-          next[newIdx] = { ...next[newIdx], count: next[newIdx].count + 1 };
-        } else {
-          next.push({ emoji, count: 1 });
-        }
-      }
-      return next.filter(r => r.count > 0);
-    });
-    setUserEmoji(previousEmoji === emoji ? null : emoji);
-    setShowReactionPicker(false);
+        return updated.filter(r => r.count > 0);
+      });
+    }
     
     try {
-      const { data, error } = await supabase.rpc("upsert_photo_reaction", { p_photo_id: currentPhotoId, p_user_id: userId, p_emoji: emoji });
-      if (error) throw error;
-      
-      // If action was 'removed', sync state
-      if ((data as any)?.action === 'removed') {
-        setUserEmoji(null);
-      }
+      await supabase.rpc("upsert_photo_reaction", { p_photo_id: currentPhotoId, p_user_id: userId, p_emoji: emoji });
+      // Reload to sync with server
+      const { data: counts } = await supabase.from("photo_reaction_counts").select("emoji, count").eq("photo_id", currentPhotoId);
+      setReactions(counts?.filter(r => (r.count ?? 0) > 0) ?? []);
+      const { data: ur } = await supabase.from("photo_reactions").select("emoji").eq("photo_id", currentPhotoId).eq("user_id", userId).maybeSingle();
+      setUserEmoji(ur?.emoji ?? null);
     } catch (error) {
       // Revert optimistic update on error
       setUserEmoji(previousEmoji);
       setReactions(previousReactions);
       console.error("Reaction failed:", error);
     }
+    setShowReactionPicker(false);
   };
 
   if (!open || images.length === 0) return null;

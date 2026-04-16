@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
 import { useNavigate } from "react-router-dom";
@@ -165,8 +166,8 @@ export default function Explore() {
             <ExploreMap />
 
             {/* Category Grid */}
-            <div>
-              <h2 className="text-base font-semibold tracking-tight mb-4">Categorias</h2>
+            <div className="space-y-3">
+              <SectionTitle>Categorias</SectionTitle>
               <div className="grid grid-cols-3 gap-4">
                 {CATEGORIES.map(({ label, icon: Icon }) => (
                   <button
@@ -191,8 +192,8 @@ export default function Explore() {
             </div>
 
             {/* Popular Places */}
-            <div>
-              <h2 className="text-base font-semibold tracking-tight mb-4">Populares agora</h2>
+            <div className="space-y-3">
+              <SectionTitle>Populares agora</SectionTitle>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
                   {popularPlaces.map((place) => (
@@ -221,8 +222,8 @@ export default function Explore() {
             </div>
 
             {/* Recommended Places */}
-            <div>
-              <h2 className="text-base font-semibold tracking-tight mb-4">Recomendados</h2>
+            <div className="space-y-3">
+              <SectionTitle>Recomendados</SectionTitle>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
                   {recommendedPlaces.map((place) => (
@@ -251,8 +252,8 @@ export default function Explore() {
             </div>
 
             {/* Experiences Carousel */}
-            <div>
-              <h2 className="text-base font-semibold tracking-tight mb-4">Experiências</h2>
+            <div className="space-y-3">
+              <SectionTitle>Experiências</SectionTitle>
               <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
                 <div className="flex gap-4 pb-2">
                   {experiences.map((exp) => (
@@ -267,8 +268,8 @@ export default function Explore() {
             </div>
 
             {/* Nearby establishments */}
-            <div>
-              <h2 className="text-base font-semibold tracking-tight mb-4">Próximos de você</h2>
+            <div className="space-y-3">
+              <SectionTitle>Próximos de você</SectionTitle>
               <div className="space-y-4">
                 {nearbyPlaces.map((est) => (
                   <Card key={est.id} className="cursor-pointer shadow-card hover:shadow-card-hover transition-shadow overflow-hidden" onClick={() => navigate(`/estabelecimento/${est.slug}`)}>
