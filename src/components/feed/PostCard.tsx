@@ -22,10 +22,12 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   const [showSave, setShowSave] = useState(false);
   const { getDistance } = useLocation();
 
-  const { isPostSaved, toggleSavedPost } = useFavorites();
+  const { isPlaceSaved, toggleSavedPlace } = useFavorites();
   const { getReaction, setReaction, getCounts, setInitialCounts } = useReactions();
 
-  const isSaved = isPostSaved(post.id);
+  // Use establishment_id from post for favorites
+  const establishmentId = (post as any).establishment_id || (post as any).establishment?.id;
+  const isSaved = establishmentId ? isPlaceSaved(establishmentId) : false;
   const userReaction = getReaction(post.id);
   
   // Sync initial counts from post data to context
@@ -73,6 +75,16 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
     } else {
       await navigator.clipboard.writeText(url);
       toast.success("Link copiado!");
+    }
+  };
+
+  const handleToggleSave = async () => {
+    if (!establishmentId) return;
+    if (isSaved) {
+      await toggleSavedPlace(establishmentId);
+      toast.success("Removido dos favoritos");
+    } else {
+      setShowSave(true);
     }
   };
 
@@ -195,7 +207,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
           </button>
           <button
             className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
-            onClick={() => isSaved ? toggleSavedPost(post.id) : setShowSave(true)}
+            onClick={handleToggleSave}
             aria-label="Salvar lugar"
           >
             {isSaved ? (
@@ -211,7 +223,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
         open={showSave}
         onOpenChange={setShowSave}
         itemName={post.establishment_name}
-        onSaved={() => toggleSavedPost(post.id)}
+        establishmentId={establishmentId}
       />
 
       {/* Reaction Modal */}
