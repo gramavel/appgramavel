@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, Route as RouteIcon, FolderPlus, Folder } from "lucide-react";
+import { Heart, Route as RouteIcon, FolderPlus, Folder, ArrowLeft } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -155,7 +155,16 @@ export function SaveSheet({ open, onOpenChange, itemName, establishmentId, onSav
       <Sheet open={showRouteSelect} onOpenChange={setShowRouteSelect}>
         <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] overflow-y-auto">
           <SheetHeader className="pb-4">
-            <SheetTitle className="text-lg font-bold text-foreground">Escolher roteiro</SheetTitle>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setShowRouteSelect(false); onOpenChange(true); }}
+                className="p-1.5 -ml-1.5 rounded-full hover:bg-secondary transition-colors"
+                aria-label="Voltar"
+              >
+                <ArrowLeft className="w-5 h-5 text-foreground" />
+              </button>
+              <SheetTitle className="text-lg font-bold text-foreground">Escolher roteiro</SheetTitle>
+            </div>
           </SheetHeader>
           <div className="space-y-2 pb-4">
             {MOCK_ROUTES.map((route) => {
@@ -184,7 +193,16 @@ export function SaveSheet({ open, onOpenChange, itemName, establishmentId, onSav
       <Sheet open={showFolderSelect} onOpenChange={(v) => { setShowFolderSelect(v); if (!v) setShowNewFolder(false); }}>
         <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] overflow-y-auto">
           <SheetHeader className="pb-4">
-            <SheetTitle className="text-lg font-bold text-foreground">Salvar favorito</SheetTitle>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setShowFolderSelect(false); setShowNewFolder(false); onOpenChange(true); }}
+                className="p-1.5 -ml-1.5 rounded-full hover:bg-secondary transition-colors"
+                aria-label="Voltar"
+              >
+                <ArrowLeft className="w-5 h-5 text-foreground" />
+              </button>
+              <SheetTitle className="text-lg font-bold text-foreground">Salvar favorito</SheetTitle>
+            </div>
           </SheetHeader>
           <div className="space-y-2 pb-4">
             {/* Save without folder */}
