@@ -1679,6 +1679,10 @@ export type Database = {
         Args: { p_emoji: string; p_post_id: string }
         Returns: undefined
       }
+      delete_folder: {
+        Args: { p_folder_id: string; p_mode?: string }
+        Returns: Json
+      }
       get_post_reaction_counts: {
         Args: { p_post_id: string }
         Returns: {
@@ -1696,11 +1700,32 @@ export type Database = {
           folder_name: string
         }[]
       }
+      get_user_folders: {
+        Args: { p_user_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          total: number
+        }[]
+      }
       increment_reaction: {
         Args: { p_emoji: string; p_post_id: string }
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      move_favorite_to_folder: {
+        Args: { p_establishment_id: string; p_target_folder_id?: string }
+        Returns: Json
+      }
+      remove_favorite_from_folder: {
+        Args: { p_establishment_id: string }
+        Returns: Json
+      }
+      rename_folder: {
+        Args: { p_folder_id: string; p_new_name: string }
+        Returns: Json
+      }
       save_favorite_to_folder: {
         Args: {
           p_establishment_id: string
