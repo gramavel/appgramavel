@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getCurrentUserId } from "@/lib/auth";
 import { toast } from "sonner";
 
-interface FolderItem { id: string; name: string; }
+interface FolderItem { id: string; name: string; total?: number; }
 interface FavoriteRow { id: string; establishment_id: string; folder_id: string | null; }
 
 export default function SavedPlaces() {
