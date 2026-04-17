@@ -5,7 +5,11 @@ import "./index.css";
 async function setupServiceWorker() {
   if (!("serviceWorker" in navigator)) return false;
 
-  if (import.meta.env.PROD) {
+  const hostname = window.location.hostname;
+  const isLovablePreviewHost =
+    hostname.endsWith(".lovable.app") || hostname.endsWith(".lovableproject.com");
+
+  if (import.meta.env.PROD && !isLovablePreviewHost) {
     try {
       const registration = await navigator.serviceWorker.register("/sw.js");
       console.log("Service Worker registrado:", registration.scope);

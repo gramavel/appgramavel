@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gramavel-v2';
+const CACHE_NAME = 'gramavel-v3';
 
 const STATIC_ASSETS = [
   '/',
@@ -28,7 +28,35 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Estratégia: Network First para navegação, Cache First para assets
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, response.clone());
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    if (request.mode === 'navigate') {
+      return caches.match('/index.html');
+    }
+
+    throw new Error('Network and cache both failed');
+  }
+}
+
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  const cache = await caches.open(CACHE_NAME);
+  cache.put(request, response.clone());
+  return response;
+}
+
+// Estratégia: Network First para navegação, JS e CSS; Cache First para imagens estáveis
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -46,30 +74,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navegação (HTML): Network First
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
-        })
-        .catch(() => caches.match('/index.html'))
-    );
+    event.respondWith(networkFirst(request));
     return;
   }
 
-  // Assets estáticos (JS, CSS, imagens): Cache First
-  event.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request).then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
-        })
-    )
-  );
+  const isVersionedAsset =
+    request.destination === 'script' ||
+    request.destination === 'style' ||
+    url.pathname.startsWith('/assets/');
+
+  event.respondWith(isVersionedAsset ? networkFirst(request) : cacheFirst(request));
 });
