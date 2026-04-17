@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getCurrentUserId } from "@/lib/auth";
 import { toast } from "sonner";
 
-interface FolderItem { id: string; name: string; }
+interface FolderItem { id: string; name: string; total?: number; }
 interface FavoriteRow { id: string; establishment_id: string; folder_id: string | null; }
 
 export default function SavedPlaces() {
@@ -60,11 +60,13 @@ export default function SavedPlaces() {
     try {
       const userId = await getCurrentUserId();
       const [foldersRes, favsRes] = await Promise.all([
-        (supabase as any).from("favorite_folders").select("id, name").eq("user_id", userId).order("created_at", { ascending: false }),
-        (supabase as any).from("user_favorites").select("id, establishment_id, folder_id").eq("user_id", userId),
+        (supabase as any).rpc("get_user_folders", { p_user_id: userId }),
+        (supabase as any).rpc("get_user_favorites_with_folders", { p_user_id: userId }),
       ]);
-      setFolders((foldersRes.data as FolderItem[]) ?? []);
-      setFavorites((favsRes.data as FavoriteRow[]) ?? []);
+      setFolders(((foldersRes.data as any[]) ?? []).map(f => ({ id: f.id, name: f.name, total: Number(f.total ?? 0) })));
+      setFavorites(((favsRes.data as any[]) ?? []).map(f => ({
+        id: f.favorite_id, establishment_id: f.establishment_id, folder_id: f.folder_id,
+      })));
     } catch {
       setFolders([]); setFavorites([]);
     }
@@ -85,18 +87,20 @@ export default function SavedPlaces() {
 
   const popularPlaces = allEstablishments.slice().sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 3);
 
-  // ===== folder actions =====
+  // ===== folder actions (RPCs only) =====
   async function handleCreateFolder() {
     const name = newFolderName.trim();
     if (!name) return;
     try {
       const userId = await getCurrentUserId();
+      // create empty folder by calling save_favorite_to_folder requires an estId;
+      // for empty folder creation use direct insert through RPC isn't available, so use favorite_folders insert as fallback.
       const { error } = await (supabase as any).from("favorite_folders").insert({ user_id: userId, name });
       if (error) throw error;
       toast.success(`Pasta "${name}" criada`);
       setNewFolderName(""); setShowCreateFolder(false);
       loadFoldersAndFavorites();
-    } catch (e: any) {
+    } catch {
       toast.error("Erro ao criar pasta");
     }
   }
@@ -105,8 +109,11 @@ export default function SavedPlaces() {
     if (!renameTarget) return;
     const name = renameValue.trim();
     if (!name) return;
-    const { error } = await (supabase as any).from("favorite_folders").update({ name }).eq("id", renameTarget.id);
-    if (error) { toast.error("Erro ao renomear"); return; }
+    const { data, error } = await (supabase as any).rpc("rename_folder", {
+      p_folder_id: renameTarget.id,
+      p_new_name: name,
+    });
+    if (error || (data && data.success === false)) { toast.error("Erro ao renomear"); return; }
     toast.success("Pasta renomeada");
     setRenameTarget(null);
     loadFoldersAndFavorites();
@@ -114,30 +121,26 @@ export default function SavedPlaces() {
 
   async function handleDeleteFolder(keepFavorites: boolean) {
     if (!deleteTarget) return;
-    const folderId = deleteTarget.id;
-    try {
-      const userId = await getCurrentUserId();
-      if (keepFavorites) {
-        // move favorites to "no folder"
-        await (supabase as any).from("user_favorites").update({ folder_id: null }).eq("folder_id", folderId).eq("user_id", userId);
-      } else {
-        // delete favorites then folder
-        await (supabase as any).from("user_favorites").delete().eq("folder_id", folderId).eq("user_id", userId);
-      }
-      await (supabase as any).from("favorite_folders").delete().eq("id", folderId);
-      toast.success("Pasta excluída");
-      setDeleteTarget(null);
-      window.dispatchEvent(new CustomEvent("favorites:changed"));
-      loadFoldersAndFavorites();
-    } catch {
-      toast.error("Erro ao excluir pasta");
-    }
+    const { data, error } = await (supabase as any).rpc("delete_folder", {
+      p_folder_id: deleteTarget.id,
+      p_mode: keepFavorites ? "folder_only" : "with_content",
+    });
+    if (error || (data && data.success === false)) { toast.error("Erro ao excluir pasta"); return; }
+    toast.success(keepFavorites ? "Pasta excluída — conteúdo movido para sem pasta" : "Pasta e conteúdo excluídos");
+    setDeleteTarget(null);
+    window.dispatchEvent(new CustomEvent("favorites:changed"));
+    loadFoldersAndFavorites();
   }
 
   async function handleMoveFavorite(targetFolderId: string | null) {
     if (!moveTarget) return;
-    const { error } = await (supabase as any).from("user_favorites").update({ folder_id: targetFolderId }).eq("id", moveTarget.favoriteId);
-    if (error) { toast.error("Erro ao mover"); return; }
+    const fav = favorites.find(f => f.id === moveTarget.favoriteId);
+    if (!fav) { setMoveTarget(null); return; }
+    const { data, error } = await (supabase as any).rpc("move_favorite_to_folder", {
+      p_establishment_id: fav.establishment_id,
+      p_target_folder_id: targetFolderId,
+    });
+    if (error || (data && data.success === false)) { toast.error("Erro ao mover"); return; }
     toast.success("Favorito movido");
     setMoveTarget(null);
     loadFoldersAndFavorites();
