@@ -204,21 +204,14 @@ export default function EstablishmentPage() {
 
         {/* Rating pill centered */}
         <div className="flex items-center justify-center mt-4">
-          {est.total_reviews > 0 ? (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
-              <span className="text-sm font-semibold text-foreground">{est.rating}</span>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} className={`h-3 w-3 ${s <= Math.round(Number(est.rating)) ? "fill-primary text-primary" : "fill-primary/40 text-primary/40"}`} />
-                ))}
-              </div>
-              <span className="text-xs text-muted-foreground">({est.total_reviews} avaliações)</span>
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border">
-              <span className="text-xs text-muted-foreground">Ainda sem avaliações</span>
-            </div>
-          )}
+          <RatingDisplay
+            rating={Number(est.rating)}
+            totalReviews={est.total_reviews ?? 0}
+            variant="pill"
+            size="md"
+            showReviewsLabel
+            emptyLabel="Ainda sem avaliações"
+          />
         </div>
 
         {/* 4 Action buttons */}
