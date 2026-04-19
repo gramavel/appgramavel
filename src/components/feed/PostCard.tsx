@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Star, MapPin, X, SmilePlus, Share } from "lucide-react";
+import { MapPin, X, SmilePlus, Share } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { RatingDisplay } from "@/components/ui/RatingDisplay";
 import { useReactions } from "@/contexts/ReactionsContext";
 import { useLocation } from "@/contexts/LocationContext";
 import { CANONICAL_REACTIONS } from "@/lib/constants";
@@ -109,36 +110,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
 
       {/* Tags row */}
       <div className="px-4 py-2 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
-          {hasReviews ? (
-            <>
-              <span className="text-xs font-semibold text-foreground">
-                {Number(rating).toFixed(1).replace(".", ",")}
-              </span>
-              <span className="flex items-center" aria-label={`Avaliação ${rating} de 5`}>
-                {[0, 1, 2, 3, 4].map((i) => {
-                  const fillPct = Math.max(0, Math.min(1, Number(rating) - i)) * 100;
-                  return (
-                    <span key={i} className="relative inline-block w-3 h-3">
-                      <Star className="absolute inset-0 w-3 h-3 text-rating/30" />
-                      <span
-                        className="absolute inset-0 overflow-hidden"
-                        style={{ width: `${fillPct}%` }}
-                      >
-                        <Star className="w-3 h-3 fill-rating text-rating" />
-                      </span>
-                    </span>
-                  );
-                })}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                ({totalReviews.toLocaleString("pt-BR")})
-              </span>
-            </>
-          ) : (
-            <span className="text-xs text-muted-foreground/60">Novo</span>
-          )}
-        </div>
+        <RatingDisplay rating={Number(rating)} totalReviews={totalReviews} />
         {distanceLabel && (
           <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
             <MapPin className="h-3 w-3" />
