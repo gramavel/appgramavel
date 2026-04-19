@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, Star, TrendingUp, MapPin, X, SmilePlus, Share } from "lucide-react";
+import { Star, MapPin, X, SmilePlus, Share } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { SaveSheet } from "@/components/SaveSheet";
-import { useFavorites } from "@/contexts/FavoritesContext";
 import { useReactions } from "@/contexts/ReactionsContext";
 import { useLocation } from "@/contexts/LocationContext";
 import { CANONICAL_REACTIONS } from "@/lib/constants";
