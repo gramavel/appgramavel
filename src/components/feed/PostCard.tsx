@@ -17,13 +17,10 @@ interface PostCardProps {
 export function PostCard({ post, isFirst = false }: PostCardProps) {
   const navigate = useNavigate();
   const [showReactions, setShowReactions] = useState(false);
-  const [showSave, setShowSave] = useState(false);
   const { getDistance } = useLocation();
 
-  const { isPlaceSaved, toggleSavedPlace } = useFavorites();
   const { getReaction, setReaction, getCountDelta } = useReactions();
 
-  const isSaved = isPlaceSaved(post.establishment_id);
   const userReaction = getReaction(post.id);
 
   const rating = (post as any).establishment?.rating ?? post.rating ?? 0;
