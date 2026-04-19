@@ -111,6 +111,13 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
       {/* Tags row */}
       <div className="px-4 py-2 flex items-center justify-between gap-2">
         <RatingDisplay rating={Number(rating)} totalReviews={totalReviews} />
+        {distanceLabel && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+            <MapPin className="h-3 w-3" />
+            {distanceLabel}
+          </span>
+        )}
+      </div>
 
       {/* Image */}
       <div className="relative w-full aspect-[4/5] overflow-hidden">
