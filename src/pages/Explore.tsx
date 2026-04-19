@@ -191,6 +191,9 @@ export default function Explore() {
               </div>
             </div>
 
+            {/* Separator */}
+            <div className="border-t border-border" />
+
             {/* Popular Places */}
             <div className="space-y-3">
               <SectionTitle>Populares agora</SectionTitle>
