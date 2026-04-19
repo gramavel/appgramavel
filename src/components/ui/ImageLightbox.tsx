@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CloseButton } from "@/components/ui/CloseButton";
 import { supabase } from "@/integrations/supabase/client";
 import { getCurrentUserId } from "@/lib/auth";
 import { CANONICAL_REACTIONS } from "@/lib/constants";
