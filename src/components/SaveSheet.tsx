@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Heart, Route as RouteIcon, FolderPlus, Folder, ChevronLeft, ChevronRight, Bookmark, Plus, X } from "lucide-react";
+import { Heart, Route as RouteIcon, FolderPlus, Folder, ChevronLeft, ChevronRight, Bookmark, Plus } from "lucide-react";
+import { CloseButton } from "@/components/ui/CloseButton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -218,15 +219,12 @@ export function SaveSheet({ open, onOpenChange, itemName, establishmentId, onSav
                 >
                   Salvar
                 </Button>
-                <Button
-                  size="sm"
+                <CloseButton
                   variant="ghost"
-                  className="rounded-full h-10 px-3"
+                  size="sm"
+                  label="Cancelar"
                   onClick={() => { setCreatingFolder(false); setNewFolderName(""); }}
-                  aria-label="Cancelar"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+                />
               </div>
             )}
           </div>
