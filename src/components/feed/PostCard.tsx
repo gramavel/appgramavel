@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { MapPin, X, SmilePlus, Share } from "lucide-react";
+import { MapPin, SmilePlus, Share } from "lucide-react";
+import { CloseButton } from "@/components/ui/CloseButton";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -197,13 +198,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-end mb-4">
-              <button
-                onClick={() => setShowReactions(false)}
-                className="p-2 rounded-full hover:bg-secondary"
-                aria-label="Fechar"
-              >
-                <X className="w-4 h-4 text-muted-foreground" />
-              </button>
+              <CloseButton variant="ghost" size="sm" onClick={() => setShowReactions(false)} />
             </div>
             <div className="flex justify-around">
               {CANONICAL_REACTIONS.map((item) => {

@@ -118,9 +118,7 @@ export default function ImageLightbox({ images, initialIndex = 0, open, onClose,
       <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/80 text-sm font-medium">
         {currentIndex + 1} / {images.length}
       </div>
-      <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors z-10">
-        <X className="w-6 h-6" />
-      </button>
+      <CloseButton variant="overlay" size="md" onClick={onClose} className="absolute top-4 right-4 z-10" />
       {images.length > 1 && (
         <>
           <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/80 hover:bg-white/20 transition-colors z-10">
