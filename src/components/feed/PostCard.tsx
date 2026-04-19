@@ -196,8 +196,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
             className="w-full max-w-md bg-card rounded-t-2xl border-t border-border p-4 pb-24 animate-in slide-in-from-bottom duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-foreground">Reagir</h4>
+            <div className="flex items-center justify-end mb-4">
               <button
                 onClick={() => setShowReactions(false)}
                 className="p-2 rounded-full hover:bg-secondary"
