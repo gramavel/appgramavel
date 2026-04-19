@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RatingDisplay } from "@/components/ui/RatingDisplay";
 import { MOCK_ESTABLISHMENTS, type Establishment } from "@/data/mock";
 
 import { SaveSheet } from "@/components/SaveSheet";
