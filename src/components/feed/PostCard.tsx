@@ -53,7 +53,7 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
   const totalReactions = adjustedReactions.reduce((sum, r) => sum + (r.count ?? 0), 0);
   const displayReactions = adjustedReactions.filter(r => (r.count ?? 0) > 0).slice(0, 3);
 
-  const isPopular = post.is_popular || (post as any).establishment?.is_popular;
+  
 
   const [animatingEmoji, setAnimatingEmoji] = useState<string | null>(null);
 
