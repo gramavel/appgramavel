@@ -100,16 +100,6 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
               <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 {post.establishment_category}
               </Badge>
-              {hasReviews ? (
-                <span className="flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-rating text-rating" />
-                  <span className="text-xs text-muted-foreground">
-                    {rating} ({totalReviews})
-                  </span>
-                </span>
-              ) : (
-                <span className="text-xs text-muted-foreground/60">Novo</span>
-              )}
             </div>
           </div>
         </div>
@@ -118,17 +108,39 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
       <Separator />
 
       {/* Tags row */}
-      <div className="px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {isPopular && (
-            <Badge variant="default" className="text-xs px-2.5 py-0.5 gap-1">
-              <TrendingUp className="h-3 w-3" />
-              Popular esta semana
-            </Badge>
+      <div className="px-4 py-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          {hasReviews ? (
+            <>
+              <span className="text-xs font-semibold text-foreground">
+                {Number(rating).toFixed(1).replace(".", ",")}
+              </span>
+              <span className="flex items-center" aria-label={`Avaliação ${rating} de 5`}>
+                {[0, 1, 2, 3, 4].map((i) => {
+                  const fillPct = Math.max(0, Math.min(1, Number(rating) - i)) * 100;
+                  return (
+                    <span key={i} className="relative inline-block w-3 h-3">
+                      <Star className="absolute inset-0 w-3 h-3 text-rating/30" />
+                      <span
+                        className="absolute inset-0 overflow-hidden"
+                        style={{ width: `${fillPct}%` }}
+                      >
+                        <Star className="w-3 h-3 fill-rating text-rating" />
+                      </span>
+                    </span>
+                  );
+                })}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                ({totalReviews.toLocaleString("pt-BR")})
+              </span>
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground/60">Novo</span>
           )}
         </div>
         {distanceLabel && (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
             <MapPin className="h-3 w-3" />
             {distanceLabel}
           </span>
@@ -191,34 +203,14 @@ export function PostCard({ post, isFirst = false }: PostCardProps) {
           )}
         </button>
 
-        <div className="flex items-center gap-1">
-          <button
-            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
-            onClick={handleShare}
-            aria-label="Compartilhar"
-          >
-            <Share className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
-            onClick={() => isSaved ? toggleSavedPlace(post.establishment_id) : setShowSave(true)}
-            aria-label="Salvar favorito"
-          >
-            {isSaved ? (
-              <BookmarkCheck className="w-5 h-5 text-primary fill-primary" />
-            ) : (
-              <Bookmark className="w-5 h-5" />
-            )}
-          </button>
-        </div>
+        <button
+          className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
+          onClick={handleShare}
+          aria-label="Compartilhar"
+        >
+          <Share className="w-5 h-5" />
+        </button>
       </div>
-
-      <SaveSheet
-        open={showSave}
-        onOpenChange={setShowSave}
-        itemName={post.establishment_name}
-        establishmentId={post.establishment_id}
-      />
 
       {/* Reaction Modal */}
       {showReactions && (
