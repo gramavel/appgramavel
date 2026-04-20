@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { MapPin, ExternalLink, AlertCircle, Car, Bike, Footprints, Navigation2 } from "lucide-react";
@@ -148,16 +149,18 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
         </div>
       </SheetContent>
 
-      {navigating && (
-        <NavigationView
-          destination={{ lat: destLat, lng: destLng, name: establishment.name }}
-          initialRoute={routeData}
-          onExit={() => {
-            setNavigating(false);
-            onClose();
-          }}
-        />
-      )}
+      {navigating &&
+        createPortal(
+          <NavigationView
+            destination={{ lat: destLat, lng: destLng, name: establishment.name }}
+            initialRoute={routeData}
+            onExit={() => {
+              setNavigating(false);
+              onClose();
+            }}
+          />,
+          document.body,
+        )}
     </Sheet>
   );
 }
