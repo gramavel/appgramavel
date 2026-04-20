@@ -195,23 +195,34 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !coords) return;
-    if (!userMarkerRef.current) {
-      const userIcon = L.divIcon({
+    const buildUserIcon = (h: number) =>
+      L.divIcon({
         className: "",
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        html: `<div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;"><div style="position:absolute;width:28px;height:28px;background:hsl(233 100% 69% / 0.25);border-radius:50%;animation:nav-pulse 2s ease-out infinite;"></div><div style="position:absolute;width:16px;height:16px;background:hsl(233,100%,69%);border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(95,114,255,0.5);"></div></div>`,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+        html: `
+          <div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+            <div style="position:absolute;width:40px;height:40px;background:hsl(233 100% 69% / 0.22);border-radius:50%;animation:nav-pulse 2s ease-out infinite;"></div>
+            <div style="position:relative;width:30px;height:30px;border-radius:50%;background:hsl(233,100%,69%);border:3px solid white;box-shadow:0 2px 8px rgba(95,114,255,0.55);display:flex;align-items:center;justify-content:center;transform:rotate(${h}deg);transition:transform 200ms ease;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="white" style="transform:translateY(-1px);">
+                <path d="M12 2 L19 20 L12 16 L5 20 Z"/>
+              </svg>
+            </div>
+          </div>`,
       });
+
+    if (!userMarkerRef.current) {
       userMarkerRef.current = L.marker([coords.lat, coords.lng], {
-        icon: userIcon, zIndexOffset: 1000,
+        icon: buildUserIcon(heading), zIndexOffset: 1000,
       }).addTo(map);
     } else {
       userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
+      userMarkerRef.current.setIcon(buildUserIcon(heading));
     }
     if (recentering) {
       map.setView([coords.lat, coords.lng], 17, { animate: true });
     }
-  }, [coords, recentering]);
+  }, [coords, recentering, heading]);
 
   // Recalcular passo atual + distâncias
   useEffect(() => {
