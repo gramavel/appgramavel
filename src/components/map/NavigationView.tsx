@@ -68,6 +68,20 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   const [muted, setMuted] = useState(false);
   const [recentering, setRecentering] = useState(true);
   const lastSpokenRef = useRef<number>(-1);
+  const watchIdRef = useRef<number | null>(null);
+
+  // Encerra navegação imediatamente: cancela voz, watch e dispara onExit em microtask
+  const exitNow = () => {
+    try {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    } catch { /* ignore */ }
+    if (watchIdRef.current !== null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    // Garante que o React processe o fechamento sem bloqueios de animação do mapa
+    queueMicrotask(() => onExit());
+  };
 
   // Inicializa mapa
   useEffect(() => {
@@ -128,15 +142,31 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     }).addTo(map);
   }, [route]);
 
-  // Watch geolocation
+  // Watch geolocation (alta precisão + posição inicial rápida + filtro de accuracy)
   useEffect(() => {
     if (!navigator.geolocation) return;
-    const id = navigator.geolocation.watchPosition(
+
+    // 1) posição inicial rápida (cache permitido) para já mostrar usuário no mapa
+    navigator.geolocation.getCurrentPosition(
       (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      (err) => console.warn("watchPosition error", err),
-      { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
+      () => { /* ignore */ },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 5000 },
     );
-    return () => navigator.geolocation.clearWatch(id);
+
+    // 2) watch contínuo de alta precisão; descarta amostras com accuracy ruim (>50m)
+    const id = navigator.geolocation.watchPosition(
+      (pos) => {
+        if (pos.coords.accuracy && pos.coords.accuracy > 50) return;
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (err) => console.warn("watchPosition error", err),
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
+    );
+    watchIdRef.current = id;
+    return () => {
+      navigator.geolocation.clearWatch(id);
+      watchIdRef.current = null;
+    };
   }, []);
 
   // Atualizar marcador do usuário + recentralizar
@@ -276,10 +306,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
             variant="overlay"
             size="md"
             label="Encerrar navegação"
-            onClick={() => {
-              if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-              onExit();
-            }}
+            onClick={exitNow}
             className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground shrink-0"
           />
         </div>
