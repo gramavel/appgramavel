@@ -142,15 +142,31 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     }).addTo(map);
   }, [route]);
 
-  // Watch geolocation
+  // Watch geolocation (alta precisão + posição inicial rápida + filtro de accuracy)
   useEffect(() => {
     if (!navigator.geolocation) return;
-    const id = navigator.geolocation.watchPosition(
+
+    // 1) posição inicial rápida (cache permitido) para já mostrar usuário no mapa
+    navigator.geolocation.getCurrentPosition(
       (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      (err) => console.warn("watchPosition error", err),
-      { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
+      () => { /* ignore */ },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 5000 },
     );
-    return () => navigator.geolocation.clearWatch(id);
+
+    // 2) watch contínuo de alta precisão; descarta amostras com accuracy ruim (>50m)
+    const id = navigator.geolocation.watchPosition(
+      (pos) => {
+        if (pos.coords.accuracy && pos.coords.accuracy > 50) return;
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (err) => console.warn("watchPosition error", err),
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
+    );
+    watchIdRef.current = id;
+    return () => {
+      navigator.geolocation.clearWatch(id);
+      watchIdRef.current = null;
+    };
   }, []);
 
   // Atualizar marcador do usuário + recentralizar
