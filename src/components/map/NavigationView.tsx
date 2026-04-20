@@ -159,7 +159,27 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     const id = navigator.geolocation.watchPosition(
       (pos) => {
         if (pos.coords.accuracy && pos.coords.accuracy > 50) return;
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        // Heading: prefere o do GPS; se ausente, calcula a partir do deslocamento
+        if (typeof pos.coords.heading === "number" && !isNaN(pos.coords.heading) && pos.coords.heading >= 0) {
+          setHeading(pos.coords.heading);
+        } else if (lastCoordsRef.current) {
+          const prev = lastCoordsRef.current;
+          const dLat = next.lat - prev.lat;
+          const dLng = next.lng - prev.lng;
+          // só atualiza se houve movimento mínimo (~5m) para evitar jitter
+          if (Math.hypot(dLat, dLng) > 0.00005) {
+            const φ1 = (prev.lat * Math.PI) / 180;
+            const φ2 = (next.lat * Math.PI) / 180;
+            const Δλ = ((next.lng - prev.lng) * Math.PI) / 180;
+            const y = Math.sin(Δλ) * Math.cos(φ2);
+            const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+            const brng = (Math.atan2(y, x) * 180) / Math.PI;
+            setHeading((brng + 360) % 360);
+          }
+        }
+        lastCoordsRef.current = next;
+        setCoords(next);
       },
       (err) => console.warn("watchPosition error", err),
       { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
