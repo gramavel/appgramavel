@@ -244,21 +244,18 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   const etaLabel = eta.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="fixed inset-0 z-[60] bg-background flex flex-col">
-      {/* Mapa */}
-      <div ref={containerRef} className="absolute inset-0" />
-
+    <div className="fixed inset-0 z-[100] bg-background flex flex-col overflow-hidden">
       {/* Top: instrução grande */}
-      <div className="relative z-10 p-4 pt-[max(env(safe-area-inset-top),1rem)]">
-        <div className="bg-primary text-primary-foreground rounded-2xl shadow-lg p-4 flex items-center gap-4">
-          <div className="shrink-0 w-14 h-14 rounded-xl bg-primary-foreground/15 flex items-center justify-center">
-            {currentStep ? maneuverIcon(currentStep.maneuver, currentStep.modifier) : <Navigation2 className="w-7 h-7 text-primary-foreground" />}
+      <div className="shrink-0 p-3 pt-[max(env(safe-area-inset-top),0.75rem)] bg-background">
+        <div className="bg-primary text-primary-foreground rounded-2xl shadow-lg p-3 flex items-center gap-3">
+          <div className="shrink-0 w-12 h-12 rounded-xl bg-primary-foreground/15 flex items-center justify-center">
+            {currentStep ? maneuverIcon(currentStep.maneuver, currentStep.modifier) : <Navigation2 className="w-6 h-6 text-primary-foreground" />}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-2xl font-bold leading-tight">
+            <div className="text-xl font-bold leading-tight">
               {arrived ? "Chegou!" : fmtDistance(distanceToManeuver)}
             </div>
-            <div className="text-sm text-primary-foreground/90 truncate">
+            <div className="text-xs text-primary-foreground/90 truncate">
               {arrived ? destination.name : (nextStep?.instruction ?? currentStep?.instruction ?? "Calculando...")}
             </div>
           </div>
@@ -270,65 +267,67 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
               if ("speechSynthesis" in window) window.speechSynthesis.cancel();
               onExit();
             }}
-            className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground"
+            className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground shrink-0"
           />
         </div>
       </div>
 
-      {/* Recenter button (quando usuário arrastou o mapa) */}
-      {!recentering && coords && (
+      {/* Mapa (ocupa o espaço entre header e footer) */}
+      <div className="relative flex-1 min-h-0">
+        <div ref={containerRef} className="absolute inset-0" />
+
+        {/* Botões flutuantes sobre o mapa */}
         <button
-          onClick={() => setRecentering(true)}
-          className="absolute right-4 bottom-36 z-10 w-12 h-12 rounded-full bg-card shadow-lg flex items-center justify-center border border-border active:scale-95 transition"
-          aria-label="Recentralizar no meu local"
+          onClick={() => {
+            setMuted((m) => {
+              if (!m && "speechSynthesis" in window) window.speechSynthesis.cancel();
+              return !m;
+            });
+          }}
+          className="absolute right-3 top-3 z-10 w-11 h-11 rounded-full bg-card shadow-lg flex items-center justify-center border border-border active:scale-95 transition"
+          aria-label={muted ? "Ativar voz" : "Silenciar voz"}
         >
-          <Navigation2 className="w-5 h-5 text-primary" />
+          {muted ? <VolumeX className="w-5 h-5 text-muted-foreground" /> : <Volume2 className="w-5 h-5 text-primary" />}
         </button>
-      )}
 
-      {/* Mute button */}
-      <button
-        onClick={() => {
-          setMuted((m) => {
-            if (!m && "speechSynthesis" in window) window.speechSynthesis.cancel();
-            return !m;
-          });
-        }}
-        className="absolute right-4 bottom-52 z-10 w-12 h-12 rounded-full bg-card shadow-lg flex items-center justify-center border border-border active:scale-95 transition"
-        aria-label={muted ? "Ativar voz" : "Silenciar voz"}
-      >
-        {muted ? <VolumeX className="w-5 h-5 text-muted-foreground" /> : <Volume2 className="w-5 h-5 text-primary" />}
-      </button>
+        {!recentering && coords && (
+          <button
+            onClick={() => setRecentering(true)}
+            className="absolute right-3 bottom-3 z-10 w-11 h-11 rounded-full bg-card shadow-lg flex items-center justify-center border border-border active:scale-95 transition"
+            aria-label="Recentralizar no meu local"
+          >
+            <Navigation2 className="w-5 h-5 text-primary" />
+          </button>
+        )}
+      </div>
 
-      {/* Bottom: ETA + ações */}
-      <div className="relative z-10 mt-auto p-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
-        <div className="bg-card rounded-2xl shadow-lg border border-border p-4 space-y-3">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <div className="text-2xl font-bold text-foreground leading-none">
-                {arrived ? "0 min" : fmtTime(etaMin)}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {fmtDistance(remainingM)} · chegada {etaLabel}
-              </div>
+      {/* Bottom: ETA + encerrar */}
+      <div className="shrink-0 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] bg-background border-t border-border">
+        <div className="flex items-center justify-between gap-3 mb-3 px-1">
+          <div>
+            <div className="text-xl font-bold text-foreground leading-none">
+              {arrived ? "0 min" : fmtTime(etaMin)}
             </div>
-            <div className="text-right min-w-0 max-w-[55%]">
-              <div className="text-xs text-muted-foreground">Destino</div>
-              <div className="text-sm font-semibold text-foreground truncate">{destination.name}</div>
+            <div className="text-[11px] text-muted-foreground mt-1">
+              {fmtDistance(remainingM)} · chegada {etaLabel}
             </div>
           </div>
-          <Button
-            variant="destructive"
-            className="w-full rounded-full"
-            onClick={() => {
-              if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-              onExit();
-            }}
-          >
-            <X className="w-4 h-4" />
-            {arrived ? "Concluir" : "Encerrar navegação"}
-          </Button>
+          <div className="text-right min-w-0 max-w-[60%]">
+            <div className="text-[11px] text-muted-foreground">Destino</div>
+            <div className="text-sm font-semibold text-foreground truncate">{destination.name}</div>
+          </div>
         </div>
+        <Button
+          variant="destructive"
+          className="w-full rounded-full h-11"
+          onClick={() => {
+            if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+            onExit();
+          }}
+        >
+          <X className="w-4 h-4" />
+          {arrived ? "Concluir" : "Encerrar navegação"}
+        </Button>
       </div>
 
       <style>{`
