@@ -3,10 +3,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./map-styles.css";
 import {
-  ArrowUp, ArrowUpLeft, ArrowUpRight, ArrowLeft, ArrowRight,
-  CornerUpLeft, CornerUpRight, RotateCw, Flag, Navigation2, X, Volume2, VolumeX,
+  ArrowUp, MoveUpLeft, MoveUpRight, CornerUpLeft, CornerUpRight,
+  CornerLeftUp, CornerRightUp, Redo2, RotateCw, Flag, Navigation2,
+  Volume2, VolumeX,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/CloseButton";
 import {
   getRoute, distanceMeters, type RouteResult, type RouteStep,
@@ -24,13 +24,18 @@ function maneuverIcon(maneuver: string, modifier?: string) {
   if (maneuver === "depart") return <Navigation2 className={cls} />;
   if (maneuver === "roundabout" || maneuver === "rotary") return <RotateCw className={cls} />;
   switch (modifier) {
-    case "left": return <ArrowLeft className={cls} />;
-    case "right": return <ArrowRight className={cls} />;
-    case "slight left": return <ArrowUpLeft className={cls} />;
-    case "slight right": return <ArrowUpRight className={cls} />;
-    case "sharp left": return <CornerUpLeft className={cls} />;
-    case "sharp right": return <CornerUpRight className={cls} />;
-    case "uturn": return <RotateCw className={cls} />;
+    // Virar (curva fechada de 90°)
+    case "left": return <CornerUpLeft className={cls} />;
+    case "right": return <CornerUpRight className={cls} />;
+    // Suave (mudança leve de direção)
+    case "slight left": return <MoveUpLeft className={cls} />;
+    case "slight right": return <MoveUpRight className={cls} />;
+    // Curva acentuada
+    case "sharp left": return <CornerLeftUp className={cls} />;
+    case "sharp right": return <CornerRightUp className={cls} />;
+    // Retorno em U
+    case "uturn": return <Redo2 className={`${cls} -scale-x-100`} />;
+    // Em frente
     default: return <ArrowUp className={cls} />;
   }
 }
@@ -309,9 +314,9 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
         )}
       </div>
 
-      {/* Bottom: ETA + encerrar */}
+      {/* Bottom: ETA */}
       <div className="shrink-0 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] bg-background border-t border-border">
-        <div className="flex items-center justify-between gap-3 mb-3 px-1">
+        <div className="flex items-center justify-between gap-3 px-1">
           <div>
             <div className="text-xl font-bold text-foreground leading-none">
               {arrived ? "0 min" : fmtTime(etaMin)}
@@ -325,17 +330,6 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
             <div className="text-sm font-semibold text-foreground truncate">{destination.name}</div>
           </div>
         </div>
-        <Button
-          variant="destructive"
-          className="w-full rounded-full h-11"
-          onClick={() => {
-            if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-            onExit();
-          }}
-        >
-          <X className="w-4 h-4" />
-          {arrived ? "Concluir" : "Encerrar navegação"}
-        </Button>
       </div>
 
       <style>{`
