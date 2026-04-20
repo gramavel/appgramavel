@@ -61,6 +61,8 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
 
   const [route, setRoute] = useState<RouteResult | null>(initialRoute);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [heading, setHeading] = useState<number>(0);
+  const lastCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
   const [stepIdx, setStepIdx] = useState(0);
   const [distanceToManeuver, setDistanceToManeuver] = useState<number>(0);
   const [remainingM, setRemainingM] = useState<number>(initialRoute ? initialRoute.distanceKm * 1000 : 0);
@@ -157,7 +159,27 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     const id = navigator.geolocation.watchPosition(
       (pos) => {
         if (pos.coords.accuracy && pos.coords.accuracy > 50) return;
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        // Heading: prefere o do GPS; se ausente, calcula a partir do deslocamento
+        if (typeof pos.coords.heading === "number" && !isNaN(pos.coords.heading) && pos.coords.heading >= 0) {
+          setHeading(pos.coords.heading);
+        } else if (lastCoordsRef.current) {
+          const prev = lastCoordsRef.current;
+          const dLat = next.lat - prev.lat;
+          const dLng = next.lng - prev.lng;
+          // só atualiza se houve movimento mínimo (~5m) para evitar jitter
+          if (Math.hypot(dLat, dLng) > 0.00005) {
+            const φ1 = (prev.lat * Math.PI) / 180;
+            const φ2 = (next.lat * Math.PI) / 180;
+            const Δλ = ((next.lng - prev.lng) * Math.PI) / 180;
+            const y = Math.sin(Δλ) * Math.cos(φ2);
+            const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+            const brng = (Math.atan2(y, x) * 180) / Math.PI;
+            setHeading((brng + 360) % 360);
+          }
+        }
+        lastCoordsRef.current = next;
+        setCoords(next);
       },
       (err) => console.warn("watchPosition error", err),
       { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
@@ -173,23 +195,34 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !coords) return;
-    if (!userMarkerRef.current) {
-      const userIcon = L.divIcon({
+    const buildUserIcon = (h: number) =>
+      L.divIcon({
         className: "",
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        html: `<div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;"><div style="position:absolute;width:28px;height:28px;background:hsl(233 100% 69% / 0.25);border-radius:50%;animation:nav-pulse 2s ease-out infinite;"></div><div style="position:absolute;width:16px;height:16px;background:hsl(233,100%,69%);border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(95,114,255,0.5);"></div></div>`,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+        html: `
+          <div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+            <div style="position:absolute;width:40px;height:40px;background:hsl(233 100% 69% / 0.22);border-radius:50%;animation:nav-pulse 2s ease-out infinite;"></div>
+            <div style="position:relative;width:30px;height:30px;border-radius:50%;background:hsl(233,100%,69%);border:3px solid white;box-shadow:0 2px 8px rgba(95,114,255,0.55);display:flex;align-items:center;justify-content:center;transform:rotate(${h}deg);transition:transform 200ms ease;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="white" style="transform:translateY(-1px);">
+                <path d="M12 2 L19 20 L12 16 L5 20 Z"/>
+              </svg>
+            </div>
+          </div>`,
       });
+
+    if (!userMarkerRef.current) {
       userMarkerRef.current = L.marker([coords.lat, coords.lng], {
-        icon: userIcon, zIndexOffset: 1000,
+        icon: buildUserIcon(heading), zIndexOffset: 1000,
       }).addTo(map);
     } else {
       userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
+      userMarkerRef.current.setIcon(buildUserIcon(heading));
     }
     if (recentering) {
       map.setView([coords.lat, coords.lng], 17, { animate: true });
     }
-  }, [coords, recentering]);
+  }, [coords, recentering, heading]);
 
   // Recalcular passo atual + distâncias
   useEffect(() => {
