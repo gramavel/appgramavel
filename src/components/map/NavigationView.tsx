@@ -68,6 +68,20 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   const [muted, setMuted] = useState(false);
   const [recentering, setRecentering] = useState(true);
   const lastSpokenRef = useRef<number>(-1);
+  const watchIdRef = useRef<number | null>(null);
+
+  // Encerra navegação imediatamente: cancela voz, watch e dispara onExit em microtask
+  const exitNow = () => {
+    try {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    } catch { /* ignore */ }
+    if (watchIdRef.current !== null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    // Garante que o React processe o fechamento sem bloqueios de animação do mapa
+    queueMicrotask(() => onExit());
+  };
 
   // Inicializa mapa
   useEffect(() => {
