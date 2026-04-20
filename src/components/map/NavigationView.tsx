@@ -315,9 +315,9 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
         )}
       </div>
 
-      {/* Bottom: ETA + encerrar */}
+      {/* Bottom: ETA */}
       <div className="shrink-0 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] bg-background border-t border-border">
-        <div className="flex items-center justify-between gap-3 mb-3 px-1">
+        <div className="flex items-center justify-between gap-3 px-1">
           <div>
             <div className="text-xl font-bold text-foreground leading-none">
               {arrived ? "0 min" : fmtTime(etaMin)}
@@ -331,17 +331,6 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
             <div className="text-sm font-semibold text-foreground truncate">{destination.name}</div>
           </div>
         </div>
-        <Button
-          variant="destructive"
-          className="w-full rounded-full h-11"
-          onClick={() => {
-            if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-            onExit();
-          }}
-        >
-          <X className="w-4 h-4" />
-          {arrived ? "Concluir" : "Encerrar navegação"}
-        </Button>
       </div>
 
       <style>{`
