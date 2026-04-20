@@ -1,0 +1,342 @@
+import { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import "./map-styles.css";
+import {
+  ArrowUp, ArrowUpLeft, ArrowUpRight, ArrowLeft, ArrowRight,
+  CornerUpLeft, CornerUpRight, RotateCw, Flag, Navigation2, X, Volume2, VolumeX,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CloseButton } from "@/components/ui/CloseButton";
+import {
+  getRoute, distanceMeters, type RouteResult, type RouteStep,
+} from "@/lib/routing";
+
+interface NavigationViewProps {
+  destination: { lat: number; lng: number; name: string };
+  initialRoute: RouteResult | null;
+  onExit: () => void;
+}
+
+function maneuverIcon(maneuver: string, modifier?: string) {
+  const cls = "w-7 h-7 text-primary-foreground";
+  if (maneuver === "arrive") return <Flag className={cls} />;
+  if (maneuver === "depart") return <Navigation2 className={cls} />;
+  if (maneuver === "roundabout" || maneuver === "rotary") return <RotateCw className={cls} />;
+  switch (modifier) {
+    case "left": return <ArrowLeft className={cls} />;
+    case "right": return <ArrowRight className={cls} />;
+    case "slight left": return <ArrowUpLeft className={cls} />;
+    case "slight right": return <ArrowUpRight className={cls} />;
+    case "sharp left": return <CornerUpLeft className={cls} />;
+    case "sharp right": return <CornerUpRight className={cls} />;
+    case "uturn": return <RotateCw className={cls} />;
+    default: return <ArrowUp className={cls} />;
+  }
+}
+
+function fmtDistance(m: number) {
+  if (m < 1000) return `${Math.round(m / 10) * 10} m`;
+  return `${(m / 1000).toFixed(1)} km`;
+}
+
+function fmtTime(min: number) {
+  if (min < 1) return "menos de 1 min";
+  if (min < 60) return `${Math.round(min)} min`;
+  const h = Math.floor(min / 60);
+  const m = Math.round(min % 60);
+  return m > 0 ? `${h}h ${m}min` : `${h}h`;
+}
+
+export default function NavigationView({ destination, initialRoute, onExit }: NavigationViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const polylineRef = useRef<L.Polyline | null>(null);
+
+  const [route, setRoute] = useState<RouteResult | null>(initialRoute);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [stepIdx, setStepIdx] = useState(0);
+  const [distanceToManeuver, setDistanceToManeuver] = useState<number>(0);
+  const [remainingM, setRemainingM] = useState<number>(initialRoute ? initialRoute.distanceKm * 1000 : 0);
+  const [arrived, setArrived] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [recentering, setRecentering] = useState(true);
+  const lastSpokenRef = useRef<number>(-1);
+
+  // Inicializa mapa
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+    const map = L.map(containerRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: true,
+    });
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      { maxZoom: 19, subdomains: "abcd" },
+    ).addTo(map);
+
+    // destino
+    const destIcon = L.divIcon({
+      className: "",
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      html: `<div style="width:32px;height:32px;background:hsl(233,100%,69%);border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;"><div style="transform:rotate(45deg);width:10px;height:10px;background:white;border-radius:50%;"></div></div>`,
+    });
+    L.marker([destination.lat, destination.lng], { icon: destIcon }).addTo(map);
+
+    map.setView([destination.lat, destination.lng], 17);
+
+    // detectar interação manual do usuário p/ desativar recentering
+    map.on("dragstart", () => setRecentering(false));
+
+    mapRef.current = map;
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [destination.lat, destination.lng]);
+
+  // Desenhar polyline da rota
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !route) return;
+    if (polylineRef.current) {
+      map.removeLayer(polylineRef.current);
+    }
+    const points = route.coordinates.map(([lat, lng]) => [lat, lng] as L.LatLngExpression);
+    polylineRef.current = L.polyline(points, {
+      color: "hsl(233,100%,69%)",
+      weight: 6,
+      opacity: 0.85,
+      lineCap: "round",
+      lineJoin: "round",
+    }).addTo(map);
+  }, [route]);
+
+  // Watch geolocation
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    const id = navigator.geolocation.watchPosition(
+      (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (err) => console.warn("watchPosition error", err),
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
+    );
+    return () => navigator.geolocation.clearWatch(id);
+  }, []);
+
+  // Atualizar marcador do usuário + recentralizar
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !coords) return;
+    if (!userMarkerRef.current) {
+      const userIcon = L.divIcon({
+        className: "",
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        html: `<div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;"><div style="position:absolute;width:28px;height:28px;background:hsl(233 100% 69% / 0.25);border-radius:50%;animation:nav-pulse 2s ease-out infinite;"></div><div style="position:absolute;width:16px;height:16px;background:hsl(233,100%,69%);border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(95,114,255,0.5);"></div></div>`,
+      });
+      userMarkerRef.current = L.marker([coords.lat, coords.lng], {
+        icon: userIcon, zIndexOffset: 1000,
+      }).addTo(map);
+    } else {
+      userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
+    }
+    if (recentering) {
+      map.setView([coords.lat, coords.lng], 17, { animate: true });
+    }
+  }, [coords, recentering]);
+
+  // Recalcular passo atual + distâncias
+  useEffect(() => {
+    if (!coords || !route || arrived) return;
+
+    // 1) chegou ao destino?
+    const distToDest = distanceMeters(coords, destination);
+    if (distToDest < 30) {
+      setArrived(true);
+      setRemainingM(0);
+      return;
+    }
+
+    // 2) avançar para o próximo passo se estiver perto da próxima manobra
+    let idx = stepIdx;
+    while (idx < route.steps.length - 1) {
+      const next = route.steps[idx + 1];
+      const dToNext = distanceMeters(coords, { lat: next.location[0], lng: next.location[1] });
+      const dToCurrent = distanceMeters(coords, {
+        lat: route.steps[idx].location[0],
+        lng: route.steps[idx].location[1],
+      });
+      // se estamos mais perto do próximo do que do atual, avançamos
+      if (dToNext < dToCurrent || dToNext < 25) {
+        idx++;
+      } else {
+        break;
+      }
+    }
+    if (idx !== stepIdx) setStepIdx(idx);
+
+    // 3) distância até a próxima manobra (= alvo do passo atual+1, ou destino)
+    const target = route.steps[idx + 1]?.location ?? [destination.lat, destination.lng];
+    setDistanceToManeuver(distanceMeters(coords, { lat: target[0], lng: target[1] }));
+
+    // 4) restante: soma das pernas remanescentes a partir do passo atual
+    const remaining = route.steps.slice(idx).reduce((acc, s) => acc + s.distanceM, 0);
+    setRemainingM(Math.max(remaining, distToDest));
+
+    // 5) recalcular rota se desviou (>60m da polyline aproximado pelo passo atual)
+    const dToCurrentStep = distanceMeters(coords, {
+      lat: route.steps[idx].location[0], lng: route.steps[idx].location[1],
+    });
+    const dToNextStep = route.steps[idx + 1]
+      ? distanceMeters(coords, {
+          lat: route.steps[idx + 1].location[0], lng: route.steps[idx + 1].location[1],
+        })
+      : Infinity;
+    if (Math.min(dToCurrentStep, dToNextStep) > 120) {
+      // Desviou — recalcula rota
+      getRoute(coords, destination).then((r) => {
+        if (r) {
+          setRoute(r);
+          setStepIdx(0);
+        }
+      });
+    }
+  }, [coords, route, stepIdx, arrived, destination]);
+
+  // Voz: anunciar manobra ao trocar de passo
+  useEffect(() => {
+    if (muted || arrived) return;
+    if (!route || stepIdx === lastSpokenRef.current) return;
+    if (!("speechSynthesis" in window)) return;
+    lastSpokenRef.current = stepIdx;
+    const step = route.steps[stepIdx];
+    if (!step) return;
+    try {
+      const u = new SpeechSynthesisUtterance(step.instruction);
+      u.lang = "pt-BR";
+      u.rate = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch { /* ignore */ }
+  }, [stepIdx, route, muted, arrived]);
+
+  // Voz: anuncia chegada
+  useEffect(() => {
+    if (arrived && !muted && "speechSynthesis" in window) {
+      try {
+        const u = new SpeechSynthesisUtterance("Você chegou ao destino.");
+        u.lang = "pt-BR";
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      } catch { /* ignore */ }
+    }
+  }, [arrived, muted]);
+
+  const currentStep: RouteStep | undefined = route?.steps[stepIdx];
+  const nextStep: RouteStep | undefined = route?.steps[stepIdx + 1];
+
+  // ETA simples baseado em ~40km/h média urbana
+  const etaMin = remainingM / 1000 / 40 * 60;
+  const eta = new Date(Date.now() + etaMin * 60 * 1000);
+  const etaLabel = eta.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-background flex flex-col">
+      {/* Mapa */}
+      <div ref={containerRef} className="absolute inset-0" />
+
+      {/* Top: instrução grande */}
+      <div className="relative z-10 p-4 pt-[max(env(safe-area-inset-top),1rem)]">
+        <div className="bg-primary text-primary-foreground rounded-2xl shadow-lg p-4 flex items-center gap-4">
+          <div className="shrink-0 w-14 h-14 rounded-xl bg-primary-foreground/15 flex items-center justify-center">
+            {currentStep ? maneuverIcon(currentStep.maneuver, currentStep.modifier) : <Navigation2 className="w-7 h-7 text-primary-foreground" />}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-2xl font-bold leading-tight">
+              {arrived ? "Chegou!" : fmtDistance(distanceToManeuver)}
+            </div>
+            <div className="text-sm text-primary-foreground/90 truncate">
+              {arrived ? destination.name : (nextStep?.instruction ?? currentStep?.instruction ?? "Calculando...")}
+            </div>
+          </div>
+          <CloseButton
+            variant="overlay"
+            size="md"
+            label="Encerrar navegação"
+            onClick={() => {
+              if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+              onExit();
+            }}
+            className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground"
+          />
+        </div>
+      </div>
+
+      {/* Recenter button (quando usuário arrastou o mapa) */}
+      {!recentering && coords && (
+        <button
+          onClick={() => setRecentering(true)}
+          className="absolute right-4 bottom-36 z-10 w-12 h-12 rounded-full bg-card shadow-lg flex items-center justify-center border border-border active:scale-95 transition"
+          aria-label="Recentralizar no meu local"
+        >
+          <Navigation2 className="w-5 h-5 text-primary" />
+        </button>
+      )}
+
+      {/* Mute button */}
+      <button
+        onClick={() => {
+          setMuted((m) => {
+            if (!m && "speechSynthesis" in window) window.speechSynthesis.cancel();
+            return !m;
+          });
+        }}
+        className="absolute right-4 bottom-52 z-10 w-12 h-12 rounded-full bg-card shadow-lg flex items-center justify-center border border-border active:scale-95 transition"
+        aria-label={muted ? "Ativar voz" : "Silenciar voz"}
+      >
+        {muted ? <VolumeX className="w-5 h-5 text-muted-foreground" /> : <Volume2 className="w-5 h-5 text-primary" />}
+      </button>
+
+      {/* Bottom: ETA + ações */}
+      <div className="relative z-10 mt-auto p-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
+        <div className="bg-card rounded-2xl shadow-lg border border-border p-4 space-y-3">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <div className="text-2xl font-bold text-foreground leading-none">
+                {arrived ? "0 min" : fmtTime(etaMin)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {fmtDistance(remainingM)} · chegada {etaLabel}
+              </div>
+            </div>
+            <div className="text-right min-w-0 max-w-[55%]">
+              <div className="text-xs text-muted-foreground">Destino</div>
+              <div className="text-sm font-semibold text-foreground truncate">{destination.name}</div>
+            </div>
+          </div>
+          <Button
+            variant="destructive"
+            className="w-full rounded-full"
+            onClick={() => {
+              if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+              onExit();
+            }}
+          >
+            <X className="w-4 h-4" />
+            {arrived ? "Concluir" : "Encerrar navegação"}
+          </Button>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes nav-pulse {
+          0% { transform: scale(0.6); opacity: 0.8; }
+          100% { transform: scale(2.4); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+}

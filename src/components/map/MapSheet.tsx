@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { MapPin, ExternalLink, Loader2, AlertCircle, Car, Bike, Footprints } from "lucide-react";
+import { MapPin, ExternalLink, AlertCircle, Car, Bike, Footprints, Navigation2 } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import RouteMap from "./RouteMap";
+import NavigationView from "./NavigationView";
 import type { RouteResult } from "@/lib/routing";
 
 function MotoIcon({ className }: { className?: string }) {
@@ -47,6 +48,7 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
   const { coords, loading } = useLocation();
   const [routeData, setRouteData] = useState<RouteResult | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(true);
+  const [navigating, setNavigating] = useState(false);
 
   const destLat = establishment.latitude ?? -29.3789;
   const destLng = establishment.longitude ?? -50.8732;
@@ -126,8 +128,13 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
 
         {/* Bottom */}
         <div className="p-4 border-t border-border space-y-2">
-          <Button className="w-full rounded-full" onClick={onClose}>
-            Fechar
+          <Button
+            className="w-full rounded-full gap-2"
+            onClick={() => setNavigating(true)}
+            disabled={!coords || loadingRoute || !routeData}
+          >
+            <Navigation2 className="w-4 h-4" />
+            Iniciar navegação
           </Button>
           <Button
             variant="ghost"
@@ -140,6 +147,17 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
           </Button>
         </div>
       </SheetContent>
+
+      {navigating && (
+        <NavigationView
+          destination={{ lat: destLat, lng: destLng, name: establishment.name }}
+          initialRoute={routeData}
+          onExit={() => {
+            setNavigating(false);
+            onClose();
+          }}
+        />
+      )}
     </Sheet>
   );
 }
