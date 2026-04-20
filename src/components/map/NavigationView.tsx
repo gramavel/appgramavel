@@ -92,7 +92,15 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     map.on("dragstart", () => setRecentering(false));
 
     mapRef.current = map;
+
+    // Garante que o Leaflet recalcula tiles quando o container muda (ex.: animações de portal)
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    ro.observe(containerRef.current);
+    // Invalidação inicial após mount
+    setTimeout(() => map.invalidateSize(), 50);
+
     return () => {
+      ro.disconnect();
       map.remove();
       mapRef.current = null;
     };
