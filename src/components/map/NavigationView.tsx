@@ -7,7 +7,6 @@ import {
   CornerLeftUp, CornerRightUp, Redo2, RotateCw, Flag, Navigation2,
   Volume2, VolumeX,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/CloseButton";
 import {
   getRoute, distanceMeters, type RouteResult, type RouteStep,
