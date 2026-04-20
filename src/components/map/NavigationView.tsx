@@ -3,8 +3,9 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./map-styles.css";
 import {
-  ArrowUp, ArrowUpLeft, ArrowUpRight, ArrowLeft, ArrowRight,
-  CornerUpLeft, CornerUpRight, RotateCw, Flag, Navigation2, X, Volume2, VolumeX,
+  ArrowUp, MoveUpLeft, MoveUpRight, CornerUpLeft, CornerUpRight,
+  CornerLeftUp, CornerRightUp, Redo2, RotateCw, Flag, Navigation2,
+  Volume2, VolumeX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CloseButton } from "@/components/ui/CloseButton";
@@ -24,13 +25,18 @@ function maneuverIcon(maneuver: string, modifier?: string) {
   if (maneuver === "depart") return <Navigation2 className={cls} />;
   if (maneuver === "roundabout" || maneuver === "rotary") return <RotateCw className={cls} />;
   switch (modifier) {
-    case "left": return <ArrowLeft className={cls} />;
-    case "right": return <ArrowRight className={cls} />;
-    case "slight left": return <ArrowUpLeft className={cls} />;
-    case "slight right": return <ArrowUpRight className={cls} />;
-    case "sharp left": return <CornerUpLeft className={cls} />;
-    case "sharp right": return <CornerUpRight className={cls} />;
-    case "uturn": return <RotateCw className={cls} />;
+    // Virar (curva fechada de 90°)
+    case "left": return <CornerUpLeft className={cls} />;
+    case "right": return <CornerUpRight className={cls} />;
+    // Suave (mudança leve de direção)
+    case "slight left": return <MoveUpLeft className={cls} />;
+    case "slight right": return <MoveUpRight className={cls} />;
+    // Curva acentuada
+    case "sharp left": return <CornerLeftUp className={cls} />;
+    case "sharp right": return <CornerRightUp className={cls} />;
+    // Retorno em U
+    case "uturn": return <Redo2 className={`${cls} -scale-x-100`} />;
+    // Em frente
     default: return <ArrowUp className={cls} />;
   }
 }
