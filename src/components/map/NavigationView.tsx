@@ -61,6 +61,8 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
 
   const [route, setRoute] = useState<RouteResult | null>(initialRoute);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [heading, setHeading] = useState<number>(0);
+  const lastCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
   const [stepIdx, setStepIdx] = useState(0);
   const [distanceToManeuver, setDistanceToManeuver] = useState<number>(0);
   const [remainingM, setRemainingM] = useState<number>(initialRoute ? initialRoute.distanceKm * 1000 : 0);
