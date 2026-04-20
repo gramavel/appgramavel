@@ -306,10 +306,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
             variant="overlay"
             size="md"
             label="Encerrar navegação"
-            onClick={() => {
-              if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-              onExit();
-            }}
+            onClick={exitNow}
             className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground shrink-0"
           />
         </div>
