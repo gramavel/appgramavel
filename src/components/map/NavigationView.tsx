@@ -197,6 +197,47 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     };
   }, []);
 
+  // Bússola do aparelho (DeviceOrientation) — orienta o mapa mesmo parado
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleOrientation = (event: DeviceOrientationEvent & { webkitCompassHeading?: number }) => {
+      // iOS Safari: webkitCompassHeading (já em graus, 0=Norte, sentido horário)
+      if (typeof event.webkitCompassHeading === "number" && !isNaN(event.webkitCompassHeading)) {
+        setHeadingDevice(event.webkitCompassHeading);
+        return;
+      }
+      // Android/Chrome: alpha (0=Norte quando absolute=true), invertido
+      if (event.absolute && typeof event.alpha === "number" && !isNaN(event.alpha)) {
+        setHeadingDevice((360 - event.alpha) % 360);
+      }
+    };
+
+    let added = false;
+    const attach = () => {
+      window.addEventListener("deviceorientationabsolute", handleOrientation as EventListener, true);
+      window.addEventListener("deviceorientation", handleOrientation as EventListener, true);
+      added = true;
+    };
+
+    // iOS 13+ exige permissão explícita
+    const DOE = (DeviceOrientationEvent as unknown) as { requestPermission?: () => Promise<"granted" | "denied"> };
+    if (typeof DOE.requestPermission === "function") {
+      DOE.requestPermission()
+        .then((res) => { if (res === "granted") attach(); })
+        .catch(() => { /* ignore */ });
+    } else {
+      attach();
+    }
+
+    return () => {
+      if (added) {
+        window.removeEventListener("deviceorientationabsolute", handleOrientation as EventListener, true);
+        window.removeEventListener("deviceorientation", handleOrientation as EventListener, true);
+      }
+    };
+  }, []);
+
   // Atualizar marcador do usuário + recentralizar
   useEffect(() => {
     const map = mapRef.current;
