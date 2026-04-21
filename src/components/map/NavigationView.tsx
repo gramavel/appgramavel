@@ -165,7 +165,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
         const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         // Heading: prefere o do GPS; se ausente, calcula a partir do deslocamento
         if (typeof pos.coords.heading === "number" && !isNaN(pos.coords.heading) && pos.coords.heading >= 0) {
-          setHeadingGps(pos.coords.heading);
+          setHeading(pos.coords.heading);
         } else if (lastCoordsRef.current) {
           const prev = lastCoordsRef.current;
           const dLat = next.lat - prev.lat;
@@ -178,7 +178,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
             const y = Math.sin(Δλ) * Math.cos(φ2);
             const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
             const brng = (Math.atan2(y, x) * 180) / Math.PI;
-            setHeadingGps((brng + 360) % 360);
+            setHeading((brng + 360) % 360);
           }
         }
         lastCoordsRef.current = next;
