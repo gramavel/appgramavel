@@ -62,11 +62,11 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
 
   const [route, setRoute] = useState<RouteResult | null>(initialRoute);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  // headingGps: derivado de GPS/movimento (fallback)
-  // headingDevice: bússola do aparelho (preferencial quando disponível)
-  const [headingGps, setHeadingGps] = useState<number>(0);
-  const [headingDevice, setHeadingDevice] = useState<number | null>(null);
+  // Heading derivado APENAS do movimento real (GPS / deslocamento entre amostras).
+  // Bússola do aparelho foi removida porque gira o mapa a qualquer micro-tilt.
+  const [heading, setHeading] = useState<number>(0);
   const lastCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
+  const lastAppliedHeadingRef = useRef<number>(0);
   const [stepIdx, setStepIdx] = useState(0);
   const [distanceToManeuver, setDistanceToManeuver] = useState<number>(0);
   const [remainingM, setRemainingM] = useState<number>(initialRoute ? initialRoute.distanceKm * 1000 : 0);
@@ -75,9 +75,6 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   const [recentering, setRecentering] = useState(true);
   const lastSpokenRef = useRef<number>(-1);
   const watchIdRef = useRef<number | null>(null);
-
-  // Heading efetivo: prioriza bússola do aparelho; cai para GPS/calculado
-  const heading = headingDevice ?? headingGps;
 
   // Encerra navegação imediatamente: cancela voz, watch e dispara onExit
   const exitNow = () => {
