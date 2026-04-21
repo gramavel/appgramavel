@@ -138,7 +138,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     };
   }, [destination.lat, destination.lng]);
 
-  // Desenhar polyline da rota
+  // Desenhar polyline da rota — estilo "casing" + neon (glow inferior + linha vívida em cima)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !route) return;
@@ -146,13 +146,24 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       map.removeLayer(polylineRef.current);
     }
     const points = route.coordinates.map(([lat, lng]) => [lat, lng] as L.LatLngExpression);
-    polylineRef.current = L.polyline(points, {
-      color: "hsl(233,100%,69%)",
-      weight: 6,
-      opacity: 0.85,
+    // Camada inferior (casing escuro) para contraste no tema dark
+    const casing = L.polyline(points, {
+      color: "#0b1024",
+      weight: 12,
+      opacity: 0.9,
       lineCap: "round",
       lineJoin: "round",
     }).addTo(map);
+    // Camada superior (linha primária com glow)
+    const line = L.polyline(points, {
+      color: "hsl(233,100%,69%)",
+      weight: 7,
+      opacity: 1,
+      lineCap: "round",
+      lineJoin: "round",
+      className: "nav-route-line",
+    }).addTo(map);
+    polylineRef.current = L.layerGroup([casing, line]) as unknown as L.Polyline;
   }, [route]);
 
   // Watch geolocation (alta precisão + posição inicial rápida + filtro de accuracy)
