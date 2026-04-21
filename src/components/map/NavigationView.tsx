@@ -404,8 +404,20 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       </div>
 
       {/* Mapa (ocupa o espaço entre header e footer) */}
-      <div className="relative flex-1 min-h-0">
-        <div ref={containerRef} className="absolute inset-0" />
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        {/* Wrapper rotacionável (heading-up). Maior que a viewport p/ não mostrar borda ao girar. */}
+        <div
+          ref={mapPaneRef}
+          className="absolute"
+          style={{
+            top: "-50%", left: "-50%", width: "200%", height: "200%",
+            transformOrigin: "50% 50%",
+            transition: "transform 250ms ease-out",
+            willChange: "transform",
+          }}
+        >
+          <div ref={containerRef} className="absolute inset-0" />
+        </div>
 
         {/* Botões flutuantes sobre o mapa */}
         <button
