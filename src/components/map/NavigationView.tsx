@@ -55,13 +55,17 @@ function fmtTime(min: number) {
 
 export default function NavigationView({ destination, initialRoute, onExit }: NavigationViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapPaneRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
 
   const [route, setRoute] = useState<RouteResult | null>(initialRoute);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [heading, setHeading] = useState<number>(0);
+  // headingGps: derivado de GPS/movimento (fallback)
+  // headingDevice: bússola do aparelho (preferencial quando disponível)
+  const [headingGps, setHeadingGps] = useState<number>(0);
+  const [headingDevice, setHeadingDevice] = useState<number | null>(null);
   const lastCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
   const [stepIdx, setStepIdx] = useState(0);
   const [distanceToManeuver, setDistanceToManeuver] = useState<number>(0);
@@ -72,7 +76,10 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   const lastSpokenRef = useRef<number>(-1);
   const watchIdRef = useRef<number | null>(null);
 
-  // Encerra navegação imediatamente: cancela voz, watch e dispara onExit em microtask
+  // Heading efetivo: prioriza bússola do aparelho; cai para GPS/calculado
+  const heading = headingDevice ?? headingGps;
+
+  // Encerra navegação imediatamente: cancela voz, watch e dispara onExit
   const exitNow = () => {
     try {
       if ("speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -81,8 +88,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
-    // Garante que o React processe o fechamento sem bloqueios de animação do mapa
-    queueMicrotask(() => onExit());
+    onExit();
   };
 
   // Inicializa mapa
