@@ -155,9 +155,9 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
             destination={{ lat: destLat, lng: destLng, name: establishment.name }}
             initialRoute={routeData}
             onExit={() => {
-              // Fecha o overlay imediatamente; o Sheet pai fecha em seguida
+              // Fecha overlay e Sheet pai no mesmo tick — evita "dois cliques"
               setNavigating(false);
-              setTimeout(() => onClose(), 0);
+              onClose();
             }}
           />,
           document.body,
