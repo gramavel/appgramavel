@@ -224,28 +224,37 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     if (!map || !coords) return;
     const userIcon = L.divIcon({
       className: "",
-      iconSize: [40, 40],
-      iconAnchor: [20, 20],
+      iconSize: [120, 120],
+      iconAnchor: [60, 60],
       html: `
-        <div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
-          <div style="position:absolute;width:40px;height:40px;background:hsl(233 100% 69% / 0.22);border-radius:50%;animation:nav-pulse 2s ease-out infinite;"></div>
-          <div style="position:relative;width:30px;height:30px;border-radius:50%;background:hsl(233,100%,69%);border:3px solid white;box-shadow:0 2px 8px rgba(95,114,255,0.55);display:flex;align-items:center;justify-content:center;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="white" style="transform:translateY(-1px);">
-              <path d="M12 2 L19 20 L12 16 L5 20 Z"/>
-            </svg>
+        <div style="position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;">
+          <!-- Cone de visão (apontando para cima da tela quando heading-up) -->
+          <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:60px;overflow:hidden;pointer-events:none;">
+            <div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(ellipse 60px 60px at 50% 100%, hsl(233 100% 69% / 0.55) 0%, hsl(233 100% 69% / 0.15) 45%, transparent 70%);clip-path:polygon(50% 100%, 8% 0%, 92% 0%);"></div>
           </div>
+          <!-- Pulso -->
+          <div style="position:absolute;width:48px;height:48px;background:hsl(233 100% 69% / 0.28);border-radius:50%;animation:nav-pulse 2.2s ease-out infinite;"></div>
+          <!-- Disco do usuário -->
+          <div style="position:relative;width:24px;height:24px;border-radius:50%;background:hsl(233,100%,69%);border:3px solid white;box-shadow:0 4px 14px rgba(95,114,255,0.7),0 0 0 1px rgba(0,0,0,0.15);"></div>
         </div>`,
     });
 
     if (!userMarkerRef.current) {
       userMarkerRef.current = L.marker([coords.lat, coords.lng], {
-        icon: userIcon, zIndexOffset: 1000,
+        icon: userIcon, zIndexOffset: 1000, interactive: false,
       }).addTo(map);
     } else {
       userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
     }
     if (recentering) {
-      map.setView([coords.lat, coords.lng], 18, { animate: true });
+      // Imersivo: zoom alto + offset vertical p/ posicionar o usuário ~30% acima do fundo,
+      // dando a sensação de "perspectiva à frente" como no Google Maps Driving.
+      const targetZoom = 19;
+      const point = map.project([coords.lat, coords.lng], targetZoom);
+      const size = map.getSize();
+      const yOffset = size.y * 0.22; // empurra o ponto p/ baixo (visualmente o usuário fica abaixo do centro)
+      const adjusted = map.unproject(point.subtract([0, -yOffset]), targetZoom);
+      map.setView(adjusted, targetZoom, { animate: true });
     }
   }, [coords, recentering]);
 
