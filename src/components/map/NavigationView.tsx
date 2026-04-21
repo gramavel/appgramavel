@@ -95,22 +95,30 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       zoomControl: false,
       attributionControl: false,
       dragging: true,
+      zoomSnap: 0.25,
     });
+    // Tiles escuros estilo navegação imersiva (Google Maps Driving theme)
     L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      { maxZoom: 19, subdomains: "abcd" },
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      { maxZoom: 20, subdomains: "abcd" },
     ).addTo(map);
 
-    // destino
+    // destino (pin "bandeira" com glow)
     const destIcon = L.divIcon({
       className: "",
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      html: `<div style="width:32px;height:32px;background:hsl(233,100%,69%);border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;"><div style="transform:rotate(45deg);width:10px;height:10px;background:white;border-radius:50%;"></div></div>`,
+      iconSize: [44, 56],
+      iconAnchor: [22, 52],
+      html: `
+        <div style="position:relative;width:44px;height:56px;filter:drop-shadow(0 4px 14px rgba(95,114,255,0.55));">
+          <div style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;background:hsl(233,100%,69%);box-shadow:0 0 0 4px hsl(233 100% 69% / 0.25);"></div>
+          <div style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,hsl(233,100%,69%),hsl(236,100%,79%));border:3px solid white;display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a1 1 0 0 1 1-1h13l-3 5 3 5H5"/></svg>
+          </div>
+        </div>`,
     });
     L.marker([destination.lat, destination.lng], { icon: destIcon }).addTo(map);
 
-    map.setView([destination.lat, destination.lng], 17);
+    map.setView([destination.lat, destination.lng], 18);
 
     // detectar interação manual do usuário p/ desativar recentering
     map.on("dragstart", () => setRecentering(false));
