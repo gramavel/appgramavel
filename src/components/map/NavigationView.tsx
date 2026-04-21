@@ -62,11 +62,11 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
 
   const [route, setRoute] = useState<RouteResult | null>(initialRoute);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  // headingGps: derivado de GPS/movimento (fallback)
-  // headingDevice: bússola do aparelho (preferencial quando disponível)
-  const [headingGps, setHeadingGps] = useState<number>(0);
-  const [headingDevice, setHeadingDevice] = useState<number | null>(null);
+  // Heading derivado APENAS do movimento real (GPS / deslocamento entre amostras).
+  // Bússola do aparelho foi removida porque gira o mapa a qualquer micro-tilt.
+  const [heading, setHeading] = useState<number>(0);
   const lastCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
+  const lastAppliedHeadingRef = useRef<number>(0);
   const [stepIdx, setStepIdx] = useState(0);
   const [distanceToManeuver, setDistanceToManeuver] = useState<number>(0);
   const [remainingM, setRemainingM] = useState<number>(initialRoute ? initialRoute.distanceKm * 1000 : 0);
@@ -75,9 +75,6 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   const [recentering, setRecentering] = useState(true);
   const lastSpokenRef = useRef<number>(-1);
   const watchIdRef = useRef<number | null>(null);
-
-  // Heading efetivo: prioriza bússola do aparelho; cai para GPS/calculado
-  const heading = headingDevice ?? headingGps;
 
   // Encerra navegação imediatamente: cancela voz, watch e dispara onExit
   const exitNow = () => {
@@ -168,7 +165,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
         const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         // Heading: prefere o do GPS; se ausente, calcula a partir do deslocamento
         if (typeof pos.coords.heading === "number" && !isNaN(pos.coords.heading) && pos.coords.heading >= 0) {
-          setHeadingGps(pos.coords.heading);
+          setHeading(pos.coords.heading);
         } else if (lastCoordsRef.current) {
           const prev = lastCoordsRef.current;
           const dLat = next.lat - prev.lat;
@@ -181,7 +178,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
             const y = Math.sin(Δλ) * Math.cos(φ2);
             const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
             const brng = (Math.atan2(y, x) * 180) / Math.PI;
-            setHeadingGps((brng + 360) % 360);
+            setHeading((brng + 360) % 360);
           }
         }
         lastCoordsRef.current = next;
@@ -197,46 +194,9 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     };
   }, []);
 
-  // Bússola do aparelho (DeviceOrientation) — orienta o mapa mesmo parado
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleOrientation = (event: DeviceOrientationEvent & { webkitCompassHeading?: number }) => {
-      // iOS Safari: webkitCompassHeading (já em graus, 0=Norte, sentido horário)
-      if (typeof event.webkitCompassHeading === "number" && !isNaN(event.webkitCompassHeading)) {
-        setHeadingDevice(event.webkitCompassHeading);
-        return;
-      }
-      // Android/Chrome: alpha (0=Norte quando absolute=true), invertido
-      if (event.absolute && typeof event.alpha === "number" && !isNaN(event.alpha)) {
-        setHeadingDevice((360 - event.alpha) % 360);
-      }
-    };
-
-    let added = false;
-    const attach = () => {
-      window.addEventListener("deviceorientationabsolute", handleOrientation as EventListener, true);
-      window.addEventListener("deviceorientation", handleOrientation as EventListener, true);
-      added = true;
-    };
-
-    // iOS 13+ exige permissão explícita
-    const DOE = (DeviceOrientationEvent as unknown) as { requestPermission?: () => Promise<"granted" | "denied"> };
-    if (typeof DOE.requestPermission === "function") {
-      DOE.requestPermission()
-        .then((res) => { if (res === "granted") attach(); })
-        .catch(() => { /* ignore */ });
-    } else {
-      attach();
-    }
-
-    return () => {
-      if (added) {
-        window.removeEventListener("deviceorientationabsolute", handleOrientation as EventListener, true);
-        window.removeEventListener("deviceorientation", handleOrientation as EventListener, true);
-      }
-    };
-  }, []);
+  // Bússola DeviceOrientation foi removida intencionalmente: girava o mapa a cada
+  // micro-tilt do aparelho. Agora a rotação heading-up usa apenas o heading do GPS
+  // (direção real de deslocamento), o que mantém o mapa estável quando parado.
 
   // Atualizar marcador do usuário + recentralizar
   // Em modo heading-up, o mapa rotaciona; a seta do usuário fica fixa apontando p/ cima da tela.
@@ -270,16 +230,22 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     }
   }, [coords, recentering]);
 
-  // Rotação heading-up: gira o pane do mapa para alinhar a direção do usuário com o topo da tela
+  // Rotação heading-up: gira o pane do mapa para alinhar a direção do usuário com o topo.
+  // Aplica limiar de 10° para evitar tremulação contínua quando o GPS oscila levemente.
   useEffect(() => {
     const el = mapPaneRef.current;
     if (!el) return;
-    if (recentering) {
-      // Contra-rotação: se o usuário aponta para "heading", giramos o mapa em -heading
-      el.style.transform = `rotate(${-heading}deg)`;
-    } else {
+    if (!recentering) {
       el.style.transform = "rotate(0deg)";
+      lastAppliedHeadingRef.current = 0;
+      return;
     }
+    const last = lastAppliedHeadingRef.current;
+    let delta = Math.abs(heading - last);
+    if (delta > 180) delta = 360 - delta; // diferença angular curta
+    if (delta < 10) return; // ignora micro variações
+    lastAppliedHeadingRef.current = heading;
+    el.style.transform = `rotate(${-heading}deg)`;
   }, [heading, recentering]);
 
   // Recalcular passo atual + distâncias

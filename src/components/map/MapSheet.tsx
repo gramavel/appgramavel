@@ -65,7 +65,7 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
   };
 
   return (
-    <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
+    <Sheet open={open && !navigating} onOpenChange={(v) => !v && !navigating && onClose()}>
       <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl p-0 flex flex-col">
         <SheetHeader className="px-4 pt-4 pb-2 space-y-1">
           <SheetTitle className="text-lg font-bold text-foreground">
