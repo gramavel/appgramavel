@@ -230,16 +230,22 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     }
   }, [coords, recentering]);
 
-  // Rotação heading-up: gira o pane do mapa para alinhar a direção do usuário com o topo da tela
+  // Rotação heading-up: gira o pane do mapa para alinhar a direção do usuário com o topo.
+  // Aplica limiar de 10° para evitar tremulação contínua quando o GPS oscila levemente.
   useEffect(() => {
     const el = mapPaneRef.current;
     if (!el) return;
-    if (recentering) {
-      // Contra-rotação: se o usuário aponta para "heading", giramos o mapa em -heading
-      el.style.transform = `rotate(${-heading}deg)`;
-    } else {
+    if (!recentering) {
       el.style.transform = "rotate(0deg)";
+      lastAppliedHeadingRef.current = 0;
+      return;
     }
+    const last = lastAppliedHeadingRef.current;
+    let delta = Math.abs(heading - last);
+    if (delta > 180) delta = 360 - delta; // diferença angular curta
+    if (delta < 10) return; // ignora micro variações
+    lastAppliedHeadingRef.current = heading;
+    el.style.transform = `rotate(${-heading}deg)`;
   }, [heading, recentering]);
 
   // Recalcular passo atual + distâncias
