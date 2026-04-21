@@ -95,22 +95,30 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       zoomControl: false,
       attributionControl: false,
       dragging: true,
+      zoomSnap: 0.25,
     });
+    // Tiles escuros estilo navegação imersiva (Google Maps Driving theme)
     L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      { maxZoom: 19, subdomains: "abcd" },
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      { maxZoom: 20, subdomains: "abcd" },
     ).addTo(map);
 
-    // destino
+    // destino (pin "bandeira" com glow)
     const destIcon = L.divIcon({
       className: "",
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      html: `<div style="width:32px;height:32px;background:hsl(233,100%,69%);border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;"><div style="transform:rotate(45deg);width:10px;height:10px;background:white;border-radius:50%;"></div></div>`,
+      iconSize: [44, 56],
+      iconAnchor: [22, 52],
+      html: `
+        <div style="position:relative;width:44px;height:56px;filter:drop-shadow(0 4px 14px rgba(95,114,255,0.55));">
+          <div style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;background:hsl(233,100%,69%);box-shadow:0 0 0 4px hsl(233 100% 69% / 0.25);"></div>
+          <div style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,hsl(233,100%,69%),hsl(236,100%,79%));border:3px solid white;display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a1 1 0 0 1 1-1h13l-3 5 3 5H5"/></svg>
+          </div>
+        </div>`,
     });
     L.marker([destination.lat, destination.lng], { icon: destIcon }).addTo(map);
 
-    map.setView([destination.lat, destination.lng], 17);
+    map.setView([destination.lat, destination.lng], 18);
 
     // detectar interação manual do usuário p/ desativar recentering
     map.on("dragstart", () => setRecentering(false));
@@ -130,7 +138,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     };
   }, [destination.lat, destination.lng]);
 
-  // Desenhar polyline da rota
+  // Desenhar polyline da rota — estilo "casing" + neon (glow inferior + linha vívida em cima)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !route) return;
@@ -138,13 +146,24 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       map.removeLayer(polylineRef.current);
     }
     const points = route.coordinates.map(([lat, lng]) => [lat, lng] as L.LatLngExpression);
-    polylineRef.current = L.polyline(points, {
-      color: "hsl(233,100%,69%)",
-      weight: 6,
-      opacity: 0.85,
+    // Camada inferior (casing escuro) para contraste no tema dark
+    const casing = L.polyline(points, {
+      color: "#0b1024",
+      weight: 12,
+      opacity: 0.9,
       lineCap: "round",
       lineJoin: "round",
     }).addTo(map);
+    // Camada superior (linha primária com glow)
+    const line = L.polyline(points, {
+      color: "hsl(233,100%,69%)",
+      weight: 7,
+      opacity: 1,
+      lineCap: "round",
+      lineJoin: "round",
+      className: "nav-route-line",
+    }).addTo(map);
+    polylineRef.current = L.layerGroup([casing, line]) as unknown as L.Polyline;
   }, [route]);
 
   // Watch geolocation (alta precisão + posição inicial rápida + filtro de accuracy)
@@ -205,28 +224,37 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     if (!map || !coords) return;
     const userIcon = L.divIcon({
       className: "",
-      iconSize: [40, 40],
-      iconAnchor: [20, 20],
+      iconSize: [120, 120],
+      iconAnchor: [60, 60],
       html: `
-        <div style="position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
-          <div style="position:absolute;width:40px;height:40px;background:hsl(233 100% 69% / 0.22);border-radius:50%;animation:nav-pulse 2s ease-out infinite;"></div>
-          <div style="position:relative;width:30px;height:30px;border-radius:50%;background:hsl(233,100%,69%);border:3px solid white;box-shadow:0 2px 8px rgba(95,114,255,0.55);display:flex;align-items:center;justify-content:center;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="white" style="transform:translateY(-1px);">
-              <path d="M12 2 L19 20 L12 16 L5 20 Z"/>
-            </svg>
+        <div style="position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;">
+          <!-- Cone de visão (apontando para cima da tela quando heading-up) -->
+          <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:60px;overflow:hidden;pointer-events:none;">
+            <div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(ellipse 60px 60px at 50% 100%, hsl(233 100% 69% / 0.55) 0%, hsl(233 100% 69% / 0.15) 45%, transparent 70%);clip-path:polygon(50% 100%, 8% 0%, 92% 0%);"></div>
           </div>
+          <!-- Pulso -->
+          <div style="position:absolute;width:48px;height:48px;background:hsl(233 100% 69% / 0.28);border-radius:50%;animation:nav-pulse 2.2s ease-out infinite;"></div>
+          <!-- Disco do usuário -->
+          <div style="position:relative;width:24px;height:24px;border-radius:50%;background:hsl(233,100%,69%);border:3px solid white;box-shadow:0 4px 14px rgba(95,114,255,0.7),0 0 0 1px rgba(0,0,0,0.15);"></div>
         </div>`,
     });
 
     if (!userMarkerRef.current) {
       userMarkerRef.current = L.marker([coords.lat, coords.lng], {
-        icon: userIcon, zIndexOffset: 1000,
+        icon: userIcon, zIndexOffset: 1000, interactive: false,
       }).addTo(map);
     } else {
       userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
     }
     if (recentering) {
-      map.setView([coords.lat, coords.lng], 18, { animate: true });
+      // Imersivo: zoom alto + offset vertical p/ posicionar o usuário ~30% acima do fundo,
+      // dando a sensação de "perspectiva à frente" como no Google Maps Driving.
+      const targetZoom = 19;
+      const point = map.project([coords.lat, coords.lng], targetZoom);
+      const size = map.getSize();
+      const yOffset = size.y * 0.22; // empurra o ponto p/ baixo (visualmente o usuário fica abaixo do centro)
+      const adjusted = map.unproject(point.subtract([0, -yOffset]), targetZoom);
+      map.setView(adjusted, targetZoom, { animate: true });
     }
   }, [coords, recentering]);
 
@@ -344,19 +372,50 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
   const etaLabel = eta.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background flex flex-col overflow-hidden">
-      {/* Top: instrução grande */}
-      <div className="shrink-0 p-3 pt-[max(env(safe-area-inset-top),0.75rem)] bg-background">
-        <div className="bg-primary text-primary-foreground rounded-2xl shadow-lg p-3 flex items-center gap-3">
-          <div className="shrink-0 w-12 h-12 rounded-xl bg-primary-foreground/15 flex items-center justify-center">
+    <div className="fixed inset-0 z-[100] bg-[#0b1024] flex flex-col overflow-hidden">
+      {/* Mapa fullscreen com perspectiva 3D (tilt) — fundo de tudo */}
+      <div className="absolute inset-0" style={{ perspective: "1200px", perspectiveOrigin: "50% 80%" }}>
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{
+            transform: recentering ? "rotateX(55deg)" : "rotateX(0deg)",
+            transformOrigin: "50% 65%",
+            transition: "transform 400ms ease-out",
+          }}
+        >
+          {/* Wrapper rotacionável (heading-up). Maior que a viewport p/ não mostrar borda ao girar. */}
+          <div
+            ref={mapPaneRef}
+            className="absolute"
+            style={{
+              top: "-50%", left: "-50%", width: "200%", height: "200%",
+              transformOrigin: "50% 50%",
+              transition: "transform 250ms ease-out",
+              willChange: "transform",
+            }}
+          >
+            <div ref={containerRef} className="absolute inset-0" />
+          </div>
+        </div>
+
+        {/* Vinheta superior — escurece o "horizonte" para reforçar profundidade */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[#0b1024]/90 via-[#0b1024]/40 to-transparent" />
+        {/* Vinheta inferior — base sólida onde flutua o card de ETA */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#0b1024] via-[#0b1024]/70 to-transparent" />
+      </div>
+
+      {/* Card de instrução flutuante no topo (glass) */}
+      <div className="relative z-10 shrink-0 px-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
+        <div className="bg-primary/95 backdrop-blur-md text-primary-foreground rounded-2xl shadow-[0_12px_32px_-8px_rgba(95,114,255,0.65)] p-3 flex items-center gap-3 border border-white/10">
+          <div className="shrink-0 w-14 h-14 rounded-2xl bg-primary-foreground/15 flex items-center justify-center ring-1 ring-white/10">
             {currentStep ? maneuverIcon(currentStep.maneuver, currentStep.modifier) : <Navigation2 className="w-6 h-6 text-primary-foreground" />}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-xl font-bold leading-tight">
+            <div className="text-2xl font-extrabold leading-none tracking-tight">
               {arrived ? "Chegou!" : fmtDistance(distanceToManeuver)}
             </div>
-            <div className="text-xs text-primary-foreground/90 truncate">
-              {arrived ? destination.name : (nextStep?.instruction ?? currentStep?.instruction ?? "Calculando...")}
+            <div className="text-[13px] text-primary-foreground/95 truncate mt-1">
+              {arrived ? destination.name : (nextStep?.instruction ?? currentStep?.instruction ?? "Calculando rota…")}
             </div>
           </div>
           <CloseButton
@@ -369,23 +428,8 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
         </div>
       </div>
 
-      {/* Mapa (ocupa o espaço entre header e footer) */}
-      <div className="relative flex-1 min-h-0 overflow-hidden">
-        {/* Wrapper rotacionável (heading-up). Maior que a viewport p/ não mostrar borda ao girar. */}
-        <div
-          ref={mapPaneRef}
-          className="absolute"
-          style={{
-            top: "-50%", left: "-50%", width: "200%", height: "200%",
-            transformOrigin: "50% 50%",
-            transition: "transform 250ms ease-out",
-            willChange: "transform",
-          }}
-        >
-          <div ref={containerRef} className="absolute inset-0" />
-        </div>
-
-        {/* Botões flutuantes sobre o mapa */}
+      {/* Espaço expansível p/ os botões flutuantes laterais */}
+      <div className="relative z-10 flex-1 min-h-0 pointer-events-none">
         <button
           onClick={() => {
             setMuted((m) => {
@@ -393,7 +437,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
               return !m;
             });
           }}
-          className="absolute right-3 top-3 z-10 w-11 h-11 rounded-full bg-card shadow-lg flex items-center justify-center border border-border active:scale-95 transition"
+          className="pointer-events-auto absolute right-3 top-3 w-11 h-11 rounded-full bg-card/90 backdrop-blur shadow-lg flex items-center justify-center border border-border/60 active:scale-95 transition"
           aria-label={muted ? "Ativar voz" : "Silenciar voz"}
         >
           {muted ? <VolumeX className="w-5 h-5 text-muted-foreground" /> : <Volume2 className="w-5 h-5 text-primary" />}
@@ -402,7 +446,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
         {!recentering && coords && (
           <button
             onClick={() => setRecentering(true)}
-            className="absolute right-3 bottom-3 z-10 w-11 h-11 rounded-full bg-card shadow-lg flex items-center justify-center border border-border active:scale-95 transition"
+            className="pointer-events-auto absolute right-3 bottom-3 w-11 h-11 rounded-full bg-card/90 backdrop-blur shadow-lg flex items-center justify-center border border-border/60 active:scale-95 transition"
             aria-label="Recentralizar no meu local"
           >
             <Navigation2 className="w-5 h-5 text-primary" />
@@ -410,20 +454,20 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
         )}
       </div>
 
-      {/* Bottom: ETA */}
-      <div className="shrink-0 p-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] bg-background border-t border-border">
-        <div className="flex items-center justify-between gap-3 px-1">
+      {/* Card de ETA flutuante no rodapé (glass dark) */}
+      <div className="relative z-10 shrink-0 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+        <div className="bg-[#10162e]/85 backdrop-blur-md border border-white/10 rounded-2xl shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.6)] p-4 flex items-center justify-between gap-3">
           <div>
-            <div className="text-xl font-bold text-foreground leading-none">
+            <div className="text-2xl font-extrabold text-white leading-none tracking-tight">
               {arrived ? "0 min" : fmtTime(etaMin)}
             </div>
-            <div className="text-[11px] text-muted-foreground mt-1">
+            <div className="text-[11px] text-white/60 mt-1.5">
               {fmtDistance(remainingM)} · chegada {etaLabel}
             </div>
           </div>
           <div className="text-right min-w-0 max-w-[60%]">
-            <div className="text-[11px] text-muted-foreground">Destino</div>
-            <div className="text-sm font-semibold text-foreground truncate">{destination.name}</div>
+            <div className="text-[10px] uppercase tracking-widest text-white/50">Destino</div>
+            <div className="text-sm font-semibold text-white truncate mt-1">{destination.name}</div>
           </div>
         </div>
       </div>
@@ -433,6 +477,12 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
           0% { transform: scale(0.6); opacity: 0.8; }
           100% { transform: scale(2.4); opacity: 0; }
         }
+        .nav-route-line {
+          filter: drop-shadow(0 0 8px hsl(233 100% 69% / 0.85)) drop-shadow(0 0 14px hsl(233 100% 69% / 0.45));
+        }
+        /* Atribuição do Leaflet some no modo imersivo */
+        .leaflet-control-attribution { display: none !important; }
+        .leaflet-container { background: #0b1024 !important; }
       `}</style>
     </div>
   );
