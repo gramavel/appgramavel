@@ -50,6 +50,7 @@ function fmtTime(min: number) {
 
 export default function NavigationView({ destination, initialRoute, onExit }: NavigationViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tiltRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
@@ -102,7 +103,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     });
     L.marker([destination.lat, destination.lng], { icon: destIcon }).addTo(map);
 
-    map.setView([destination.lat, destination.lng], 17);
+    map.setView([destination.lat, destination.lng], 18);
     map.on("dragstart", () => setRecentering(false));
 
     mapRef.current = map;
@@ -126,14 +127,14 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     const points = route.coordinates.map(([lat, lng]) => [lat, lng] as L.LatLngExpression);
     const casing = L.polyline(points, {
       color: "#ffffff",
-      weight: 9,
+      weight: 10,
       opacity: 1,
       lineCap: "round",
       lineJoin: "round",
     }).addTo(map);
     const line = L.polyline(points, {
       color: "hsl(233,100%,69%)",
-      weight: 5,
+      weight: 6,
       opacity: 1,
       lineCap: "round",
       lineJoin: "round",
@@ -164,7 +165,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     };
   }, []);
 
-  // Marcador do usuário + recentralizar (top-down, sem rotação)
+  // Marcador do usuário + recentralizar com offset (câmera estilo Google Maps)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !coords) return;
@@ -187,7 +188,12 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
     }
     if (recentering) {
-      map.setView([coords.lat, coords.lng], 17, { animate: true });
+      // Câmera "à frente": empurra o usuário para a parte inferior da tela
+      const targetZoom = 18;
+      const point = map.project([coords.lat, coords.lng], targetZoom);
+      const yOffset = map.getSize().y * 0.22;
+      const adjusted = map.unproject(point.add([0, -yOffset]), targetZoom);
+      map.setView(adjusted, targetZoom, { animate: true });
     }
   }, [coords, recentering]);
 
@@ -261,6 +267,17 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     }
   }, [arrived, muted]);
 
+  // Aplica/retira tilt 3D suavemente quando recentering muda
+  useEffect(() => {
+    const el = tiltRef.current;
+    if (!el) return;
+    el.style.transition = "transform 400ms ease";
+    el.style.transform = recentering ? "rotateX(50deg)" : "rotateX(0deg)";
+    // Reajusta tiles após transição
+    const t = setTimeout(() => mapRef.current?.invalidateSize(), 450);
+    return () => clearTimeout(t);
+  }, [recentering]);
+
   const currentStep: RouteStep | undefined = route?.steps[stepIdx];
   const nextStep: RouteStep | undefined = route?.steps[stepIdx + 1];
 
@@ -270,8 +287,19 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
 
   return (
     <div className="fixed inset-0 z-[100] bg-background flex flex-col overflow-hidden">
-      {/* Mapa fullscreen — top-down, sem tilt nem rotação */}
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* Camada com perspectiva 3D — estilo Google Maps, sem efeitos neon */}
+      <div
+        className="absolute inset-0"
+        style={{ perspective: "1400px", perspectiveOrigin: "50% 70%" }}
+      >
+        <div
+          ref={tiltRef}
+          className="absolute inset-0"
+          style={{ transformOrigin: "50% 70%", willChange: "transform" }}
+        >
+          <div ref={containerRef} className="absolute inset-0" />
+        </div>
+      </div>
 
       {/* Card de instrução flutuante no topo */}
       <div className="relative z-10 shrink-0 px-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
