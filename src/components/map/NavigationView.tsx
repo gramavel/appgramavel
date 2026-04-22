@@ -267,17 +267,6 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     }
   }, [arrived, muted]);
 
-  // Aplica/retira tilt 3D suavemente quando recentering muda
-  useEffect(() => {
-    const el = tiltRef.current;
-    if (!el) return;
-    el.style.transition = "transform 400ms ease";
-    el.style.transform = recentering ? "rotateX(50deg)" : "rotateX(0deg)";
-    // Reajusta tiles após transição
-    const t = setTimeout(() => mapRef.current?.invalidateSize(), 450);
-    return () => clearTimeout(t);
-  }, [recentering]);
-
   const currentStep: RouteStep | undefined = route?.steps[stepIdx];
   const nextStep: RouteStep | undefined = route?.steps[stepIdx + 1];
 
@@ -287,19 +276,8 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
 
   return (
     <div className="fixed inset-0 z-[100] bg-background flex flex-col overflow-hidden">
-      {/* Camada com perspectiva 3D — estilo Google Maps, sem efeitos neon */}
-      <div
-        className="absolute inset-0"
-        style={{ perspective: "1400px", perspectiveOrigin: "50% 70%" }}
-      >
-        <div
-          ref={tiltRef}
-          className="absolute inset-0"
-          style={{ transformOrigin: "50% 70%", willChange: "transform" }}
-        >
-          <div ref={containerRef} className="absolute inset-0" />
-        </div>
-      </div>
+      {/* Mapa em vista padrão (top-down), sem perspectiva 3D */}
+      <div ref={containerRef} className="absolute inset-0" />
 
       {/* Card de instrução flutuante no topo */}
       <div className="relative z-10 shrink-0 px-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
