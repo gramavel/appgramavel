@@ -50,7 +50,7 @@ function fmtTime(min: number) {
 
 export default function NavigationView({ destination, initialRoute, onExit }: NavigationViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const tiltRef = useRef<HTMLDivElement>(null);
+  
   const mapRef = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
