@@ -299,7 +299,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       <div ref={containerRef} className="absolute inset-0" />
 
       {/* Card de instrução flutuante no topo */}
-      <div className="relative z-10 shrink-0 px-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
+      <div className="relative z-[1000] shrink-0 px-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
         <div className="bg-primary text-primary-foreground rounded-2xl shadow-lg p-3 flex items-center gap-3">
           <div className="shrink-0 w-14 h-14 rounded-2xl bg-primary-foreground/15 flex items-center justify-center">
             {currentStep ? maneuverIcon(currentStep.maneuver, currentStep.modifier) : <Navigation2 className="w-6 h-6 text-primary-foreground" />}
@@ -323,7 +323,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       </div>
 
       {/* Botões flutuantes laterais */}
-      <div className="relative z-10 flex-1 min-h-0 pointer-events-none">
+      <div className="relative z-[1000] flex-1 min-h-0 pointer-events-none">
         <button
           onClick={() => {
             setMuted((m) => {
@@ -349,7 +349,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       </div>
 
       {/* Card de ETA flutuante no rodapé */}
-      <div className="relative z-10 shrink-0 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+      <div className="relative z-[1000] shrink-0 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
         <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-2xl shadow-lg p-4 flex items-center justify-between gap-3">
           <div>
             <div className="text-2xl font-extrabold text-foreground leading-none tracking-tight">
