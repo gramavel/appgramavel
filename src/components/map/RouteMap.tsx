@@ -48,7 +48,11 @@ function createUserDot() {
 export default function RouteMap({ user, destination, onRouteCalculated }: RouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const polylineRef = useRef<L.Polyline | null>(null);
+  const routeRequestedRef = useRef<string | null>(null);
 
+  // Inicializa mapa uma vez
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -62,41 +66,78 @@ export default function RouteMap({ user, destination, onRouteCalculated }: Route
       { maxZoom: 19, subdomains: "abcd" }
     ).addTo(map);
 
-    // Destination marker
     L.marker([destination.lat, destination.lng], { icon: createDestinationIcon() }).addTo(map);
-
-    if (user) {
-      L.marker([user.lat, user.lng], { icon: createUserDot(), zIndexOffset: 1000 }).addTo(map);
-
-      // Try OSRM route
-      getRoute(user, destination).then((result) => {
-        onRouteCalculated?.(result);
-
-        const points: L.LatLngExpression[] = result
-          ? result.coordinates.map(([lat, lng]) => [lat, lng] as L.LatLngExpression)
-          : [[user.lat, user.lng], [destination.lat, destination.lng]];
-
-        const polyline = L.polyline(points, {
-          color: "hsl(233,100%,69%)",
-          weight: 4,
-          opacity: 0.8,
-          dashArray: result ? undefined : "8 8",
-        }).addTo(map);
-
-        map.fitBounds(polyline.getBounds(), { padding: [48, 48], maxZoom: 16 });
-      });
-    } else {
-      map.setView([destination.lat, destination.lng], 15);
-      onRouteCalculated?.(null);
-    }
+    map.setView([destination.lat, destination.lng], 15);
 
     mapRef.current = map;
 
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    ro.observe(containerRef.current);
+    setTimeout(() => map.invalidateSize(), 50);
+
     return () => {
+      ro.disconnect();
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [destination.lat, destination.lng]);
+
+  // Reage à chegada/mudança da localização do usuário
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!user) {
+      onRouteCalculated?.(null);
+      return;
+    }
+
+    // Marcador do usuário
+    if (!userMarkerRef.current) {
+      userMarkerRef.current = L.marker([user.lat, user.lng], {
+        icon: createUserDot(),
+        zIndexOffset: 1000,
+      }).addTo(map);
+    } else {
+      userMarkerRef.current.setLatLng([user.lat, user.lng]);
+    }
+
+    // Evita refazer requisição para a mesma posição arredondada
+    const key = `${user.lat.toFixed(4)},${user.lng.toFixed(4)}`;
+    if (routeRequestedRef.current === key) return;
+    routeRequestedRef.current = key;
+
+    let cancelled = false;
+    getRoute(user, destination).then((result) => {
+      if (cancelled || !mapRef.current) return;
+      onRouteCalculated?.(result);
+
+      if (polylineRef.current) {
+        map.removeLayer(polylineRef.current);
+        polylineRef.current = null;
+      }
+
+      const points: L.LatLngExpression[] = result
+        ? result.coordinates.map(([lat, lng]) => [lat, lng] as L.LatLngExpression)
+        : [[user.lat, user.lng], [destination.lat, destination.lng]];
+
+      const polyline = L.polyline(points, {
+        color: "hsl(233,100%,69%)",
+        weight: 4,
+        opacity: 0.8,
+        dashArray: result ? undefined : "8 8",
+      }).addTo(map);
+      polylineRef.current = polyline;
+
+      map.fitBounds(polyline.getBounds(), { padding: [48, 48], maxZoom: 16 });
+    }).catch(() => {
+      if (!cancelled) onRouteCalculated?.(null);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.lat, user?.lng, destination.lat, destination.lng, onRouteCalculated]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 }

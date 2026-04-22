@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -54,10 +54,18 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
   const destLat = establishment.latitude ?? -29.3789;
   const destLng = establishment.longitude ?? -50.8732;
 
-  const handleRouteCalculated = (result: RouteResult | null) => {
+  // Reseta estado ao reabrir / mudar destino
+  useEffect(() => {
+    if (open) {
+      setRouteData(null);
+      setLoadingRoute(true);
+    }
+  }, [open, destLat, destLng]);
+
+  const handleRouteCalculated = useCallback((result: RouteResult | null) => {
     setRouteData(result);
     setLoadingRoute(false);
-  };
+  }, []);
 
   const handleOpenExternal = () => {
     const q = `${destLat},${destLng}`;
