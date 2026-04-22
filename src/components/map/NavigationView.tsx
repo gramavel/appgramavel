@@ -144,7 +144,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     polylineRef.current = L.layerGroup([casing, line]) as unknown as L.Polyline;
   }, [route]);
 
-  // Watch geolocation
+  // Watch geolocation (incluindo heading quando disponível)
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -155,7 +155,26 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     const id = navigator.geolocation.watchPosition(
       (pos) => {
         if (pos.coords.accuracy && pos.coords.accuracy > 50) return;
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (typeof pos.coords.heading === "number" && !Number.isNaN(pos.coords.heading)) {
+          setHeading(pos.coords.heading);
+        } else if (prevCoordsRef.current) {
+          const prev = prevCoordsRef.current;
+          const moved = distanceMeters(prev, next);
+          if (moved > 3) {
+            const φ1 = (prev.lat * Math.PI) / 180;
+            const φ2 = (next.lat * Math.PI) / 180;
+            const Δλ = ((next.lng - prev.lng) * Math.PI) / 180;
+            const y = Math.sin(Δλ) * Math.cos(φ2);
+            const x =
+              Math.cos(φ1) * Math.sin(φ2) -
+              Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+            const brng = (Math.atan2(y, x) * 180) / Math.PI;
+            setHeading((brng + 360) % 360);
+          }
+        }
+        prevCoordsRef.current = next;
+        setCoords(next);
       },
       (err) => console.warn("watchPosition error", err),
       { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
@@ -167,7 +186,7 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
     };
   }, []);
 
-  // Marcador do usuário + recentralizar com offset (câmera estilo Google Maps)
+  // Marcador do usuário (seta direcional) + recentralizar
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !coords) return;
@@ -178,7 +197,9 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       html: `
         <div style="position:relative;width:56px;height:56px;display:flex;align-items:center;justify-content:center;">
           <div style="position:absolute;width:48px;height:48px;background:hsl(233 100% 69% / 0.22);border-radius:50%;animation:nav-pulse 2.2s ease-out infinite;"></div>
-          <div style="position:relative;width:20px;height:20px;border-radius:50%;background:hsl(233,100%,69%);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);"></div>
+          <div style="position:relative;width:34px;height:34px;border-radius:50%;background:white;border:2px solid hsl(233,100%,69%);box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transform:rotate(${heading}deg);transition:transform 200ms ease;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="hsl(233,100%,69%)" stroke="hsl(233,100%,69%)" stroke-width="1" stroke-linejoin="round"><path d="M12 2 L19 20 L12 16 L5 20 Z"/></svg>
+          </div>
         </div>`,
     });
 
@@ -188,16 +209,12 @@ export default function NavigationView({ destination, initialRoute, onExit }: Na
       }).addTo(map);
     } else {
       userMarkerRef.current.setLatLng([coords.lat, coords.lng]);
+      userMarkerRef.current.setIcon(userIcon);
     }
     if (recentering) {
-      // Câmera "à frente": empurra o usuário para a parte inferior da tela
-      const targetZoom = 18;
-      const point = map.project([coords.lat, coords.lng], targetZoom);
-      const yOffset = map.getSize().y * 0.22;
-      const adjusted = map.unproject(point.add([0, -yOffset]), targetZoom);
-      map.setView(adjusted, targetZoom, { animate: true });
+      map.setView([coords.lat, coords.lng], 18, { animate: true });
     }
-  }, [coords, recentering]);
+  }, [coords, recentering, heading]);
 
   // Recalcular passo + distâncias
   useEffect(() => {
