@@ -83,13 +83,13 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
 
         {/* Transport chips */}
         <div className="px-4 pb-3">
-          {loading ? (
+          {loading || (!coords && permissionState !== "denied") ? (
             <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="h-7 w-20 rounded-full bg-secondary animate-pulse shrink-0" />
               ))}
             </div>
-          ) : loadingRoute ? (
+          ) : loadingRoute && coords ? (
             <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="h-7 w-20 rounded-full bg-secondary animate-pulse shrink-0" />
@@ -117,12 +117,27 @@ export default function MapSheet({ open, onClose, establishment }: MapSheetProps
               ))}
             </div>
           ) : coords ? (
+            <div className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <AlertCircle className="w-3.5 h-3.5" />
+                Não foi possível calcular a rota
+              </span>
+            </div>
+          ) : permissionState === "denied" ? (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <AlertCircle className="w-3.5 h-3.5" />
-              Não foi possível calcular a rota
+              Ative a localização nas configurações do navegador para ver a rota
             </span>
           ) : (
-            <span className="text-xs text-muted-foreground">Ative a localização para ver a rota</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">Não foi possível obter sua localização.</span>
+              <button
+                onClick={requestLocation}
+                className="text-xs font-semibold text-primary hover:underline shrink-0"
+              >
+                Tentar novamente
+              </button>
+            </div>
           )}
         </div>
 
