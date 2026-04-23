@@ -102,8 +102,8 @@ export default function RouteMap({ user, destination, onRouteCalculated }: Route
       userMarkerRef.current.setLatLng([user.lat, user.lng]);
     }
 
-    // Evita refazer requisição para a mesma posição arredondada
-    const key = `${user.lat.toFixed(4)},${user.lng.toFixed(4)}`;
+    // Evita refazer requisição para a mesma posição+destino arredondados
+    const key = `${user.lat.toFixed(4)},${user.lng.toFixed(4)}->${destination.lat.toFixed(4)},${destination.lng.toFixed(4)}`;
     if (routeRequestedRef.current === key) return;
     routeRequestedRef.current = key;
 
