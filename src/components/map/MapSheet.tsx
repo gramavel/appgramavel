@@ -46,7 +46,7 @@ function formatDuration(min: number) {
 }
 
 export default function MapSheet({ open, onClose, establishment }: MapSheetProps) {
-  const { coords, loading } = useLocation();
+  const { coords, loading, permissionState, requestLocation } = useLocation();
   const [routeData, setRouteData] = useState<RouteResult | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(true);
   const [navigating, setNavigating] = useState(false);
