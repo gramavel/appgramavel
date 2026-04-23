@@ -1,188 +1,74 @@
 
+## Auditoria do Mapa de Navegação — Bugs encontrados e correções
 
-## Auditoria completa de UI/UX — Gramável Design System
+Após análise de `NavigationView.tsx`, `RouteMap.tsx`, `MapSheet.tsx` e `lib/routing.ts`, identifiquei os seguintes problemas e proponho as correções abaixo.
 
-Auditoria realizada em 17 arquivos. Abaixo, todas as inconsistencias encontradas e as correções a aplicar.
+### Bugs identificados
 
----
+**1. Pin de destino com transform conflitante (renderização quebrada)**
+Em `NavigationView.tsx` linha 101, há dois `transform:` no mesmo style inline — o segundo sobrescreve o primeiro, fazendo o ícone não centralizar corretamente.
 
-### 1. index.css — Adicionar utilitário global `animate-fade-in-up`
+**2. Polyline não é removida ao recalcular rota**
+Em `NavigationView.tsx` linha 128, o `removeLayer` só funciona para `Polyline`, mas armazenamos um `LayerGroup` (linha 144). Resultado: ao recalcular a rota (linha 256), as linhas antigas ficam acumuladas no mapa.
 
-Adicionar keyframe `fadeInUp` e classe `.animate-fade-in-up` no `@layer utilities`. Isso permite remover todos os blocos `<style>` inline duplicados em 7 arquivos.
+**3. Recálculo de rota dispara em loop**
+A condição da linha 254 (`>120m do step atual`) pode ser satisfeita continuamente em vias longas, disparando `getRoute` repetidamente sem debounce. Falta um guard de tempo/flag de "já recalculando".
 
----
+**4. Marcador do usuário recriado a cada heading change**
+Em `NavigationView.tsx` linhas 190–217, o `useEffect` depende de `heading`, recriando o `divIcon` e fazendo `setIcon` a cada mudança — perde a transição suave da seta e força reflow.
 
-### 2. Remoção de `<style>` inline em 7 arquivos
+**5. ETA usa velocidade fixa de 40 km/h**
+Linha 292 calcula ETA assumindo 40 km/h independente do tempo real retornado pelo OSRM. Devíamos usar `route.steps[i].durationS` restante.
 
-Remover blocos `<style>{...fadeInUp...}</style>` e substituir por `className="animate-fade-in-up"` com `style={{ animationDelay }}` apenas para delays:
+**6. `arrived` nunca é resetado**
+Se o usuário se afastar do destino após chegar, o estado `arrived` permanece `true` permanentemente até fechar a tela.
 
-- `Profile.tsx` (L235-240)
-- `Roteiros.tsx` (L351-356, L453-458, L201-206 scaleIn)
-- `SavedPlaces.tsx` (L78-83)
-- `Routes.tsx` (L196-201)
-- `UserCoupons.tsx` (L83-88)
-- `Badges.tsx` (L127-143) — fadeInScale e fadeInUp e shimmer. Mover fadeInScale e shimmer para index.css também.
+**7. `getCurrentPosition` redundante**
+Linhas 150–154: chamada one-shot antes do `watchPosition`, sem necessidade — o watch já entrega a primeira posição rapidamente. Causa duplo `setCoords` e potencial flicker inicial.
 
----
+**8. Speech anuncia step inicial mesmo após retomar do background**
+`lastSpokenRef` é resetado ao montar, mas se o componente re-renderizar com novo `route` (após recálculo), reanuncia o passo 0 desnecessariamente.
 
-### 3. Border Radius — Sistema de 3 níveis
+**9. Pulse animation pesada em mobile**
+A animação `nav-pulse` (linha 199) escala 4x continuamente — em iOS pode causar jank. Reduzir intensidade.
 
-**Cards → `rounded-xl`** (atualmente `rounded-lg`):
-- `PostCard.tsx` L33: `rounded-lg` → `rounded-xl`
-- `CouponCard.tsx` L22: Card component (usa default `rounded-lg` do Card) → adicionar `className` com `rounded-xl`
-- `SavedPlaces.tsx` L47: `rounded-lg` → `rounded-xl`
-- `UserCoupons.tsx` L14: `rounded-lg` → `rounded-xl`
-- `Explore.tsx` L253, L278, L304: category grid e carousel cards `rounded-lg` → `rounded-xl`
-- `Explore.tsx` L164, L345: list cards (Card component) → adicionar `rounded-xl`
-- `Profile.tsx` L109: stats card `rounded-lg` → `rounded-xl`
-- `Profile.tsx` L136: badge chips `rounded-lg` → `rounded-xl`
-- `Profile.tsx` L168: timeline items `rounded-lg` → `rounded-xl`
-- `ProximityCheckinCard.tsx` L13: `rounded-lg` → `rounded-xl`
-- `NotificationsSheet.tsx`: items já não têm border-radius explícito (ok)
-- `Settings.tsx` L51: notification card `rounded-lg` → `rounded-xl`
-- `Routes.tsx` L53: RouteCard `rounded-lg` → `rounded-xl`
+**10. CartoDB tile maxZoom=20 inválido**
+CartoDB Voyager suporta até zoom 19; pedir 20 retorna 404 nas tiles em zoom máximo.
 
-**Buttons → `rounded-full`** (remover `rounded-md`):
-- `Auth.tsx` L58, L67: `rounded-md` → `rounded-full`
-- `Settings.tsx` L63: `rounded-md` → `rounded-full`
-- `Settings.tsx` L85, L86: AlertDialog buttons `rounded-md` → `rounded-full`
-- `Establishment.tsx` L160: "Deixar avaliação" `rounded-md` → `rounded-full`
-- `Establishment.tsx` L229, L232: Ligar/WhatsApp `rounded-md` → `rounded-full`
-- `CouponCard.tsx` L51: "Ativar Cupom" `rounded-md` → `rounded-full`
+**11. Falta cleanup do `speechSynthesis` ao trocar de step rapidamente**
+A fila de voz pode acumular se o usuário passar por muitas manobras curtas seguidas.
 
-**Modais/Dialogs → `rounded-2xl`**:
-- `CouponCard.tsx` L62: DialogContent → adicionar `rounded-2xl`
-- `Settings.tsx` L77: AlertDialogContent → adicionar `rounded-2xl`
-- Roteiros.tsx L332: AlertDialogContent já tem `rounded-2xl` (ok)
+### Correções propostas
 
-**Photos grid → `rounded-lg`** (ok, é "pequeno"):
-- `Establishment.tsx` L143: `rounded-md` → `rounded-lg`
+**`src/components/map/NavigationView.tsx`**
+- Corrigir transform do pin de destino (consolidar em um único `transform`).
+- Trocar armazenamento da polyline por `L.LayerGroup` tipado e remover via `polylineGroupRef.current.remove()`.
+- Adicionar `recalcInProgressRef` + `lastRecalcAtRef` (debounce de 8s) antes de chamar `getRoute` no recálculo.
+- Separar effect do marker em dois: criação/posição (deps: coords, recentering) e rotação (deps: heading), aplicando `transform` via DOM diretamente no elemento do ícone.
+- Calcular ETA somando `durationS` dos steps restantes + proporção do step atual baseado em `distanceToManeuver`.
+- Resetar `arrived` se `distToDest > 60m` novamente.
+- Remover `getCurrentPosition` redundante.
+- Resetar `lastSpokenRef.current = -1` quando `route` mudar (após recálculo) e cancelar fila de voz antes de cada `speak`.
+- Reduzir keyframes do pulse (scale 0.8 → 1.8, opacity 0.6 → 0).
+- Trocar `maxZoom: 20` por `19` e limitar `setView` para `Math.min(18, 19)`.
 
-**Card base component** (`src/components/ui/card.tsx`):
-- L6: `rounded-lg` → `rounded-xl` para default, e `shadow-sm` → `shadow-card`
+**`src/components/map/RouteMap.tsx`**
+- Mesma correção do tile `maxZoom` (já está em 19, ok — manter).
+- Garantir que `routeRequestedRef` seja resetado quando `destination` mudar (atualmente depende só do user).
 
----
+**`src/lib/routing.ts`**
+- Expor `totalDurationS` no `RouteResult` para o ETA real (ou usar soma dos steps já existentes — sem mudança necessária).
 
-### 4. Sombras — Sistema unificado
+### Resultado esperado
+- Pin de destino renderiza corretamente.
+- Linhas da rota não se acumulam.
+- Sem chamadas repetidas ao OSRM.
+- Seta do usuário gira suavemente (transição CSS preservada).
+- ETA condizente com a rota OSRM.
+- Estado de "chegou" responsivo.
+- Sem 404s de tiles em zoom alto.
+- Fila de voz limpa entre manobras.
 
-**Remover `shadow-sm` e `shadow-md` de cards/componentes de app** (manter em shadcn internos):
-- `card.tsx` L6: `shadow-sm` → `shadow-card`
-- `ExploreMap.tsx` L192: `shadow-sm` → `shadow-card`
-- `Roteiros.tsx` L522, L559: `shadow-sm hover:shadow-md` → `shadow-card hover:shadow-card-hover`
-- `FilterChips.tsx` L18: `shadow-md` → remover (active chip não precisa shadow)
-- `GlobalHeader.tsx` L22: `shadow-sm` → remover (header usa border-b, shadow desnecessário)
-
-**Manter `shadow-md` em**: popover, dropdown, tooltip, select (shadcn internos — ok), FAB (ok usa `shadow-lg`), ExploreMap locate button (ok).
-
----
-
-### 5. Tipografia — Hierarquia consistente
-
-**Section labels → `text-[11px] font-bold tracking-widest uppercase`**:
-- `Explore.tsx` L247: `text-lg font-semibold` → `text-base font-semibold tracking-tight` (é título de seção, não label)
-- `Explore.tsx` L274, L300, L326, L342: `text-lg font-semibold` → `text-base font-semibold tracking-tight`
-- `Profile.tsx` L129, L152, L197: já usa `text-xs font-bold tracking-widest uppercase` (ok)
-
-**Badges section labels** em `Badges.tsx` L61, L94: `text-xs font-semibold` → `text-[11px] font-bold tracking-widest uppercase` para consistência com Profile.
-
----
-
-### 6. Espaçamento — Card padding `p-4`
-
-- `Roteiros.tsx` L522, L559: route list items `p-3` → `p-4`
-- `Roteiros.tsx` L285: next stop preview `p-3` → `p-4`
-- `Roteiros.tsx` L407: timeline stop items `p-3` → `p-4`
-- `Roteiros.tsx` L718: establishment selection items `p-2.5` → `p-4` (ou manter menor para lista densa — aceitar `p-3` mínimo)
-
----
-
-### 7. Empty States — Padrão unificado
-
-Padronizar com icon `w-12 h-12` em circle `w-16 h-16 rounded-full bg-secondary`, título `text-sm font-semibold`, descrição `text-xs text-muted-foreground`:
-
-- `Explore.tsx` L155, L187: texto simples → padrão com ícone
-- `Coupons.tsx` L27: texto simples → padrão com ícone Ticket
-- `Feed.tsx` L28: texto simples → padrão com ícone
-- `Roteiros.tsx` L538: texto simples → padrão com ícone (Meus roteiros já tem o padrão correto L597-608, só o sugeridos vazio precisa)
-- `UserCoupons.tsx` L61, L72: já tem ícone mas falta circle bg-secondary wrapper e título semibold
-- `Routes.tsx` L156, L175: idem
-- `SavedPlaces.tsx` L39: idem — já tem ícone, falta wrapper
-
----
-
-### 8. Sheets — Padrão unificado
-
-- `SaveSheet.tsx` L33: já `rounded-t-2xl` (ok)
-- `Establishment.tsx` L188: já `rounded-t-2xl` (ok)
-- `Roteiros.tsx` L625: já `rounded-t-2xl` (ok)
-- `NotificationsSheet.tsx` L67: é side="right", não bottom — ok sem rounded-t
-
----
-
-### 9. Animações — Centralizar no index.css
-
-Adicionar ao `index.css`:
-```css
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up {
-  animation: fadeInUp 0.4s ease-out both;
-}
-
-@keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-.animate-fade-in-scale {
-  animation: fadeInScale 0.5s ease-out both;
-}
-
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.85); }
-  to { opacity: 1; transform: scale(1); }
-}
-.animate-scale-in {
-  animation: scaleIn 0.5s ease-out both;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-.animate-shimmer {
-  animation: shimmer 3s infinite;
-}
-```
-
----
-
-### Resumo de arquivos a editar (14 arquivos)
-
-| Arquivo | Mudanças |
-|---------|----------|
-| `src/index.css` | Adicionar 4 keyframes + classes utilitárias |
-| `src/components/ui/card.tsx` | `rounded-lg` → `rounded-xl`, `shadow-sm` → `shadow-card` |
-| `src/components/ui/FilterChips.tsx` | Remover `shadow-md` do active chip |
-| `src/components/layout/GlobalHeader.tsx` | Remover `shadow-sm` |
-| `src/components/feed/PostCard.tsx` | `rounded-lg` → `rounded-xl` |
-| `src/components/feed/ProximityCheckinCard.tsx` | `rounded-lg` → `rounded-xl` |
-| `src/components/coupons/CouponCard.tsx` | `rounded-xl`, button `rounded-full`, dialog `rounded-2xl` |
-| `src/components/SaveSheet.tsx` | Card items `rounded-lg` → `rounded-xl` |
-| `src/pages/Auth.tsx` | Buttons `rounded-full` |
-| `src/pages/Explore.tsx` | Cards `rounded-xl`, section titles `text-base`, empty states padronizados |
-| `src/pages/Establishment.tsx` | Buttons `rounded-full`, photo grid `rounded-lg`, review cards `rounded-xl` |
-| `src/pages/Roteiros.tsx` | Shadows → `shadow-card`, padding `p-4`, remover `<style>` inline |
-| `src/pages/Profile.tsx` | Cards `rounded-xl`, remover `<style>` inline |
-| `src/pages/Feed.tsx` | Empty state padronizado |
-| `src/pages/Coupons.tsx` | Empty state padronizado |
-| `src/pages/profile/SavedPlaces.tsx` | Cards `rounded-xl`, empty state, remover `<style>` |
-| `src/pages/profile/Settings.tsx` | Buttons `rounded-full`, card `rounded-xl`, dialog `rounded-2xl` |
-| `src/pages/profile/Routes.tsx` | Card `rounded-xl`, empty states, remover `<style>` |
-| `src/pages/profile/UserCoupons.tsx` | Cards `rounded-xl`, empty states, remover `<style>` |
-| `src/pages/profile/Badges.tsx` | Section labels, card radius `rounded-xl`, remover `<style>` |
-| `src/components/map/ExploreMap.tsx` | `shadow-sm` → `shadow-card` |
-
-Nenhuma mudança em lógica, dados mock, rotas ou Supabase — apenas classes Tailwind.
-
+### Arquivos a modificar
+- `src/components/map/NavigationView.tsx` (principal)
+- `src/components/map/RouteMap.tsx` (ajuste menor)
