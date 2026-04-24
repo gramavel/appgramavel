@@ -1,50 +1,119 @@
 import { createRoot } from "react-dom/client";
+import { toast } from "sonner";
 import App from "./App.tsx";
 import "./index.css";
 
-async function setupServiceWorker() {
-  if (!("serviceWorker" in navigator)) return false;
-
-  const hostname = window.location.hostname;
-  const isLovablePreviewHost =
-    hostname.endsWith(".lovable.app") || hostname.endsWith(".lovableproject.com");
-
-  if (import.meta.env.PROD && !isLovablePreviewHost) {
-    try {
-      const registration = await navigator.serviceWorker.register("/sw.js");
-      console.log("Service Worker registrado:", registration.scope);
-    } catch (error) {
-      console.error("Falha ao registrar Service Worker:", error);
-    }
-    return false;
+function isInIframe() {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
   }
+}
 
-  const hadController = Boolean(navigator.serviceWorker.controller);
-  const registrations = await navigator.serviceWorker.getRegistrations();
-  await Promise.all(registrations.map((registration) => registration.unregister()));
+function isLovablePreviewHost() {
+  const h = window.location.hostname;
+  return (
+    h.includes("id-preview--") ||
+    h.endsWith(".lovableproject.com") ||
+    h.endsWith(".lovable.app") === false
+      ? false
+      : h.includes("id-preview--") || h.endsWith(".lovableproject.com")
+  );
+}
 
+// Simpler check: only register SW in production AND not in iframe AND not in dev preview
+function shouldRegisterSW() {
+  if (!("serviceWorker" in navigator)) return false;
+  if (!import.meta.env.PROD) return false;
+  if (isInIframe()) return false;
+  const h = window.location.hostname;
+  if (h.includes("id-preview--") || h.endsWith(".lovableproject.com")) return false;
+  return true;
+}
+
+async function unregisterAllSW() {
+  if (!("serviceWorker" in navigator)) return false;
+  const regs = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(regs.map((r) => r.unregister()));
   if ("caches" in window) {
     const keys = await caches.keys();
-    await Promise.all(keys.map((key) => caches.delete(key)));
+    await Promise.all(keys.map((k) => caches.delete(k)));
+  }
+  return regs.length > 0;
+}
+
+function notifyUpdateReady(registration: ServiceWorkerRegistration) {
+  const waiting = registration.waiting;
+  if (!waiting) return;
+  toast("Nova versão disponível", {
+    description: "Atualize para ver as últimas melhorias.",
+    duration: Infinity,
+    action: {
+      label: "Atualizar",
+      onClick: () => {
+        waiting.postMessage("SKIP_WAITING");
+      },
+    },
+  });
+}
+
+async function setupServiceWorker() {
+  if (!shouldRegisterSW()) {
+    // In preview/iframe/dev: ensure no leftover SW interferes
+    const had = await unregisterAllSW();
+    return had;
   }
 
-  return hadController || registrations.length > 0;
+  try {
+    const registration = await navigator.serviceWorker.register("/sw.js", {
+      updateViaCache: "none",
+    });
+
+    // If a worker is already waiting, prompt immediately
+    if (registration.waiting) notifyUpdateReady(registration);
+
+    // Detect future updates
+    registration.addEventListener("updatefound", () => {
+      const newWorker = registration.installing;
+      if (!newWorker) return;
+      newWorker.addEventListener("statechange", () => {
+        if (
+          newWorker.state === "installed" &&
+          navigator.serviceWorker.controller
+        ) {
+          notifyUpdateReady(registration);
+        }
+      });
+    });
+
+    // Reload once when the new SW takes control
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
+    // Periodic update check (every 30 min while open)
+    setInterval(() => registration.update().catch(() => {}), 30 * 60 * 1000);
+  } catch (error) {
+    console.error("Falha ao registrar Service Worker:", error);
+  }
+  return false;
 }
 
 setupServiceWorker()
   .then((shouldReload) => {
     const reloadFlag = "__gramavel_sw_dev_reload_done__";
-
     if (shouldReload && !sessionStorage.getItem(reloadFlag)) {
       sessionStorage.setItem(reloadFlag, "1");
       window.location.reload();
       return;
     }
-
     sessionStorage.removeItem(reloadFlag);
     createRoot(document.getElementById("root")!).render(<App />);
   })
-  .catch((error) => {
-    console.error("Falha ao inicializar Service Worker em dev:", error);
+  .catch(() => {
     createRoot(document.getElementById("root")!).render(<App />);
   });
