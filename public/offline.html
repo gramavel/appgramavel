@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#5f72ff" />
+    <title>Sem conexão — Gramável</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; height: 100%; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(135deg, #5f72ff 0%, #94a3ff 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+      }
+      .card {
+        max-width: 360px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        padding: 32px 24px;
+      }
+      .icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+      }
+      h1 { font-size: 22px; margin: 0 0 8px; font-weight: 700; }
+      p { font-size: 15px; margin: 0 0 24px; opacity: 0.9; line-height: 1.5; }
+      button {
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        background: #fff;
+        color: #5f72ff;
+        border: none;
+        border-radius: 999px;
+        padding: 12px 28px;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+        min-height: 48px;
+      }
+      button:active { transform: scale(0.97); }
+      .hint { font-size: 12px; opacity: 0.7; margin-top: 16px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="icon" aria-hidden="true">📡</div>
+      <h1>Sem conexão</h1>
+      <p>Você está offline. Verifique sua internet para continuar explorando Gramado e Canela.</p>
+      <button onclick="location.reload()">Tentar novamente</button>
+      <div class="hint">Gramável</div>
+    </div>
+  </body>
+</html>
