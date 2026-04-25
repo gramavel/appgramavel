@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useReducer, useMemo, useEffect, useState } from "react";
+import React, { createContext, useContext, useReducer, useMemo, useEffect } from "react";
 import { getFavorites, addFavorite, removeFavorite, getSavedPosts, addSavedPost, removeSavedPost } from "@/services/favorites";
+import { useAuth } from "@/contexts/AuthContext";
 
 type State = { savedPlaces: string[]; savedPosts: string[]; loaded: boolean };
 
@@ -48,6 +49,7 @@ interface FavoritesContextType {
 const FavoritesContext = createContext<FavoritesContextType | null>(null);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [state, dispatch] = useReducer(favoritesReducer, {
     savedPlaces: [],
     savedPosts: [],
@@ -57,24 +59,32 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const savedPlacesSet = useMemo(() => new Set(state.savedPlaces), [state.savedPlaces]);
   const savedPostsSet = useMemo(() => new Set(state.savedPosts), [state.savedPosts]);
 
-  async function load() {
-    const [{ data: places }, { data: posts }] = await Promise.all([
-      getFavorites(),
-      getSavedPosts(),
-    ]);
-    dispatch({
-      type: "INIT",
-      savedPlaces: places?.map((p) => p.establishment_id) ?? [],
-      savedPosts: posts?.map((p) => p.post_id) ?? [],
-    });
-  }
-
   useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      if (!user?.id) {
+        dispatch({ type: "INIT", savedPlaces: [], savedPosts: [] });
+        return;
+      }
+      const [{ data: places }, { data: posts }] = await Promise.all([
+        getFavorites(user.id),
+        getSavedPosts(user.id),
+      ]);
+      if (cancelled) return;
+      dispatch({
+        type: "INIT",
+        savedPlaces: places?.map((p) => p.establishment_id) ?? [],
+        savedPosts: posts?.map((p) => p.post_id) ?? [],
+      });
+    }
     load();
     const handler = () => load();
     window.addEventListener("favorites:changed", handler);
-    return () => window.removeEventListener("favorites:changed", handler);
-  }, []);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("favorites:changed", handler);
+    };
+  }, [user?.id]);
 
   const value = useMemo(() => ({
     savedPlaces: state.savedPlaces,

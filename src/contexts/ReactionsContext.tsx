@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useMemo, useEffect, useRef, useCallback } from "react";
 import { getUserReactions } from "@/services/reactions";
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentUserId } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 type State = {
   reactions: Record<string, string[]>;
@@ -65,6 +65,7 @@ interface ReactionsContextType {
 const ReactionsContext = createContext<ReactionsContextType | null>(null);
 
 export function ReactionsProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [state, dispatch] = useReducer(reactionsReducer, {
     reactions: {},
     countDeltas: {},
@@ -74,8 +75,14 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
   const pendingRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
-      const { data } = await getUserReactions();
+      if (!user?.id) {
+        dispatch({ type: "INIT", reactions: {} });
+        return;
+      }
+      const { data } = await getUserReactions(user.id);
+      if (cancelled) return;
       const reactions: Record<string, string[]> = {};
       data?.forEach((r) => {
         reactions[r.post_id] = [r.emoji];
@@ -83,7 +90,10 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "INIT", reactions });
     }
     load();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   const getReaction = useCallback(
     (postId: string): string | null => state.reactions[postId]?.[0] ?? null,
@@ -97,6 +107,7 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
 
   const setReaction = useCallback(
     async (postId: string, emoji: string) => {
+      if (!user?.id) return;
       if (pendingRef.current.has(postId)) return;
       pendingRef.current.add(postId);
 
@@ -110,10 +121,9 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const userId = await getCurrentUserId();
-        const { data, error } = await supabase.rpc("upsert_post_reaction", {
+        const { error } = await supabase.rpc("upsert_post_reaction", {
           p_post_id: postId,
-          p_user_id: userId,
+          p_user_id: user.id,
           p_emoji: emoji,
         });
 
@@ -132,7 +142,7 @@ export function ReactionsProvider({ children }: { children: React.ReactNode }) {
         pendingRef.current.delete(postId);
       }
     },
-    [state.reactions]
+    [state.reactions, user?.id]
   );
 
   const value = useMemo(() => ({

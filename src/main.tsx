@@ -3,6 +3,10 @@ import { toast } from "sonner";
 import App from "./App.tsx";
 import "./index.css";
 
+// ---- Render IMMEDIATELY (no awaits before first paint) ----
+createRoot(document.getElementById("root")!).render(<App />);
+
+// ---- Service Worker setup runs in background, never blocks UI ----
 function isInIframe() {
   try {
     return window.self !== window.top;
@@ -11,18 +15,6 @@ function isInIframe() {
   }
 }
 
-function isLovablePreviewHost() {
-  const h = window.location.hostname;
-  return (
-    h.includes("id-preview--") ||
-    h.endsWith(".lovableproject.com") ||
-    h.endsWith(".lovable.app") === false
-      ? false
-      : h.includes("id-preview--") || h.endsWith(".lovableproject.com")
-  );
-}
-
-// Simpler check: only register SW in production AND not in iframe AND not in dev preview
 function shouldRegisterSW() {
   if (!("serviceWorker" in navigator)) return false;
   if (!import.meta.env.PROD) return false;
@@ -33,14 +25,17 @@ function shouldRegisterSW() {
 }
 
 async function unregisterAllSW() {
-  if (!("serviceWorker" in navigator)) return false;
-  const regs = await navigator.serviceWorker.getRegistrations();
-  await Promise.all(regs.map((r) => r.unregister()));
-  if ("caches" in window) {
-    const keys = await caches.keys();
-    await Promise.all(keys.map((k) => caches.delete(k)));
+  if (!("serviceWorker" in navigator)) return;
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map((r) => r.unregister()));
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+  } catch {
+    // ignore
   }
-  return regs.length > 0;
 }
 
 function notifyUpdateReady(registration: ServiceWorkerRegistration) {
@@ -60,9 +55,9 @@ function notifyUpdateReady(registration: ServiceWorkerRegistration) {
 
 async function setupServiceWorker() {
   if (!shouldRegisterSW()) {
-    // In preview/iframe/dev: ensure no leftover SW interferes
-    const had = await unregisterAllSW();
-    return had;
+    // Cleanup leftover SW in preview/iframe — fire and forget
+    unregisterAllSW();
+    return;
   }
 
   try {
@@ -70,10 +65,8 @@ async function setupServiceWorker() {
       updateViaCache: "none",
     });
 
-    // If a worker is already waiting, prompt immediately
     if (registration.waiting) notifyUpdateReady(registration);
 
-    // Detect future updates
     registration.addEventListener("updatefound", () => {
       const newWorker = registration.installing;
       if (!newWorker) return;
@@ -87,7 +80,6 @@ async function setupServiceWorker() {
       });
     });
 
-    // Reload once when the new SW takes control
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (refreshing) return;
@@ -95,10 +87,8 @@ async function setupServiceWorker() {
       window.location.reload();
     });
 
-    // Periodic update check (every 30 min while open)
     setInterval(() => registration.update().catch(() => {}), 30 * 60 * 1000);
 
-    // Log active SW version for diagnostics
     const logVersion = () => {
       const target = navigator.serviceWorker.controller || registration.active;
       if (!target) return;
@@ -117,20 +107,12 @@ async function setupServiceWorker() {
   } catch (error) {
     console.error("Falha ao registrar Service Worker:", error);
   }
-  return false;
 }
 
-setupServiceWorker()
-  .then((shouldReload) => {
-    const reloadFlag = "__gramavel_sw_dev_reload_done__";
-    if (shouldReload && !sessionStorage.getItem(reloadFlag)) {
-      sessionStorage.setItem(reloadFlag, "1");
-      window.location.reload();
-      return;
-    }
-    sessionStorage.removeItem(reloadFlag);
-    createRoot(document.getElementById("root")!).render(<App />);
-  })
-  .catch(() => {
-    createRoot(document.getElementById("root")!).render(<App />);
-  });
+// Defer SW work until the browser is idle so it doesn't fight initial render
+const scheduleIdle =
+  (window as any).requestIdleCallback ||
+  ((cb: () => void) => setTimeout(cb, 1));
+scheduleIdle(() => {
+  setupServiceWorker();
+});

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useMemo, useEffect } from "react";
 import { getUserCoupons, saveCoupon, unsaveCoupon, useCouponService } from "@/services/coupons";
+import { useAuth } from "@/contexts/AuthContext";
 
 type State = { savedCoupons: string[]; usedCoupons: string[]; loaded: boolean };
 
@@ -50,6 +51,7 @@ interface CouponsContextType {
 const CouponsContext = createContext<CouponsContextType | null>(null);
 
 export function CouponsProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [state, dispatch] = useReducer(couponsReducer, {
     savedCoupons: [],
     usedCoupons: [],
@@ -60,8 +62,14 @@ export function CouponsProvider({ children }: { children: React.ReactNode }) {
   const usedSet = useMemo(() => new Set(state.usedCoupons), [state.usedCoupons]);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
-      const { data } = await getUserCoupons();
+      if (!user?.id) {
+        dispatch({ type: "INIT", savedCoupons: [], usedCoupons: [] });
+        return;
+      }
+      const { data } = await getUserCoupons(user.id);
+      if (cancelled) return;
       const saved: string[] = [];
       const used: string[] = [];
       data?.forEach((uc) => {
@@ -71,7 +79,10 @@ export function CouponsProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "INIT", savedCoupons: saved, usedCoupons: used });
     }
     load();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   const value = useMemo(() => ({
     savedCoupons: state.savedCoupons,
