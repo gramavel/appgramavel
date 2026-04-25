@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createAppQueryClient } from "@/lib/queries";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -40,7 +41,7 @@ const AdminApp = lazy(() => import("./admin/AdminApp"));
 const AdminRouter = lazy(() => import("./admin/AdminRouter"));
 const AdminLogin = lazy(() => import("./admin/pages/AdminLogin"));
 
-const queryClient = new QueryClient();
+const queryClient = createAppQueryClient();
 
 function ScrollRestore() {
   useScrollRestore();
