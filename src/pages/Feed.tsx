@@ -65,31 +65,43 @@ export default function Feed() {
     });
   }, []);
 
-  // Load establishments from user's active routes
+  // Load establishments from user's active routes (single nested query)
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
     async function loadRouteEstablishments() {
       const { data: routes } = await supabase
         .from("user_routes")
-        .select("id")
+        .select(
+          "id, user_route_stops!inner(establishment_id, visited, establishment:establishments(id, name, slug, latitude, longitude))"
+        )
         .eq("user_id", user!.id)
-        .in("status", ["saved", "in_progress"]);
-      if (!routes || routes.length === 0) { setRouteEstablishments([]); return; }
-      const routeIds = routes.map(r => r.id);
-      const { data: stops } = await supabase
-        .from("user_route_stops")
-        .select("establishment_id, visited")
-        .in("user_route_id", routeIds)
-        .eq("visited", false);
-      if (!stops || stops.length === 0) { setRouteEstablishments([]); return; }
-      const estIds = [...new Set(stops.map(s => s.establishment_id))];
-      const { data: ests } = await supabase
-        .from("establishments")
-        .select("id, name, latitude, longitude, slug")
-        .in("id", estIds);
-      setRouteEstablishments(ests ?? []);
+        .in("status", ["saved", "in_progress"])
+        .eq("user_route_stops.visited", false);
+
+      if (cancelled) return;
+      if (!routes || routes.length === 0) {
+        setRouteEstablishments([]);
+        return;
+      }
+
+      const seen = new Set<string>();
+      const ests: any[] = [];
+      for (const r of routes) {
+        for (const stop of (r as any).user_route_stops ?? []) {
+          const est = stop.establishment;
+          if (est && !seen.has(est.id)) {
+            seen.add(est.id);
+            ests.push(est);
+          }
+        }
+      }
+      setRouteEstablishments(ests);
     }
     loadRouteEstablishments();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   // Find nearest route establishment within 300m
