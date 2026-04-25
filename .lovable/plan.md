@@ -1,34 +1,39 @@
+## Implementar pré-cache do shell + botão "Limpar cache"
 
+### 1. `public/sw.js` — Pré-cachear o shell e separar caches persistentes
 
-## Corrigir mensagem incorreta de "Ative a localização"
+- Adicionar `/` e `/index.html` ao `PRECACHE_URLS` para garantir que o shell da última versão instalada esteja sempre disponível offline.
+- Renomear o cache de runtime para `SHELL_CACHE` versionado (`gramavel-shell-${VERSION}`).
+- Tornar `ASSET_CACHE` e `IMAGE_CACHE` **persistentes entre versões** (sem prefixo `${VERSION}`):
+  - `ASSET_CACHE = 'gramavel-assets-v1'`
+  - `IMAGE_CACHE = 'gramavel-images-v1'`
+- No `activate`, deletar apenas caches `gramavel-shell-*` que não sejam o atual; preservar assets/images.
+- Manter estratégias atuais (network-first p/ navegação com fallback ao `/index.html` cacheado, cache-first para hashed assets, SWR com TTL para imagens).
+- Adicionar handler de mensagem `GET_VERSION` que responde com a versão atual via `event.ports[0]`.
+- Logar `VERSION` no `install` e `activate`.
 
-### Problema
-O `LocationContext` chama `getCurrentPosition` apenas uma vez no boot do app, com timeout curto (5s) e sem `enableHighAccuracy`. Se essa primeira chamada falhar (timeout, demora do GPS, navegador desktop, troca de aba), `coords` fica `null` para sempre. O `MapSheet` então mostra "Ative a localização para ver a rota" e desabilita o botão "Iniciar navegação", mesmo com a permissão concedida.
+### 2. `src/pages/profile/Settings.tsx` — Botão "Limpar cache do app"
 
-### Correções
+- Adicionar Card "Avançado" com botão `variant="outline"` (ícone `Trash2`) "Limpar cache do app".
+- Ao clicar: abrir `AlertDialog` de confirmação.
+- Ao confirmar:
+  1. `caches.keys()` → deletar todas.
+  2. `navigator.serviceWorker.getRegistrations()` → `unregister()` em todas.
+  3. Toast "Cache limpo. Recarregando…"
+  4. `window.location.reload()`.
+- Tratar ausência de `caches`/`serviceWorker` (fallback: apenas reload).
 
-**`src/contexts/LocationContext.tsx`**
-- Verificar `navigator.permissions.query({ name: 'geolocation' })` antes de pedir posição (quando disponível) para diferenciar `denied` de `prompt/granted`.
-- Substituir o `getCurrentPosition` único por uma estratégia mais robusta:
-  1. Primeira tentativa rápida com `enableHighAccuracy: false`, `maximumAge: 60000`, `timeout: 8000`.
-  2. Em paralelo iniciar `watchPosition` com `enableHighAccuracy: true` para atualizar `coords` quando o GPS responder, mesmo que a chamada inicial falhe.
-- Expor `permissionState` (`'granted' | 'denied' | 'prompt' | 'unknown'`) e uma função `requestLocation()` que força nova tentativa.
-- Em vez de `loading` ficar `false` apenas no callback do `getCurrentPosition`, marcar `loading=false` quando: (a) recebermos a primeira posição, (b) o erro for `PERMISSION_DENIED`, ou (c) timeout total de 10s expirar — para a UI não travar em "Carregando…".
-- Limpar o `watchPosition` no unmount.
+### 3. `src/main.tsx` — Log de versão do SW
 
-**`src/components/map/MapSheet.tsx`**
-- Trocar a lógica do estado vazio para usar `permissionState`:
-  - `permissionState === 'denied'` → "Ative a localização nas configurações do navegador para ver a rota."
-  - `loading` ou ainda sem coords mas permissão `granted/prompt` → mostrar skeleton dos chips (já existe) em vez da mensagem.
-  - Botão "Tentar novamente" chamando `requestLocation()` quando `coords` ainda é null e não está mais carregando.
-- Manter o disable do botão "Iniciar navegação" apenas quando realmente sem `coords` ou sem `routeData`, mas adicionar texto auxiliar consistente.
+- Após registrar o SW e ele ficar `active`, enviar `{ type: 'GET_VERSION' }` via `MessageChannel` e logar `[SW] versão ativa: …`.
 
-### Resultado esperado
-- Quando a permissão está concedida, `coords` é preenchido pelo `watchPosition` mesmo se a chamada inicial demorar; a UI deixa de mostrar "Ative a localização" indevidamente.
-- Quando a permissão está negada de fato, mensagem clara orientando ir às configurações.
-- Botão para retry manual sem precisar fechar/reabrir o app.
+### Resultado
+- Offline carrega sempre a **última versão instalada** do shell (não uma "fóssil").
+- Imagens e bundles hashed permanecem cacheados entre deploys (sem re-download desnecessário).
+- Usuário tem escape manual em Configurações se algo travar.
+- Console mostra a versão do SW ativo para diagnóstico.
 
-### Arquivos a modificar
-- `src/contexts/LocationContext.tsx`
-- `src/components/map/MapSheet.tsx`
-
+### Arquivos
+- `public/sw.js`
+- `src/pages/profile/Settings.tsx`
+- `src/main.tsx`
