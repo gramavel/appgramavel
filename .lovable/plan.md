@@ -1,39 +1,93 @@
-## Implementar pré-cache do shell + botão "Limpar cache"
+## Diagnóstico de performance — gargalos encontrados
 
-### 1. `public/sw.js` — Pré-cachear o shell e separar caches persistentes
+### 🔴 Críticos (bloqueiam o primeiro pixel)
 
-- Adicionar `/` e `/index.html` ao `PRECACHE_URLS` para garantir que o shell da última versão instalada esteja sempre disponível offline.
-- Renomear o cache de runtime para `SHELL_CACHE` versionado (`gramavel-shell-${VERSION}`).
-- Tornar `ASSET_CACHE` e `IMAGE_CACHE` **persistentes entre versões** (sem prefixo `${VERSION}`):
-  - `ASSET_CACHE = 'gramavel-assets-v1'`
-  - `IMAGE_CACHE = 'gramavel-images-v1'`
-- No `activate`, deletar apenas caches `gramavel-shell-*` que não sejam o atual; preservar assets/images.
-- Manter estratégias atuais (network-first p/ navegação com fallback ao `/index.html` cacheado, cache-first para hashed assets, SWR com TTL para imagens).
-- Adicionar handler de mensagem `GET_VERSION` que responde com a versão atual via `event.ports[0]`.
-- Logar `VERSION` no `install` e `activate`.
+1. **`src/main.tsx` faz await do Service Worker antes do `render`**  
+   `setupServiceWorker()` é aguardado antes de `createRoot().render(<App/>)`. Em produção isso significa esperar `register('/sw.js')` + handshake; em preview/iframe ainda chama `unregisterAllSW()` (que itera registrations + caches). A UI só pinta depois.
 
-### 2. `src/pages/profile/Settings.tsx` — Botão "Limpar cache do app"
+2. **Contextos rodam queries Supabase no boot sem esperar autenticação**  
+   `FavoritesProvider`, `ReactionsProvider`, `CouponsProvider` chamam `load()` em `useEffect([])` no mount, sem checar `user`. Cada `load()` ainda faz `supabase.auth.getUser()` (round-trip extra). Resultado: 4–6 queries paralelas competindo com o `getSession()` inicial → muitas voltam vazias por RLS (auth ainda null) e o app fica num "estado fantasma".
 
-- Adicionar Card "Avançado" com botão `variant="outline"` (ícone `Trash2`) "Limpar cache do app".
-- Ao clicar: abrir `AlertDialog` de confirmação.
-- Ao confirmar:
-  1. `caches.keys()` → deletar todas.
-  2. `navigator.serviceWorker.getRegistrations()` → `unregister()` em todas.
-  3. Toast "Cache limpo. Recarregando…"
-  4. `window.location.reload()`.
-- Tratar ausência de `caches`/`serviceWorker` (fallback: apenas reload).
+3. **`DEV_USER_ID` (`00000000-0000-0000-0000-000000000001`) usado como fallback em produção**  
+   `src/lib/auth.ts` e `src/services/coupons.ts` retornam esse UUID quando o usuário está deslogado. Causa queries inúteis + erros 401/RLS no console + lentidão no primeiro carregamento, antes do redirect para `/auth/login`.
 
-### 3. `src/main.tsx` — Log de versão do SW
+4. **`getPosts()` sem `.limit()`**  
+   Pode trazer todos os posts da base + JOINs com `establishments` e `reactions`. Custo cresce linearmente com o tempo. Limite explícito de 30 já cobre o feed inicial.
 
-- Após registrar o SW e ele ficar `active`, enviar `{ type: 'GET_VERSION' }` via `MessageChannel` e logar `[SW] versão ativa: …`.
+5. **LCP do Feed sem prioridade**  
+   `PostCard` recebe `isFirst` mas não passa `loading="eager"` + `fetchpriority="high"` na primeira `<img>`. Demais ficam com `loading="lazy"`.
 
-### Resultado
-- Offline carrega sempre a **última versão instalada** do shell (não uma "fóssil").
-- Imagens e bundles hashed permanecem cacheados entre deploys (sem re-download desnecessário).
-- Usuário tem escape manual em Configurações se algo travar.
-- Console mostra a versão do SW ativo para diagnóstico.
+### 🟡 Importantes
 
-### Arquivos
-- `public/sw.js`
-- `src/pages/profile/Settings.tsx`
+6. **`Feed.tsx loadRouteEstablishments`**: 3 queries sequenciais (`user_routes` → `user_route_stops` → `establishments`). Pode virar 1 query com JOIN ou rodar em paralelo via `Promise.all` + uma única `.in()`.
+
+7. **GA com placeholder `G-XXXXXXXXXX`** carrega `gtag.js` que falha em produção. ~100ms + erro no console. Remover até ter ID real (ou condicionar).
+
+8. **Service Worker pré-cacheia ícones** (`/icons/icon-192.png`, `/icons/icon-512.png`) que talvez não existam em `public/icons/`. Falha silenciosa, mas atrasa o `install`.
+
+### 🟢 Menores
+
+9. Reload duplo em alguns cenários do bootstrap do SW (lógica `__gramavel_sw_dev_reload_done__`).
+
+---
+
+## Correções propostas
+
+### 1. `src/main.tsx` — render imediato, SW em background
+- Renderizar `<App/>` **imediatamente** (síncrono, sem await).
+- Mover `setupServiceWorker()` para depois, em `requestIdleCallback` (fallback `setTimeout`).
+- Manter o toast "Nova versão disponível" e o `controllerchange → reload`.
+- Em iframe/preview, fazer `unregisterAllSW()` em background sem bloquear.
+
+### 2. `src/contexts/AuthContext.tsx` — expor `userId` resolvido cedo
+Já está OK, mas garantir que `loading=false` só após `getSession`. Sem mudança grande.
+
+### 3. `src/contexts/FavoritesContext.tsx` / `ReactionsContext.tsx` / `CouponsContext.tsx` — gate por `user`
+- Importar `useAuth`.
+- `useEffect` deve depender de `user?.id`. Se sem user, marcar `loaded=true` com listas vazias e **não chamar Supabase**.
+- Passar `user.id` direto pros services para eliminar `supabase.auth.getUser()` redundante.
+
+### 4. `src/lib/auth.ts` e `src/services/coupons.ts` — eliminar `DEV_USER_ID`
+- `getCurrentUserId` deve **lançar** ou retornar `null` se sem sessão; nunca o UUID fake.
+- Services devem receber `userId` obrigatório (ou não rodar quando ausente).
+
+### 5. `src/services/posts.ts` — `.limit(30)` + `.order('created_at', desc)`
+- Adicionar `.limit(30)` no `getPosts`.
+- Manter signature mas opcionalmente aceitar `limit`.
+
+### 6. `src/components/feed/PostCard.tsx` — LCP eager
+- Quando `isFirst`, passar `loading="eager"` + `fetchpriority="high"` + `decoding="async"` na `<img>` principal.
+- Demais: `loading="lazy"` + `decoding="async"`.
+
+### 7. `src/pages/Feed.tsx` — paralelizar carregamento de roteiros
+- Trocar 3 queries em série por: 1 query `user_routes` → 1 query única que une `user_route_stops` + `establishments` via `select` aninhado do Supabase (`user_route_stops(establishment_id, visited, establishment:establishments(id,name,slug,latitude,longitude))`).
+- Adicionar `.limit()` apropriado.
+
+### 8. `index.html` — remover GA placeholder
+- Comentar/remover bloco `gtag.js` enquanto `G-XXXXXXXXXX` for placeholder. Adicionar TODO.
+
+### 9. `public/sw.js` — pré-cache resiliente
+- Manter o `Promise.all` com `.catch(()=>{})` por URL (já está). Verificar se `/icons/icon-192.png` existe; se não, remover dos `PRECACHE_URLS`.
+
+---
+
+## Resultado esperado
+
+- **Primeiro paint**: queda significativa (sem await do SW + sem race de queries fantasma).
+- **Feed inicial**: TTI mais rápido por `.limit(30)` + LCP image com `fetchpriority=high`.
+- **Console limpo**: sem erros RLS de `DEV_USER_ID` nem GA 404.
+- **Navegação entre páginas**: continua usando os mesmos providers sem refetch redundante.
+
+## Arquivos a modificar
+
 - `src/main.tsx`
+- `src/contexts/FavoritesContext.tsx`
+- `src/contexts/ReactionsContext.tsx`
+- `src/contexts/CouponsContext.tsx`
+- `src/lib/auth.ts`
+- `src/services/coupons.ts`
+- `src/services/posts.ts`
+- `src/components/feed/PostCard.tsx`
+- `src/pages/Feed.tsx`
+- `index.html`
+- `public/sw.js` (verificar lista de pré-cache)
