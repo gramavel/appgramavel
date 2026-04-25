@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Camera, Save, LogOut, Bell, Pencil, X } from "lucide-react";
+import { Camera, Save, LogOut, Bell, Pencil, X, Trash2 } from "lucide-react";
 import { AgeScrollPicker } from "@/components/ui/AgeScrollPicker";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
@@ -181,6 +181,25 @@ export default function Settings() {
     navigate("/auth/login");
   };
 
+  async function handleClearCache() {
+    try {
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      toast.success("Cache limpo. Recarregando…");
+    } catch (err) {
+      console.error("Erro ao limpar cache:", err);
+      toast.error("Não foi possível limpar tudo. Recarregando mesmo assim.");
+    } finally {
+      setTimeout(() => window.location.reload(), 600);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Meu perfil" />
@@ -319,6 +338,39 @@ export default function Settings() {
             </div>
           </div>
           <Switch checked={notifications} onCheckedChange={setNotifications} />
+        </div>
+
+        {/* Advanced: clear cache */}
+        <div className="p-4 bg-card rounded-2xl border border-border shadow-card space-y-3">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Avançado</p>
+            <p className="text-xs text-muted-foreground">
+              Use se o app estiver travado ou mostrando uma versão antiga.
+            </p>
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="w-full rounded-full gap-2">
+                <Trash2 className="w-4 h-4" />
+                Limpar cache do app
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="rounded-2xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Limpar cache do app</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Isto vai apagar os dados salvos localmente e recarregar o app.
+                  Suas informações da conta não serão afetadas.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="rounded-full">Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleClearCache} className="rounded-full">
+                  Limpar e recarregar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         {/* Logout link */}

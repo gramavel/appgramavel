@@ -1,18 +1,25 @@
 // Gramável Service Worker
 // Strategy:
-// - HTML/navigation: network-first with 3s timeout, fallback to cache, then offline.html
-// - Versioned assets (/assets/*-[hash].*): cache-first (immutable)
-// - Images: stale-while-revalidate (TTL 7 days, max 60)
+// - HTML/navigation: network-first with 3s timeout, fallback to cached shell, then offline.html
+// - Versioned assets (/assets/*-[hash].*): cache-first (immutable, persistent across deploys)
+// - Images: stale-while-revalidate (TTL 7 days, max 60, persistent across deploys)
 // - Other GET same-origin: network-first with cache fallback
 // - Skip everything else (APIs, third-party, OAuth, dev assets)
 
-const VERSION = 'gramavel-v5-2026-04-24';
-const RUNTIME_CACHE = `${VERSION}-runtime`;
-const IMAGE_CACHE = `${VERSION}-images`;
-const ASSET_CACHE = `${VERSION}-assets`;
+const VERSION = 'gramavel-v6-2026-04-25';
+
+// Shell cache is versioned — replaced on every deploy so the latest HTML wins
+const SHELL_CACHE = `gramavel-shell-${VERSION}`;
+// Asset/image caches are persistent — never blown away on deploy.
+// Hashed asset filenames already guarantee freshness; images age via TTL.
+const ASSET_CACHE = 'gramavel-assets-v1';
+const IMAGE_CACHE = 'gramavel-images-v1';
+
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE_URLS = [
+  '/',
+  '/index.html',
   OFFLINE_URL,
   '/manifest.json',
   '/icons/icon-192.png',
@@ -25,20 +32,47 @@ const IMAGE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 // ---------- Install ----------
 self.addEventListener('install', (event) => {
+  console.log('[SW] install', VERSION);
   event.waitUntil(
-    caches.open(RUNTIME_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(SHELL_CACHE).then((cache) =>
+      // Use individual puts so a single failure doesn't abort the whole install
+      Promise.all(
+        PRECACHE_URLS.map((url) =>
+          fetch(url, { cache: 'reload' })
+            .then((res) => {
+              if (res && res.ok) return cache.put(url, res);
+            })
+            .catch(() => {})
+        )
+      )
+    )
   );
   // Don't auto-activate — wait for client SKIP_WAITING message
 });
 
 // ---------- Activate ----------
 self.addEventListener('activate', (event) => {
+  console.log('[SW] activate', VERSION);
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
         keys
-          .filter((k) => ![RUNTIME_CACHE, IMAGE_CACHE, ASSET_CACHE].includes(k))
+          // Delete only old shell caches; preserve persistent asset/image caches
+          .filter((k) => k.startsWith('gramavel-shell-') && k !== SHELL_CACHE)
+          .map((k) => caches.delete(k))
+      );
+      // Also clean up legacy caches from older SW versions
+      await Promise.all(
+        keys
+          .filter(
+            (k) =>
+              (k.startsWith('gramavel-v') || k.endsWith('-runtime') || k.endsWith('-images') || k.endsWith('-assets')) &&
+              k !== SHELL_CACHE &&
+              k !== ASSET_CACHE &&
+              k !== IMAGE_CACHE &&
+              !k.startsWith('gramavel-shell-')
+          )
           .map((k) => caches.delete(k))
       );
       await self.clients.claim();
@@ -48,8 +82,16 @@ self.addEventListener('activate', (event) => {
 
 // ---------- Messages ----------
 self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING' || event.data?.type === 'SKIP_WAITING') {
+  const data = event.data;
+  if (data === 'SKIP_WAITING' || data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
+    return;
+  }
+  if (data?.type === 'GET_VERSION') {
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage(VERSION);
+    }
+    return;
   }
 });
 
@@ -71,7 +113,6 @@ async function trimCache(cacheName, maxEntries) {
 }
 
 function timestamped(response) {
-  // Wrap response with a timestamp header for TTL checks
   const headers = new Headers(response.headers);
   headers.set('x-sw-cached-at', Date.now().toString());
   return new Response(response.body, {
@@ -89,7 +130,7 @@ function isExpired(response, maxAgeMs) {
 
 // Network-first with timeout for navigation
 async function navigationStrategy(request) {
-  const cache = await caches.open(RUNTIME_CACHE);
+  const cache = await caches.open(SHELL_CACHE);
   try {
     const networkPromise = fetch(request);
     const timeoutPromise = new Promise((_, reject) =>
@@ -98,10 +139,15 @@ async function navigationStrategy(request) {
     const response = await Promise.race([networkPromise, timeoutPromise]);
     if (isCacheableResponse(response)) {
       cache.put(request, response.clone()).catch(() => {});
+      // Also keep '/index.html' in sync as the canonical shell fallback
+      cache.put('/index.html', response.clone()).catch(() => {});
     }
     return response;
   } catch {
-    const cached = await cache.match(request);
+    const cached =
+      (await cache.match(request)) ||
+      (await cache.match('/index.html')) ||
+      (await cache.match('/'));
     if (cached) return cached;
     const fallback = await cache.match(OFFLINE_URL);
     if (fallback) return fallback;
@@ -153,7 +199,7 @@ async function imageStrategy(request) {
 
 // Network-first for other same-origin GETs
 async function defaultStrategy(request) {
-  const cache = await caches.open(RUNTIME_CACHE);
+  const cache = await caches.open(SHELL_CACHE);
   try {
     const response = await fetch(request);
     if (isCacheableResponse(response)) {
