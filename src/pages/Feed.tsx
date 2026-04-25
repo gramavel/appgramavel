@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CategoryBar } from "@/components/layout/CategoryBar";
 import { PostCard } from "@/components/feed/PostCard";
 import { ProximityCheckinCard } from "@/components/feed/ProximityCheckinCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getPosts } from "@/services/posts";
+import { fetchPosts, queryKeys, prefetchExploreData } from "@/lib/queries";
 import { useLocation } from "@/contexts/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,43 +28,50 @@ function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number)
 
 export default function Feed() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
   const [dismissedCheckin, setDismissedCheckin] = useState<string | null>(null);
   const [routeEstablishments, setRouteEstablishments] = useState<any[]>([]);
   const { coords } = useLocation();
   const { user } = useAuth();
+  const qc = useQueryClient();
 
+  // Cached posts — survives navigation, instant on return
+  const { data: rawPosts = [], isLoading: loading } = useQuery({
+    queryKey: queryKeys.posts(30),
+    queryFn: () => fetchPosts(30),
+  });
+
+  const posts: Post[] = useMemo(
+    () =>
+      rawPosts.map((p: any) => ({
+        id: p.id,
+        image: p.image || "",
+        caption: p.caption || "",
+        establishment_id: p.establishment?.id || p.establishment_id,
+        establishment_name: p.establishment?.name || "",
+        establishment_slug: p.establishment?.slug || "",
+        establishment_category: p.establishment?.category || "",
+        establishment_avatar: p.establishment?.logo_url || "",
+        likes: 0,
+        user_id: "",
+        user_name: "",
+        user_avatar: "",
+        rating: p.establishment?.rating || 0,
+        total_reviews: p.establishment?.total_reviews || 0,
+        distance_km: p.establishment?.distance_km || 0,
+        is_popular: p.is_popular || p.establishment?.is_popular || false,
+        reactions: (p.reactions || []).map((r: any) => ({ emoji: r.emoji, count: r.count || 0 })),
+        recent_users: [],
+        created_at: p.created_at || new Date().toISOString(),
+        establishment: p.establishment,
+      })),
+    [rawPosts]
+  );
+
+  // Prefetch the next likely route (Explore) while user reads the feed
   useEffect(() => {
-    getPosts().then(({ data }) => {
-      if (data && data.length > 0) {
-        const mapped: Post[] = data.map((p: any) => ({
-          id: p.id,
-          image: p.image || "",
-          caption: p.caption || "",
-          establishment_id: p.establishment?.id || p.establishment_id,
-          establishment_name: p.establishment?.name || "",
-          establishment_slug: p.establishment?.slug || "",
-          establishment_category: p.establishment?.category || "",
-          establishment_avatar: p.establishment?.logo_url || "",
-          likes: 0,
-          user_id: "",
-          user_name: "",
-          user_avatar: "",
-          rating: p.establishment?.rating || 0,
-          total_reviews: p.establishment?.total_reviews || 0,
-          distance_km: p.establishment?.distance_km || 0,
-          is_popular: p.is_popular || p.establishment?.is_popular || false,
-          reactions: (p.reactions || []).map((r: any) => ({ emoji: r.emoji, count: r.count || 0 })),
-          recent_users: [],
-          created_at: p.created_at || new Date().toISOString(),
-          establishment: p.establishment,
-        }));
-        setPosts(mapped);
-      }
-      setLoading(false);
-    });
-  }, []);
+    const id = window.setTimeout(() => prefetchExploreData(qc), 600);
+    return () => window.clearTimeout(id);
+  }, [qc]);
 
   // Load establishments from user's active routes (single nested query)
   useEffect(() => {

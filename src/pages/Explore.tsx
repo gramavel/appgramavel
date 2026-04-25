@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Search, X, MapPin, Clock, Star, TrendingUp, Dog, Ticket } from "lucide-react";
 import { FilterChip, FilterChipsBar } from "@/components/ui/FilterChips";
@@ -9,8 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CATEGORIES, MOCK_ESTABLISHMENTS, EXPERIENCES, type Establishment } from "@/data/mock";
-import { getEstablishments } from "@/services/establishments";
-import { getExperiences } from "@/services/experiences";
+import { fetchEstablishments, fetchExperiences, queryKeys } from "@/lib/queries";
 import { isOpenNow } from "@/lib/utils";
 import ExploreMap from "@/components/map/ExploreMap";
 import "@/components/map/map-styles.css";
@@ -28,51 +28,40 @@ export default function Explore() {
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showMap, setShowMap] = useState(true);
-  const [establishments, setEstablishments] = useState<Establishment[]>(MOCK_ESTABLISHMENTS);
-  const [experiences, setExperiences] = useState(EXPERIENCES);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    getEstablishments().then(({ data }) => {
-      if (data && data.length > 0) {
-        setEstablishments(data.map((e: any) => ({
-          ...e,
-          city: "Gramado",
-          is_active: true,
-          is_verified: true,
-          gallery: e.gallery || [],
-          sunday_hours: e.sunday_hours || null,
-        })) as Establishment[]);
-      }
-      setLoading(false);
-    });
-    getExperiences().then(({ data }) => {
-      if (data && data.length > 0) {
-        setExperiences(data.map((e: any) => ({
-          id: e.id,
-          title: e.title,
-          image: e.image_url || "",
-        })));
-      }
-    });
-  }, []);
+  const { data: estData, isLoading: loading } = useQuery({
+    queryKey: queryKeys.establishments(),
+    queryFn: fetchEstablishments,
+    refetchOnWindowFocus: true, // refresh after admin edits
+  });
 
-  // Refetch on window focus (e.g. after admin edits)
-  useEffect(() => {
-    const refetch = () => {
-      getEstablishments().then(({ data }) => {
-        if (data && data.length > 0) {
-          setEstablishments(data.map((e: any) => ({
-            ...e, city: "Gramado", is_active: true, is_verified: true,
-            gallery: e.gallery || [], sunday_hours: e.sunday_hours || null,
-          })) as Establishment[]);
-        }
-      });
-    };
-    window.addEventListener("focus", refetch);
-    return () => window.removeEventListener("focus", refetch);
-  }, []);
+  const { data: expData } = useQuery({
+    queryKey: queryKeys.experiences(),
+    queryFn: fetchExperiences,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const establishments: Establishment[] = useMemo(() => {
+    if (!estData || estData.length === 0) return MOCK_ESTABLISHMENTS;
+    return estData.map((e: any) => ({
+      ...e,
+      city: "Gramado",
+      is_active: true,
+      is_verified: true,
+      gallery: e.gallery || [],
+      sunday_hours: e.sunday_hours || null,
+    })) as Establishment[];
+  }, [estData]);
+
+  const experiences = useMemo(() => {
+    if (!expData || expData.length === 0) return EXPERIENCES;
+    return expData.map((e: any) => ({
+      id: e.id,
+      title: e.title,
+      image: e.image_url || "",
+    }));
+  }, [expData]);
 
   const isSearching = search.length > 0 || activeFilters.length > 0;
 
