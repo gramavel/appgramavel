@@ -97,6 +97,23 @@ async function setupServiceWorker() {
 
     // Periodic update check (every 30 min while open)
     setInterval(() => registration.update().catch(() => {}), 30 * 60 * 1000);
+
+    // Log active SW version for diagnostics
+    const logVersion = () => {
+      const target = navigator.serviceWorker.controller || registration.active;
+      if (!target) return;
+      try {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = (e) => {
+          console.log("[SW] versão ativa:", e.data);
+        };
+        target.postMessage({ type: "GET_VERSION" }, [channel.port2]);
+      } catch {
+        // ignore
+      }
+    };
+    if (registration.active) logVersion();
+    navigator.serviceWorker.ready.then(logVersion).catch(() => {});
   } catch (error) {
     console.error("Falha ao registrar Service Worker:", error);
   }
