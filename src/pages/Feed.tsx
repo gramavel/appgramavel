@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -27,7 +28,25 @@ function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number)
 }
 
 export default function Feed() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("cat");
+  const searchQuery = searchParams.get("q") ?? "";
+
+  const setSelectedCategory = useCallback(
+    (cat: string | null) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (cat) next.set("cat", cat);
+          else next.delete("cat");
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
+
   const [dismissedCheckin, setDismissedCheckin] = useState<string | null>(null);
   const [routeEstablishments, setRouteEstablishments] = useState<any[]>([]);
   const { coords } = useLocation();
@@ -37,8 +56,8 @@ export default function Feed() {
   // Cache por filtro: se já houver dados desse filtro, mostra na hora.
   // Caso contrário, mantém os posts do filtro anterior visíveis enquanto busca.
   const { data: rawPosts = [], isLoading: loading, isFetching } = useQuery({
-    queryKey: queryKeys.posts({ category: selectedCategory }),
-    queryFn: () => fetchPosts({ category: selectedCategory }),
+    queryKey: queryKeys.posts({ category: selectedCategory, search: searchQuery }),
+    queryFn: () => fetchPosts({ category: selectedCategory, search: searchQuery }),
     placeholderData: (prev) => prev,
   });
 
