@@ -34,12 +34,18 @@ export default function Feed() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  // Cached posts per category — alternar filtros reaproveita cache
+  // Cache por filtro: se já houver dados desse filtro, mostra na hora.
+  // Caso contrário, mantém os posts do filtro anterior visíveis enquanto busca.
   const { data: rawPosts = [], isLoading: loading, isFetching } = useQuery({
     queryKey: queryKeys.posts({ category: selectedCategory }),
     queryFn: () => fetchPosts({ category: selectedCategory }),
-    placeholderData: (prev) => prev, // mantém UI anterior enquanto troca filtro
+    placeholderData: (prev) => prev,
   });
+
+  // Skeleton só na primeiríssima carga (sem cache nem placeholder disponível)
+  const showSkeleton = loading && rawPosts.length === 0;
+  // Indicador sutil durante troca de filtro com cache anterior visível
+  const showRefreshing = isFetching && !loading;
 
   const posts: Post[] = useMemo(
     () =>
@@ -147,8 +153,13 @@ export default function Feed() {
       <CategoryBar selected={selectedCategory} onSelect={setSelectedCategory} />
 
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-[88px]">
-        <div className="space-y-4">
-          {loading ? (
+        {showRefreshing && (
+          <div className="h-0.5 w-full bg-primary/20 overflow-hidden rounded-full mb-3" aria-hidden>
+            <div className="h-full w-1/3 bg-primary animate-[loading_1s_ease-in-out_infinite]" />
+          </div>
+        )}
+        <div className={`space-y-4 transition-opacity duration-200 ${showRefreshing ? "opacity-70" : "opacity-100"}`}>
+          {showSkeleton ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden">
                 <div className="flex items-center gap-4 p-4">
