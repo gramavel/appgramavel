@@ -94,3 +94,12 @@ export function prefetchFeedData(qc: QueryClient) {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+/** Prefetch posts for a specific filter (categoria/search). Idempotente. */
+export function prefetchPostsFilter(qc: QueryClient, filter: PostsFilter) {
+  qc.prefetchQuery({
+    queryKey: queryKeys.posts(filter),
+    queryFn: () => fetchPosts(filter),
+    staleTime: 5 * 60 * 1000,
+  });
+}
