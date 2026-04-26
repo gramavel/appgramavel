@@ -6,13 +6,13 @@ import { CategoryBar } from "@/components/layout/CategoryBar";
 import { PostCard } from "@/components/feed/PostCard";
 import { ProximityCheckinCard } from "@/components/feed/ProximityCheckinCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchPosts, queryKeys, prefetchExploreData } from "@/lib/queries";
+import { fetchPosts, queryKeys, prefetchExploreData, prefetchPostsFilter } from "@/lib/queries";
 import { useLocation } from "@/contexts/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { createCheckIn } from "@/services/checkIns";
 import { toast } from "sonner";
-import type { Post } from "@/data/mock";
+import { CATEGORIES, type Post } from "@/data/mock";
 
 function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371000;
