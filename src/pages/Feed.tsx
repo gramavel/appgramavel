@@ -34,10 +34,11 @@ export default function Feed() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  // Cached posts — survives navigation, instant on return
-  const { data: rawPosts = [], isLoading: loading } = useQuery({
-    queryKey: queryKeys.posts(30),
-    queryFn: () => fetchPosts(30),
+  // Cached posts per category — alternar filtros reaproveita cache
+  const { data: rawPosts = [], isLoading: loading, isFetching } = useQuery({
+    queryKey: queryKeys.posts({ category: selectedCategory }),
+    queryFn: () => fetchPosts({ category: selectedCategory }),
+    placeholderData: (prev) => prev, // mantém UI anterior enquanto troca filtro
   });
 
   const posts: Post[] = useMemo(
