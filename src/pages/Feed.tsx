@@ -34,12 +34,18 @@ export default function Feed() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  // Cached posts per category — alternar filtros reaproveita cache
+  // Cache por filtro: se já houver dados desse filtro, mostra na hora.
+  // Caso contrário, mantém os posts do filtro anterior visíveis enquanto busca.
   const { data: rawPosts = [], isLoading: loading, isFetching } = useQuery({
     queryKey: queryKeys.posts({ category: selectedCategory }),
     queryFn: () => fetchPosts({ category: selectedCategory }),
-    placeholderData: (prev) => prev, // mantém UI anterior enquanto troca filtro
+    placeholderData: (prev) => prev,
   });
+
+  // Skeleton só na primeiríssima carga (sem cache nem placeholder disponível)
+  const showSkeleton = loading && rawPosts.length === 0;
+  // Indicador sutil durante troca de filtro com cache anterior visível
+  const showRefreshing = isFetching && !loading;
 
   const posts: Post[] = useMemo(
     () =>
