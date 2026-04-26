@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { createCheckIn } from "@/services/checkIns";
 import { toast } from "sonner";
 import { CATEGORIES, type Post } from "@/data/mock";
+import { Search, X } from "lucide-react";
 
 function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371000;
