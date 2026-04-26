@@ -89,8 +89,8 @@ export function prefetchExploreData(qc: QueryClient) {
 
 export function prefetchFeedData(qc: QueryClient) {
   qc.prefetchQuery({
-    queryKey: queryKeys.posts(30),
-    queryFn: () => fetchPosts(30),
+    queryKey: queryKeys.posts(),
+    queryFn: () => fetchPosts(),
     staleTime: 5 * 60 * 1000,
   });
 }
