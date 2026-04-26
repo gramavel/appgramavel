@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import logoSrc from "@/assets/logo_gramavel_header.svg";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -53,8 +54,8 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-sm shadow-card">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Gramável</CardTitle>
+        <CardHeader className="text-center space-y-3">
+          <img src={logoSrc} alt="Gramável" className="h-7 mx-auto" width={180} height={28} />
           <CardDescription>Entre para explorar Gramado e Canela</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

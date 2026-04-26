@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { AgeScrollPicker } from "@/components/ui/AgeScrollPicker";
+import logoSrc from "@/assets/logo_gramavel_header.svg";
 
 const BRAZILIAN_STATES = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -65,8 +66,9 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <Card className="w-full max-w-sm shadow-card">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Criar Conta</CardTitle>
+        <CardHeader className="text-center space-y-3">
+          <img src={logoSrc} alt="Gramável" className="h-6 mx-auto" width={160} height={24} />
+          <CardTitle className="text-lg font-semibold text-foreground">Criar Conta</CardTitle>
           <CardDescription>Preencha seus dados para começar</CardDescription>
         </CardHeader>
         <CardContent>

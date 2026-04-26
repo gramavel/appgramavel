@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import logoSrc from "@/assets/logo_gramavel_header.svg";
 
 export default function UpdatePassword() {
   const navigate = useNavigate();
@@ -45,8 +46,9 @@ export default function UpdatePassword() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-sm shadow-card">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl font-bold text-foreground">Nova senha</CardTitle>
+        <CardHeader className="text-center space-y-3">
+          <img src={logoSrc} alt="Gramável" className="h-6 mx-auto" width={160} height={24} />
+          <CardTitle className="text-lg font-semibold text-foreground">Nova senha</CardTitle>
           <CardDescription>Defina sua nova senha</CardDescription>
         </CardHeader>
         <CardContent>

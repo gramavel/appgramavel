@@ -5,6 +5,7 @@ import {
   Route, Bell, Ticket, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logoSrc from "@/assets/logo_gramavel_header.svg";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/admin" },
@@ -41,9 +42,7 @@ export function AdminSidebar({ collapsed, onToggle }: Props) {
       {/* Logo area */}
       <div className="h-14 flex items-center justify-between px-3 border-b border-border">
         {!collapsed && (
-          <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent">
-            Gramável
-          </span>
+          <img src={logoSrc} alt="Gramável" className="h-[18px]" width={120} height={18} />
         )}
         <Button variant="ghost" size="icon" onClick={onToggle} className="shrink-0">
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
