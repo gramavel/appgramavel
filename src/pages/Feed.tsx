@@ -47,6 +47,32 @@ export default function Feed() {
     [setSearchParams]
   );
 
+  // Local input state — instantâneo no UI; URL é atualizada com debounce
+  const [searchInput, setSearchInput] = useState(searchQuery);
+
+  // Mantém input em sincronia se URL mudar externamente (back/forward, deep link)
+  useEffect(() => {
+    setSearchInput((curr) => (curr === searchQuery ? curr : searchQuery));
+  }, [searchQuery]);
+
+  // Debounce: escreve ?q= 350ms após o usuário parar de digitar
+  useEffect(() => {
+    const trimmed = searchInput.trim();
+    if (trimmed === searchQuery) return;
+    const id = window.setTimeout(() => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (trimmed) next.set("q", trimmed);
+          else next.delete("q");
+          return next;
+        },
+        { replace: true }
+      );
+    }, 350);
+    return () => window.clearTimeout(id);
+  }, [searchInput, searchQuery, setSearchParams]);
+
   const [dismissedCheckin, setDismissedCheckin] = useState<string | null>(null);
   const [routeEstablishments, setRouteEstablishments] = useState<any[]>([]);
   const { coords } = useLocation();
