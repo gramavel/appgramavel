@@ -139,9 +139,7 @@ export default function Feed() {
     }
   };
 
-  const filteredPosts = selectedCategory
-    ? posts.filter((p) => p.establishment_category === selectedCategory)
-    : posts;
+  const filteredPosts = posts;
 
   return (
     <div className="min-h-screen bg-background pt-14">
