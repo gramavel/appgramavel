@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import logoSrc from "@/assets/logo_gramavel_header.svg";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -54,8 +55,9 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-sm shadow-card">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Admin Gramável</CardTitle>
+        <CardHeader className="text-center space-y-3">
+          <img src={logoSrc} alt="Gramável" className="h-6 mx-auto" width={160} height={24} />
+          <CardTitle className="text-base font-semibold text-foreground">Painel Admin</CardTitle>
           <CardDescription>Acesso ao painel administrativo</CardDescription>
         </CardHeader>
         <CardContent>

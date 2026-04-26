@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import logoSrc from "@/assets/logo_gramavel_header.svg";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -53,8 +54,8 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-sm shadow-card">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gradient-primary">Gramável</CardTitle>
+        <CardHeader className="text-center space-y-3">
+          <img src={logoSrc} alt="Gramável" className="h-7 mx-auto" width={180} height={28} />
           <CardDescription>Explore Gramado e Canela</CardDescription>
         </CardHeader>
         <CardContent>
