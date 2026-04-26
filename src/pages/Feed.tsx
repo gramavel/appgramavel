@@ -6,13 +6,13 @@ import { CategoryBar } from "@/components/layout/CategoryBar";
 import { PostCard } from "@/components/feed/PostCard";
 import { ProximityCheckinCard } from "@/components/feed/ProximityCheckinCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchPosts, queryKeys, prefetchExploreData } from "@/lib/queries";
+import { fetchPosts, queryKeys, prefetchExploreData, prefetchPostsFilter } from "@/lib/queries";
 import { useLocation } from "@/contexts/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { createCheckIn } from "@/services/checkIns";
 import { toast } from "sonner";
-import type { Post } from "@/data/mock";
+import { CATEGORIES, type Post } from "@/data/mock";
 
 function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371000;
@@ -79,6 +79,38 @@ export default function Feed() {
     const id = window.setTimeout(() => prefetchExploreData(qc), 600);
     return () => window.clearTimeout(id);
   }, [qc]);
+
+  // Prefetch categorias adjacentes assim que a carga atual termina,
+  // para que o próximo clique em filtro renderize instantaneamente do cache.
+  useEffect(() => {
+    if (loading) return;
+    const labels = CATEGORIES.map((c) => c.label);
+    const idx = selectedCategory ? labels.indexOf(selectedCategory) : -1;
+    const neighbors: (string | null)[] = [];
+    if (selectedCategory === null) {
+      neighbors.push(labels[0], labels[1]);
+    } else {
+      neighbors.push(null); // "Todos" é o retorno mais comum
+      if (idx >= 0) {
+        if (labels[idx + 1]) neighbors.push(labels[idx + 1]);
+        if (labels[idx - 1]) neighbors.push(labels[idx - 1]);
+      }
+    }
+    const handle = window.requestIdleCallback
+      ? window.requestIdleCallback(() => {
+          neighbors.forEach((cat) => prefetchPostsFilter(qc, { category: cat }));
+        })
+      : (window.setTimeout(() => {
+          neighbors.forEach((cat) => prefetchPostsFilter(qc, { category: cat }));
+        }, 300) as unknown as number);
+    return () => {
+      if (window.cancelIdleCallback && typeof handle === "number") {
+        try { window.cancelIdleCallback(handle); } catch { /* noop */ }
+      } else {
+        window.clearTimeout(handle as number);
+      }
+    };
+  }, [loading, selectedCategory, qc]);
 
   // Load establishments from user's active routes (single nested query)
   useEffect(() => {
