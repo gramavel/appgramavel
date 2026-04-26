@@ -230,6 +230,26 @@ export default function Feed() {
       <CategoryBar selected={selectedCategory} onSelect={setSelectedCategory} />
 
       <main className="max-w-2xl mx-auto px-4 pb-20 pt-[88px]">
+        <div className="relative mb-3">
+          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Buscar lugares..."
+            className="w-full h-10 pl-9 pr-9 rounded-full bg-secondary text-sm placeholder:text-muted-foreground border border-transparent focus:border-primary/40 focus:outline-none transition-colors"
+            aria-label="Buscar no feed"
+          />
+          {searchInput && (
+            <button
+              onClick={() => setSearchInput("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-background transition-colors"
+              aria-label="Limpar busca"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
+        </div>
         {showRefreshing && (
           <div className="h-0.5 w-full bg-primary/20 overflow-hidden rounded-full mb-3" aria-hidden>
             <div className="h-full w-1/3 bg-primary animate-[loading_1s_ease-in-out_infinite]" />
