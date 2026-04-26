@@ -8,16 +8,33 @@ import { getExperiences } from "@/services/experiences";
  * Keep keys stable so different pages share the same cache entry.
  */
 
+export type PostsFilter = {
+  limit?: number;
+  category?: string | null;
+  search?: string | null;
+};
+
 export const queryKeys = {
-  posts: (limit = 30) => ["posts", { limit }] as const,
+  posts: (filter: PostsFilter = {}) =>
+    [
+      "posts",
+      {
+        limit: filter.limit ?? 30,
+        category: filter.category ?? null,
+        search: (filter.search ?? "").trim().toLowerCase() || null,
+      },
+    ] as const,
   establishments: () => ["establishments"] as const,
   experiences: () => ["experiences"] as const,
 };
 
 // ---------- Query functions ----------
 
-export async function fetchPosts(limit = 30) {
-  const { data, error } = await getPosts(limit);
+export async function fetchPosts(filter: PostsFilter = {}) {
+  const { data, error } = await getPosts(filter.limit ?? 30, {
+    category: filter.category ?? null,
+    search: filter.search ?? null,
+  });
   if (error) throw error;
   return data ?? [];
 }
@@ -72,8 +89,8 @@ export function prefetchExploreData(qc: QueryClient) {
 
 export function prefetchFeedData(qc: QueryClient) {
   qc.prefetchQuery({
-    queryKey: queryKeys.posts(30),
-    queryFn: () => fetchPosts(30),
+    queryKey: queryKeys.posts(),
+    queryFn: () => fetchPosts(),
     staleTime: 5 * 60 * 1000,
   });
 }
