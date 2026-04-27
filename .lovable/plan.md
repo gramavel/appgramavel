@@ -1,48 +1,53 @@
-## Refatorar página "Meus Roteiros" (perfil)
+## Opção A — Card de "Meus Roteiros" leva ao Detalhe com CTA contextual
 
-Remover a divisão em duas tabs ("Em andamento" / "Concluídos") e apresentar uma única lista unificada, mais limpa, onde os roteiros concluídos são identificados apenas por um check discreto.
+Hoje o card em `/perfil/roteiros` navega genericamente para `/roteiros`. Vamos mandar para `/roteiros/:id` (página de detalhe já existente) e adaptar o botão principal conforme o status do usuário (em andamento / concluído / não iniciado).
 
-### O que muda visualmente
+### Mudança 1 — Navegação do card
 
-**Antes:** 2 tabs no topo + cards grandes (imagem 2.5:1 com gradiente, badge colorido "Em andamento"/"Concluído", barra de progresso, miniaturas das paradas, data).
+**Arquivo:** `src/pages/profile/Routes.tsx`
 
-**Depois:** Lista única, vertical, com cards horizontais compactos e clean — estilo das outras sub-páginas do perfil (Lugares Salvos, Badges).
-
-### Estrutura do novo card (horizontal, ~80–88px de altura)
-
-```text
-┌─────────────────────────────────────────────────┐
-│ [thumb 64x64]  Título do Roteiro          ✓     │
-│   rounded-xl   3 paradas · 2h            ────►  │
-│                ▓▓▓▓▓▓▓░░░  60%                  │
-└─────────────────────────────────────────────────┘
+No `RouteRow`, trocar:
+```tsx
+onClick={() => navigate("/roteiros")}
+```
+por:
+```tsx
+onClick={() =>
+  navigate(`/roteiros/${route.id}`, {
+    state: { userStatus: route.status, completedStops: route.completedStops },
+  })
+}
 ```
 
-- **Thumbnail:** 64×64, `rounded-xl`, imagem da capa do roteiro.
-- **Título:** `font-semibold text-sm` truncado em 1 linha.
-- **Subtítulo:** `text-xs text-muted-foreground` — `N paradas · duração`.
-- **Barra de progresso:** linha fina (`h-1`) só aparece em roteiros em andamento.
-- **Indicador concluído:** ícone `CheckCircle2` em `text-success` (sem badge, sem texto), no canto superior direito do card. Roteiros em andamento não exibem nada nesse espaço (só o `ChevronRight` ao final).
-- **ChevronRight** sutil à direita para indicar navegação.
-- Roteiros concluídos: opacidade levemente reduzida (`opacity-90`) e thumb com leve overlay para diferenciar visualmente sem poluir.
+Passamos o status via `location.state` para que o detalhe saiba que veio de "Meus Roteiros" e renderize o CTA correto sem precisar buscar nada novo.
 
-### Ordenação e agrupamento
+### Mudança 2 — CTA contextual no Detalhe
 
-Lista única ordenada assim:
-1. Em andamento primeiro (mais recente no topo).
-2. Concluídos em seguida (mais recente no topo).
+**Arquivo:** `src/pages/RoteiroDetail.tsx`
 
-Sem subtítulos de seção — a transição é natural pelos próprios indicadores. Se o usuário não tiver nenhum roteiro, mostrar `EmptyState` único com CTA "Ver roteiros" → `/roteiros`.
+Ler `userStatus` e `completedStops` de `useLocation().state` e renderizar o bloco de ações (linhas 127–138) condicionalmente:
 
-### Arquivos afetados
-
-- `src/pages/profile/Routes.tsx` — remover `Tabs/TabsList/TabsContent`, remover `useState` do tab, redesenhar `RouteCard` no novo formato horizontal compacto, juntar `IN_PROGRESS_ROUTES` e `COMPLETED_ROUTES` em uma única lista ordenada.
+- **Em andamento** (`userStatus === "in_progress"`):
+  - Botão primário: **"Continuar roteiro"** (ícone `Play`) → `/roteiros/:id/navegar`
+  - Mostra um pequeno indicador acima do botão: `X de N paradas concluídas`
+  - Botão secundário (outline): **"Ver no mapa"** ou ocultar o "Salvar"
+- **Concluído** (`userStatus === "completed"`):
+  - Badge verde no topo do bloco: `CheckCircle2` + "Roteiro concluído"
+  - Botão primário: **"Refazer roteiro"** (ícone `RotateCcw`) → `/roteiros/:id/navegar`
+  - Botão secundário (outline): **"Ver memórias"** → por enquanto navega para `/perfil/check-ins` (página existente); placeholder até existir uma página de memórias por roteiro
+- **Não iniciado** (sem `userStatus`, fluxo atual da descoberta):
+  - Mantém os botões originais: **"Iniciar roteiro"** + **"Salvar nos meus roteiros"**
 
 ### Detalhes técnicos
 
-- Manter o uso de `MOCK_ROUTES` e os mocks atuais de `IN_PROGRESS_ROUTES` / `COMPLETED_ROUTES` (mesma fonte de dados, só muda a renderização).
-- Continuar usando `GlobalHeader showBack title="Meus Roteiros"`, container `max-w-2xl mx-auto px-4 pb-20 pt-20` e `BottomNav`.
-- Tokens HSL do design system: `bg-card`, `border-border`, `text-success`, `text-muted-foreground`, `shadow-card`.
-- Animação `animate-fade-in-up` mantida com `delay` escalonado por item.
-- Acessibilidade: card é botão clicável (área ≥48px), `aria-label` no ícone de check ("Roteiro concluído").
-- Navegação ao clicar segue para `/roteiros` (comportamento atual preservado).
+- Usar `useLocation` do `react-router-dom` para ler `state` (já importado parcialmente no arquivo).
+- Tipagem leve: `(location.state as { userStatus?: "in_progress" | "completed"; completedStops?: number } | null)`.
+- Ícones novos do Lucide: `Play`, `RotateCcw`, `CheckCircle2`.
+- Tokens de cor: `text-success` para o indicador de concluído, `bg-primary` para o CTA.
+- Acessibilidade: botões mantêm altura padrão (≥48px) e `gap-2` com ícone.
+- Sem alterações de rota — `/roteiros/:id` e `/roteiros/:id/navegar` já existem e funcionam.
+
+### Arquivos afetados
+
+- `src/pages/profile/Routes.tsx` — apenas o `onClick` do `RouteRow`.
+- `src/pages/RoteiroDetail.tsx` — ler `location.state` e tornar o bloco de ações (linhas 127–138) condicional pelo status.
