@@ -169,25 +169,13 @@ export default function RoteiroDetail() {
             )}
 
             {!userStatus && (
-              <>
-                <Button
-                  className="w-full rounded-full gap-2"
-                  onClick={() => navigate(`/roteiros/${route.id}/navegar`)}
-                >
-                  <Navigation className="w-4 h-4" />
-                  Iniciar roteiro
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full rounded-full gap-2"
-                  onClick={() => {
-                    toast.success("Roteiro salvo nos seus roteiros!");
-                  }}
-                >
-                  <Star className="w-4 h-4" />
-                  Salvar nos meus roteiros
-                </Button>
-              </>
+              <Button
+                className="w-full rounded-full gap-2"
+                onClick={() => navigate(`/roteiros/${route.id}/navegar`)}
+              >
+                <Navigation className="w-4 h-4" />
+                Iniciar roteiro
+              </Button>
             )}
           </div>
         </div>
