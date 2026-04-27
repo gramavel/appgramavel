@@ -1,13 +1,10 @@
-import { useState } from "react";
-import { ChevronRight, Clock, MapPin, CheckCircle2, Play, Map } from "lucide-react";
+import { ChevronRight, CheckCircle2, Map } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { MOCK_ROUTES } from "@/data/mock";
-import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 const IN_PROGRESS_ROUTES = [
   {
@@ -41,164 +38,112 @@ const COMPLETED_ROUTES = [
   },
 ];
 
-type UserRoute = typeof IN_PROGRESS_ROUTES[number] | typeof COMPLETED_ROUTES[number];
+type UserRoute =
+  | typeof IN_PROGRESS_ROUTES[number]
+  | typeof COMPLETED_ROUTES[number];
 
-function RouteCard({ route }: { route: UserRoute }) {
+function RouteRow({ route }: { route: UserRoute }) {
   const navigate = useNavigate();
   const totalStops = route.stops.length;
   const progress = Math.round((route.completedStops / totalStops) * 100);
   const isCompleted = route.status === "completed";
 
   return (
-    <div
-      className="rounded-2xl bg-card border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer"
+    <button
+      type="button"
       onClick={() => navigate("/roteiros")}
+      className={cn(
+        "w-full flex items-center gap-3 p-3 rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all active:scale-[0.99] text-left min-h-[72px]",
+        isCompleted && "opacity-90"
+      )}
     >
-      {/* Cover */}
-      <div className="aspect-[2.5/1] overflow-hidden relative">
-        <img src={route.image} alt={route.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute top-4 right-4">
-          <Badge
-            className={`text-xs px-2 py-0.5 border-0 ${
-              isCompleted
-                ? "bg-success/90 text-success-foreground"
-                : "bg-primary/90 text-primary-foreground"
-            }`}
-          >
-            {isCompleted ? (
-              <><CheckCircle2 className="w-3 h-3 mr-1" /> Concluído</>
-            ) : (
-              <><Play className="w-3 h-3 mr-1" /> Em andamento</>
+      {/* Thumbnail */}
+      <div className="relative flex-shrink-0">
+        <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted">
+          <img
+            src={route.image}
+            alt={route.title}
+            className={cn(
+              "w-full h-full object-cover",
+              isCompleted && "brightness-95"
             )}
-          </Badge>
-        </div>
-        <div className="absolute bottom-4 left-4 right-4">
-          <h3 className="text-primary-foreground font-bold text-sm">{route.title}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-primary-foreground/80 text-xs flex items-center gap-1">
-              <MapPin className="w-3 h-3" /> {route.completedStops}/{totalStops} paradas
-            </span>
-            <span className="text-primary-foreground/80 text-xs flex items-center gap-1">
-              <Clock className="w-3 h-3" /> {route.duration}
-            </span>
-          </div>
+            loading="lazy"
+          />
         </div>
       </div>
 
-      {/* Progress + stops */}
-      <div className="px-4 py-4 space-y-4">
-        {/* Progress bar */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Progresso</span>
-            <span className="text-xs font-semibold text-foreground">{progress}%</span>
-          </div>
-          <Progress value={progress} className="h-1.5" />
-        </div>
-
-        {/* Stop thumbnails */}
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-          {route.stops.slice(0, 6).map((stop, j) => (
-            <div key={j} className="relative flex-shrink-0">
-              <div className={`w-10 h-10 rounded-lg overflow-hidden border-2 ${
-                j < route.completedStops ? "border-success" : "border-border opacity-50"
-              }`}>
-                <img src={stop.image} alt={stop.name} className="w-full h-full object-cover" />
-              </div>
-              {j < route.completedStops && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-success flex items-center justify-center ring-2 ring-card">
-                  <CheckCircle2 className="w-3 h-3 text-success-foreground" />
-                </div>
-              )}
-            </div>
-          ))}
-          {route.stops.length > 6 && (
-            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary flex items-center justify-center border-2 border-border">
-              <span className="text-xs font-semibold text-muted-foreground">+{route.stops.length - 6}</span>
-            </div>
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-sm text-foreground truncate">
+            {route.title}
+          </h3>
+          {isCompleted && (
+            <CheckCircle2
+              className="w-4 h-4 text-success flex-shrink-0 mt-0.5"
+              aria-label="Roteiro concluído"
+            />
           )}
         </div>
+        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+          {totalStops} {totalStops === 1 ? "parada" : "paradas"} · {route.duration}
+        </p>
 
-        {/* Date info */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            {isCompleted
-              ? `Concluído em ${new Date((route as typeof COMPLETED_ROUTES[number]).completedAt).toLocaleDateString("pt-BR")}`
-              : `Iniciado em ${new Date(route.startedAt).toLocaleDateString("pt-BR")}`
-            }
-          </span>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </div>
+        {!isCompleted && (
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex-1 h-1 bg-secondary rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
+              {progress}%
+            </span>
+          </div>
+        )}
       </div>
-    </div>
+
+      {/* Chevron */}
+      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+    </button>
   );
 }
 
 export default function RoutesPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("in_progress");
+
+  // Lista única: em andamento primeiro, depois concluídos
+  const routes: UserRoute[] = [...IN_PROGRESS_ROUTES, ...COMPLETED_ROUTES];
 
   return (
     <div className="min-h-screen bg-background">
       <GlobalHeader showBack title="Meus Roteiros" />
-      <main className="max-w-2xl mx-auto px-4 pb-20 pt-20 space-y-4">
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="in_progress" className="gap-1.5 text-sm">
-              <Play className="w-4 h-4" /> Em andamento ({IN_PROGRESS_ROUTES.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="gap-1.5 text-sm">
-              <CheckCircle2 className="w-4 h-4" /> Concluídos ({COMPLETED_ROUTES.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="in_progress" className="mt-4 space-y-4">
-            {IN_PROGRESS_ROUTES.length === 0 ? (
-              <EmptyState
-                icon={Map}
-                title="Nenhum roteiro em andamento"
-                description="Descubra roteiros prontos e personalizados para aproveitar o melhor de Gramado e Canela."
-                actionLabel="Ver roteiros"
-                onAction={() => navigate("/roteiros")}
-              />
-            ) : (
-              IN_PROGRESS_ROUTES.map((route, i) => (
-                <div
-                  key={route.id}
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <RouteCard route={route} />
-                </div>
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="completed" className="mt-4 space-y-4">
-            {COMPLETED_ROUTES.length === 0 ? (
-              <EmptyState
-                icon={CheckCircle2}
-                title="Nenhum roteiro concluído"
-                description="Seus roteiros finalizados aparecerão aqui para você lembrar de cada momento da sua viagem."
-              />
-            ) : (
-              COMPLETED_ROUTES.map((route, i) => (
-                <div
-                  key={route.id}
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <RouteCard route={route} />
-                </div>
-              ))
-            )}
-          </TabsContent>
-        </Tabs>
+      <main className="max-w-2xl mx-auto px-4 pb-20 pt-20">
+        {routes.length === 0 ? (
+          <EmptyState
+            icon={Map}
+            title="Nenhum roteiro ainda"
+            description="Descubra roteiros prontos e personalizados para aproveitar o melhor de Gramado e Canela."
+            actionLabel="Ver roteiros"
+            onAction={() => navigate("/roteiros")}
+          />
+        ) : (
+          <div className="space-y-2">
+            {routes.map((route, i) => (
+              <div
+                key={route.id}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                <RouteRow route={route} />
+              </div>
+            ))}
+          </div>
+        )}
       </main>
 
       <BottomNav />
-
     </div>
   );
 }
