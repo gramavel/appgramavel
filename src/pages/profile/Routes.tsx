@@ -51,7 +51,11 @@ function RouteRow({ route }: { route: UserRoute }) {
   return (
     <button
       type="button"
-      onClick={() => navigate("/roteiros")}
+      onClick={() =>
+        navigate(`/roteiros/${route.id}`, {
+          state: { userStatus: route.status, completedStops: route.completedStops },
+        })
+      }
       className={cn(
         "w-full flex items-center gap-3 p-3 rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all active:scale-[0.99] text-left min-h-[72px]",
         isCompleted && "opacity-90"

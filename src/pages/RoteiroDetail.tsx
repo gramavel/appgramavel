@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ChevronRight, Clock, MapPin, Star, Mountain, Navigation, Edit3 } from "lucide-react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { ChevronRight, Clock, MapPin, Star, Mountain, Navigation, Edit3, CheckCircle2, RotateCcw, Play, Image as ImageIcon } from "lucide-react";
 import { GlobalHeader } from "@/components/layout/GlobalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,10 @@ import { toast } from "sonner";
 export default function RoteiroDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const navState = location.state as { userStatus?: "in_progress" | "completed"; completedStops?: number } | null;
+  const userStatus = navState?.userStatus;
+  const completedStops = navState?.completedStops ?? 0;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -123,18 +127,68 @@ export default function RoteiroDetail() {
             </div>
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons (contextual by user status) */}
           <div className="space-y-2 pb-4">
-            <Button className="w-full rounded-full gap-2" onClick={() => navigate(`/roteiros/${route.id}/navegar`)}>
-              <Navigation className="w-4 h-4" />
-              Iniciar roteiro
-            </Button>
-            <Button variant="outline" className="w-full rounded-full gap-2" onClick={() => {
-              toast.success("Roteiro salvo nos seus roteiros!");
-            }}>
-              <Star className="w-4 h-4" />
-              Salvar nos meus roteiros
-            </Button>
+            {userStatus === "in_progress" && (
+              <>
+                <p className="text-xs text-center text-muted-foreground">
+                  {completedStops} de {route.stops.length} paradas concluídas
+                </p>
+                <Button
+                  className="w-full rounded-full gap-2"
+                  onClick={() => navigate(`/roteiros/${route.id}/navegar`)}
+                >
+                  <Play className="w-4 h-4" />
+                  Continuar roteiro
+                </Button>
+              </>
+            )}
+
+            {userStatus === "completed" && (
+              <>
+                <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-success">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Roteiro concluído
+                </div>
+                <Button
+                  className="w-full rounded-full gap-2"
+                  onClick={() => navigate(`/roteiros/${route.id}/navegar`)}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Refazer roteiro
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full gap-2"
+                  onClick={() => navigate("/perfil/check-ins")}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  Ver memórias
+                </Button>
+              </>
+            )}
+
+            {!userStatus && (
+              <>
+                <Button
+                  className="w-full rounded-full gap-2"
+                  onClick={() => navigate(`/roteiros/${route.id}/navegar`)}
+                >
+                  <Navigation className="w-4 h-4" />
+                  Iniciar roteiro
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full gap-2"
+                  onClick={() => {
+                    toast.success("Roteiro salvo nos seus roteiros!");
+                  }}
+                >
+                  <Star className="w-4 h-4" />
+                  Salvar nos meus roteiros
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </main>
