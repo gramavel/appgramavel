@@ -25,7 +25,6 @@ type AdminUser = {
   state: string | null;
   country: string | null;
   phone: string | null;
-  bio: string | null;
   birth_date: string | null;
   gender: string | null;
   gender_label: string | null;
@@ -42,7 +41,7 @@ type AdminUser = {
   routes: number | null;
   reactions: number | null;
   memories: number | null;
-  badges_earned: number | null;
+  favorite_folders: number | null;
   reviews_count: number | null;
 };
 
@@ -340,9 +339,9 @@ export default function UsersPage() {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2 text-xs text-muted-foreground">
-                    <span>📍 {u.saved_places ?? 0}</span>
-                    <span>✓ {u.checkins ?? 0}</span>
-                    <span>❤️ {u.reactions ?? 0}</span>
+                    <span title="Lugares salvos">📍 {u.saved_places ?? 0}</span>
+                    <span title="Check-ins">✓ {u.checkins ?? 0}</span>
+                    <span title="Pastas">📁 {u.favorite_folders ?? 0}</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -416,12 +415,12 @@ export default function UsersPage() {
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: "Lugares salvos", value: selectedUser.saved_places, icon: "📍" },
+                    { label: "Pastas", value: selectedUser.favorite_folders, icon: "📁" },
                     { label: "Check-ins", value: selectedUser.checkins, icon: "✓" },
                     { label: "Cupons", value: selectedUser.coupons, icon: "🎟️" },
                     { label: "Roteiros", value: selectedUser.routes, icon: "🗺️" },
                     { label: "Reações", value: selectedUser.reactions, icon: "❤️" },
                     { label: "Memórias", value: selectedUser.memories, icon: "📸" },
-                    { label: "Badges", value: selectedUser.badges_earned, icon: "🏆" },
                     { label: "Avaliações", value: selectedUser.reviews_count, icon: "⭐" },
                   ].map(({ label, value, icon }) => (
                     <div key={label} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
