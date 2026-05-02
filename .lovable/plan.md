@@ -1,53 +1,97 @@
-## Opção A — Card de "Meus Roteiros" leva ao Detalhe com CTA contextual
+## Análise da página Feed (admin) hoje
 
-Hoje o card em `/perfil/roteiros` navega genericamente para `/roteiros`. Vamos mandar para `/roteiros/:id` (página de detalhe já existente) e adaptar o botão principal conforme o status do usuário (em andamento / concluído / não iniciado).
+A página atual mostra apenas:
+- 4 KPIs fixos em janela de 7 dias (Impressões, Cliques, CTR, Reações)
+- Gráfico de impressões diárias
+- Duas tabelas (boa/baixa performance) que mostram só o ID do post truncado, sem nome do estabelecimento, sem reações, sem imagem, sem link clicável
 
-### Mudança 1 — Navegação do card
+**Limitações principais:**
+1. Sem seletor de período — sempre 7 dias fixos
+2. Tabelas mostram `postId.slice(0,8)` — admin não consegue identificar qual post é
+3. Sem comparação com período anterior (não há contexto se "1.200 impressões" é bom ou ruim)
+4. CTR é o único critério de performance — ignora reações, salvamentos e check-ins gerados
+5. Reações mostradas como número total, sem quebra por emoji (qual é a emoção dominante?)
+6. Sem ranking de estabelecimentos (apenas posts isolados)
+7. Sem visão de horários/dias da semana com mais engajamento
+8. Sem funil (impressão → clique → ação no estabelecimento)
+9. Sem distinção entre posts originados de fotos do estabelecimento vs. posts manuais
+10. Categorias mais engajadas — invisíveis hoje
 
-**Arquivo:** `src/pages/profile/Routes.tsx`
+---
 
-No `RouteRow`, trocar:
-```tsx
-onClick={() => navigate("/roteiros")}
+## O que vou construir
+
+### 1. Filtro de período (topo da página)
+Toggle com 4 opções: **7 dias / 30 dias / 90 dias / Todo período**. Todos os blocos abaixo recalculam.
+
+### 2. KPIs com comparativo (6 cards em vez de 4)
+Cada card mostra valor atual + variação % vs. período anterior equivalente (seta verde/vermelha).
+- Impressões
+- Cliques únicos (distintos por user_id)
+- CTR
+- Reações totais
+- **Salvamentos** (de `user_saved_posts` no período)
+- **Posts ativos** (posts com pelo menos 1 impressão no período)
+
+### 3. Gráfico comparativo (substitui o gráfico atual)
+Mesmo `LineChart`, mas com **duas linhas**: Impressões e Cliques no mesmo eixo, permitindo ver visualmente o gap (CTR ao longo do tempo). Tooltip mostra ambos.
+
+### 4. Novo card: Engajamento por dia da semana
+`BarChart` agregando eventos por dia da semana (Seg–Dom). Responde: "qual dia o público mais interage?".
+
+### 5. Novo card: Distribuição de reações
+Mini lista horizontal com cada emoji canônico (`CANONICAL_REACTIONS`) + contagem + barra de proporção. Mostra qual emoção predomina no feed.
+
+### 6. Top 10 posts (substitui as duas tabelas atuais)
+Uma única tabela ordenável (default por impressões desc) com:
+- **Thumbnail** (imagem do post, 40x40 rounded)
+- **Estabelecimento** (nome + categoria) — link para `/admin/estabelecimentos/:id`
+- Impressões
+- Cliques
+- CTR (badge colorido: verde ≥5%, amarelo 2–5%, vermelho <2%)
+- Reações
+- Coluna ações: ícone "ver no app" abrindo `/estabelecimento/:slug` em nova aba
+
+### 7. Top 5 estabelecimentos no feed
+Card lateral/inferior agregando performance por estabelecimento (soma de impressões/cliques de todos os posts dele). Identifica quais parceiros estão dominando o feed.
+
+### 8. Categorias mais engajadas
+`BarChart` horizontal: categoria → CTR médio. Ajuda a entender qual tipo de conteúdo converte melhor.
+
+### 9. Card de alertas/insights
+Bloco textual gerado dinamicamente com até 3 insights, ex.:
+- "Posts com fotos verticais (4:5) têm CTR X% maior" (se conseguirmos derivar)
+- "3 estabelecimentos não tiveram nenhuma impressão nos últimos 30 dias"
+- "Quinta-feira é o dia de maior engajamento"
+
+---
+
+## Mudanças técnicas
+
+**`src/admin/services/adminAnalytics.ts`** — adicionar funções:
+- `getFeedKPIs(days)` — incluir `uniqueClicks`, `savedCount`, `activePosts`, e retornar também os valores do período anterior para cálculo de delta
+- `getClicksByDay(days)` — espelho de `getImpressionsByDay` para a segunda linha do gráfico
+- `getEngagementByWeekday(days)` — agrega `feed_events` por `EXTRACT(DOW)`
+- `getReactionsBreakdown(days)` — agrupa `user_reactions.emoji` no período
+- `getPostsPerformance(days)` — enriquecer com join em `posts(image, caption, establishment:establishments(name, slug, category))` e adicionar contagem de reações por post
+- `getTopEstablishmentsInFeed(days)` — soma de impressions/clicks por `establishment_id`
+- `getCategoriesPerformance(days)` — CTR médio agrupado por categoria do estabelecimento
+- `getFeedInsights(days)` — função que monta os 2-3 insights textuais
+
+**`src/admin/pages/Feed.tsx`** — reescrever:
+- Adicionar `useState` para `period` (7/30/90/all) e refetch quando mudar
+- Substituir grid de 4 KPIs por 6 com componente `StatCard` estendido (ou wrapper local) para mostrar delta
+- Substituir tabelas atuais pela nova tabela única de Top Posts com thumbnail e nome
+- Adicionar os novos cards (weekday, reactions breakdown, top estabelecimentos, categorias, insights)
+
+**Layout proposto (desktop, segue regra `min-w-[1024px]` do admin):**
+```text
+[ Filtro de período ]
+[ KPI ][ KPI ][ KPI ][ KPI ][ KPI ][ KPI ]
+[ Gráfico Impressões vs Cliques (col-span-2) ][ Insights ]
+[ Engajamento por dia da semana ][ Distribuição de reações ]
+[ Top 10 Posts (tabela completa, full width) ]
+[ Top estabelecimentos ][ Categorias mais engajadas ]
 ```
-por:
-```tsx
-onClick={() =>
-  navigate(`/roteiros/${route.id}`, {
-    state: { userStatus: route.status, completedStops: route.completedStops },
-  })
-}
-```
 
-Passamos o status via `location.state` para que o detalhe saiba que veio de "Meus Roteiros" e renderize o CTA correto sem precisar buscar nada novo.
-
-### Mudança 2 — CTA contextual no Detalhe
-
-**Arquivo:** `src/pages/RoteiroDetail.tsx`
-
-Ler `userStatus` e `completedStops` de `useLocation().state` e renderizar o bloco de ações (linhas 127–138) condicionalmente:
-
-- **Em andamento** (`userStatus === "in_progress"`):
-  - Botão primário: **"Continuar roteiro"** (ícone `Play`) → `/roteiros/:id/navegar`
-  - Mostra um pequeno indicador acima do botão: `X de N paradas concluídas`
-  - Botão secundário (outline): **"Ver no mapa"** ou ocultar o "Salvar"
-- **Concluído** (`userStatus === "completed"`):
-  - Badge verde no topo do bloco: `CheckCircle2` + "Roteiro concluído"
-  - Botão primário: **"Refazer roteiro"** (ícone `RotateCcw`) → `/roteiros/:id/navegar`
-  - Botão secundário (outline): **"Ver memórias"** → por enquanto navega para `/perfil/check-ins` (página existente); placeholder até existir uma página de memórias por roteiro
-- **Não iniciado** (sem `userStatus`, fluxo atual da descoberta):
-  - Mantém os botões originais: **"Iniciar roteiro"** + **"Salvar nos meus roteiros"**
-
-### Detalhes técnicos
-
-- Usar `useLocation` do `react-router-dom` para ler `state` (já importado parcialmente no arquivo).
-- Tipagem leve: `(location.state as { userStatus?: "in_progress" | "completed"; completedStops?: number } | null)`.
-- Ícones novos do Lucide: `Play`, `RotateCcw`, `CheckCircle2`.
-- Tokens de cor: `text-success` para o indicador de concluído, `bg-primary` para o CTA.
-- Acessibilidade: botões mantêm altura padrão (≥48px) e `gap-2` com ícone.
-- Sem alterações de rota — `/roteiros/:id` e `/roteiros/:id/navegar` já existem e funcionam.
-
-### Arquivos afetados
-
-- `src/pages/profile/Routes.tsx` — apenas o `onClick` do `RouteRow`.
-- `src/pages/RoteiroDetail.tsx` — ler `location.state` e tornar o bloco de ações (linhas 127–138) condicional pelo status.
+**Sem alterações em:** schema do banco, componentes do app mobile, outras páginas do admin.
