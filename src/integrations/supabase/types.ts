@@ -1515,8 +1515,6 @@ export type Database = {
           age: number | null
           age_group: string | null
           avatar_url: string | null
-          badges_earned: number | null
-          bio: string | null
           birth_date: string | null
           checkins: number | null
           city: string | null
@@ -1524,6 +1522,7 @@ export type Database = {
           coupons: number | null
           created_at: string | null
           email: string | null
+          favorite_folders: number | null
           gender: string | null
           gender_label: string | null
           id: string | null
@@ -1544,8 +1543,6 @@ export type Database = {
           age?: never
           age_group?: never
           avatar_url?: string | null
-          badges_earned?: never
-          bio?: string | null
           birth_date?: string | null
           checkins?: never
           city?: string | null
@@ -1553,6 +1550,7 @@ export type Database = {
           coupons?: never
           created_at?: string | null
           email?: string | null
+          favorite_folders?: never
           gender?: string | null
           gender_label?: never
           id?: string | null
@@ -1573,8 +1571,6 @@ export type Database = {
           age?: never
           age_group?: never
           avatar_url?: string | null
-          badges_earned?: never
-          bio?: string | null
           birth_date?: string | null
           checkins?: never
           city?: string | null
@@ -1582,6 +1578,7 @@ export type Database = {
           coupons?: never
           created_at?: string | null
           email?: string | null
+          favorite_folders?: never
           gender?: string | null
           gender_label?: never
           id?: string | null
